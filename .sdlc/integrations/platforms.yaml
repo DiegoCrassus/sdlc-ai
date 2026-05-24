@@ -1,0 +1,35 @@
+# Roadmap de integrações — RPG-OP SDLC
+version: 1
+
+platforms:
+  github:
+    role: source_of_truth_code
+    integration: .sdlc/integrations/github.yaml
+    mcp: true
+    status: active
+
+  langsmith:
+    role: cursor_hooks_and_agent_tracing
+    integration: .sdlc/integrations/langsmith.yaml
+    hooks: .cursor/hooks.json
+    mcp: false
+    status: active
+    projects:
+      cursor: rpg-op-cursor
+      runtime: rpg-op
+
+  linear:
+    role: product_tracking
+    mcp: planned
+    status: backlog
+    note: Opcional se GitHub Issues bastar
+
+  docker:
+    role: local_stack
+    compose: infra/docker-compose.yml
+    status: planned
+
+  fly_railway:
+    role: deploy_target
+    status: backlog
+    docs: docs/04-infraestrutura.md

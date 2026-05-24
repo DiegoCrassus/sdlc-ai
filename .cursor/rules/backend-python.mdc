@@ -1,0 +1,25 @@
+---
+description: FastAPI backend conventions
+globs: backend/**/*
+alwaysApply: false
+---
+
+# Backend Python
+
+- FastAPI app: `backend/app/main.py`
+- Routers em `backend/app/routers/`
+- Models SQLAlchemy: `backend/app/models.py`
+- SQLite dev: `backend/data/rpg_op.db`
+- Uploads: `backend/data/uploads/`
+
+## Padrões
+
+- Pydantic v2: `model_validate(obj, from_attributes=True)` para ORM
+- Multipart para upload de template image
+- Validar fichas contra schema JSON da campanha
+
+## Teste
+
+```powershell
+backend/.venv/Scripts/python backend/scripts/smoke_test.py
+```

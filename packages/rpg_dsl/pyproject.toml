@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rpg-dsl"
+version = "0.1.0"
+description = "RPG-OP DSL — declarative specs compiler"
+requires-python = ">=3.10"
+dependencies = ["pydantic>=2.0"]
+
+[project.scripts]
+rpg = "rpg_dsl._cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["rpg_dsl*"]

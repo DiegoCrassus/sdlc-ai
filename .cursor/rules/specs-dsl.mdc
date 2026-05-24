@@ -1,0 +1,26 @@
+---
+description: DSL specs and SDLC agent definitions
+globs: specs/**/*,.sdlc/**/*
+alwaysApply: false
+---
+
+# Specs & SDLC DSL
+
+- Specs declarativas em `specs/` (Python tipado, futuro `rpg_dsl`)
+- Harness dev em `.sdlc/agents/*.yaml` e `.sdlc/skills/`
+- IR: SheetSchema, CanvasSpec, TemplateAnalysisResult — ver docs/06
+
+## Ao editar specs
+
+```python
+# Preferir keys estáveis snake_case
+character_name: str = Field(label="Nome")
+```
+
+## Subagentes produto (MVP)
+
+- `sheet-template-analyst` — único subagente MVP além do orchestrator
+
+## Não colocar aqui
+
+- SQL, FastAPI route bodies, React JSX

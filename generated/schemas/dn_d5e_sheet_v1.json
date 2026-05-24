@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DnD5eSheet",
+  "version": 1,
+  "type": "object",
+  "properties": {
+    "character_name": {
+      "title": "Nome do personagem",
+      "type": "string"
+    },
+    "player_name": {
+      "title": "Jogador",
+      "type": "string"
+    },
+    "class_name": {
+      "title": "Classe / Arquétipo",
+      "type": "string"
+    },
+    "level": {
+      "title": "Nível",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 30
+    },
+    "strength": {
+      "title": "FOR",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 30
+    },
+    "dexterity": {
+      "title": "DES",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 30
+    },
+    "constitution": {
+      "title": "CON",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 30
+    },
+    "intelligence": {
+      "title": "INT",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 30
+    },
+    "wisdom": {
+      "title": "SAB",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 30
+    },
+    "charisma": {
+      "title": "CAR",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 30
+    },
+    "armor_class": {
+      "title": "Classe de Armadura",
+      "type": "integer"
+    },
+    "hit_points": {
+      "title": "Pontos de Vida",
+      "type": "integer"
+    },
+    "speed": {
+      "title": "Deslocamento",
+      "type": "string"
+    },
+    "notes": {
+      "title": "Anotações",
+      "type": "string"
+    }
+  },
+  "required": [
+    "character_name"
+  ]
+}

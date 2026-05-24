@@ -1,0 +1,17 @@
+name: codegen-integrator
+description: Executa validate/compile, integra hooks em backend e apps/web após mudança de spec.
+skills:
+  - .sdlc/skills/compile-workflow/
+  - .sdlc/skills/safe-refactor/
+
+system_prompt: |
+  Após specs atualizadas, rode validate e compile quando rpg CLI existir.
+  Integre generated/ em backend/, apps/web/, services/agent/ com hooks mínimos.
+  Nunca modifique generated/ à mão. Prefira pytest e smoke_test.py para verificar.
+
+tools:
+  - execute
+  - read_file
+  - edit_file
+
+response_format: text

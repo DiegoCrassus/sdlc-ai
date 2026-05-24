@@ -1,0 +1,39 @@
+# Hooks SDLC — registry
+version: 1
+
+cursor_config: .cursor/hooks.json
+python_deps: .sdlc/requirements-hooks.txt
+
+pre:
+  sessionStart:
+    script: .cursor/hooks/session_start.py
+    langsmith: cursor/sessionStart
+  beforeSubmitPrompt:
+    script: .cursor/hooks/before_submit_prompt.py
+    blocks: secrets_in_prompt
+  preToolUse:
+    script: .cursor/hooks/pre_tool_use.py
+    blocks: writes_to_generated
+  beforeShellExecution:
+    script: .cursor/hooks/before_shell.py
+    asks: force_push_main
+  beforeMCPExecution:
+    script: .cursor/hooks/before_mcp.py
+
+post:
+  sessionEnd:
+    script: .cursor/hooks/session_end.py
+  stop:
+    script: .cursor/hooks/stop.py
+  postToolUse:
+    script: .cursor/hooks/post_tool_use.py
+  postToolUseFailure:
+    script: .cursor/hooks/post_tool_use_failure.py
+  afterShellExecution:
+    script: .cursor/hooks/after_shell.py
+  afterMCPExecution:
+    script: .cursor/hooks/after_mcp.py
+
+observability:
+  langsmith: .sdlc/integrations/langsmith.yaml
+  local_log: .sdlc/logs/cursor-hooks.jsonl

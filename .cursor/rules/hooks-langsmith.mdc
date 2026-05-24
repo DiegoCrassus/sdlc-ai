@@ -1,0 +1,27 @@
+---
+description: Cursor hooks pre/post and LangSmith logging for SDLC
+globs: .cursor/hooks/**/*
+alwaysApply: false
+---
+
+# Hooks + LangSmith
+
+- Config: `.cursor/hooks.json` — registry `.sdlc/hooks.yaml`
+- Lib: `.cursor/hooks/_lib/langsmith_emit.py`
+- Deps: `pip install -r .sdlc/requirements-hooks.txt`
+- LangSmith project: `rpg-op-cursor` via `LANGCHAIN_PROJECT`
+
+## Pre hooks
+
+Block writes to `generated/`; redact secrets in prompts; audit shell/MCP.
+
+## Post hooks
+
+Emit runs to LangSmith; local fallback `.sdlc/logs/cursor-hooks.jsonl`.
+
+## Do not
+
+- Log raw API keys
+- Disable hooks without updating `.sdlc/hooks.yaml`
+
+Skill: `.sdlc/skills/langsmith-observability/SKILL.md`

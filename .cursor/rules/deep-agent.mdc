@@ -1,0 +1,23 @@
+---
+description: LangChain Deep Agents — product and dev harness
+globs: services/agent/**/*,.sdlc/agents/**/*
+alwaysApply: false
+---
+
+# Deep Agent
+
+- Produto: `create_deep_agent` + `sheet-template-analyst`
+- Dev: `.sdlc/agents/dev-orchestrator.yaml` + subagentes em `subagents/`
+- Skills: `skills/` (produto) e `.sdlc/skills/` (engenharia)
+- Manifest compilado: `generated/agent_manifest/` (futuro)
+
+## Tools
+
+Implementação Python em `services/agent/tools/` — specs só declaram `ToolRef`.
+
+## HITL
+
+- `publish_template` (produto)
+- Bloquear write em `generated/**` (dev)
+
+Ref: `.sdlc/skills/deep-agent-harness/SKILL.md`

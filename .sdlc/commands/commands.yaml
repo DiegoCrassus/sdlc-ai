@@ -1,0 +1,44 @@
+# SDLC command registry — RPG-OP
+version: 1
+
+local:
+  validate:
+    windows: .sdlc/scripts/validate.ps1
+    unix: .sdlc/scripts/validate.sh
+    description: Run SDLC gates locally before push
+
+  issue_intent:
+    windows: .sdlc/scripts/gh-issue-intent.ps1
+    requires: [gh]
+    description: Create GitHub issue from SDLC intent
+
+  pr_open:
+    windows: .sdlc/scripts/gh-pr-open.ps1
+    requires: [gh]
+    description: Open PR with SDLC checklist body
+
+  sdlc_status:
+    windows: .sdlc/scripts/gh-sdlc-status.ps1
+    requires: [gh]
+    description: List open SDLC-tagged issues
+
+dsl:
+  validate: ["rpg", "validate", "specs/"]
+  compile: ["rpg", "compile", "--target", "all"]
+  eval_smoke: ["rpg", "eval", "run", "--suite", "smoke"]
+
+github_cli:
+  auth: gh auth login
+  issue_list: gh issue list --label sdlc:ready
+  pr_checks: gh pr checks
+  run_list: gh run list --workflow=sdlc.yml
+  repo_view: gh repo view
+
+mcp:
+  config: .cursor/mcp.json
+  server: github
+  skill: .sdlc/skills/github-sdlc/SKILL.md
+
+ci:
+  workflow: .github/workflows/sdlc.yml
+  triggers: [pull_request, push]

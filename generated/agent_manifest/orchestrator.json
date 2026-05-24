@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "subagents": [
+    {
+      "name": "sheet-template-analyst",
+      "response_model": "TemplateAnalysisResult",
+      "skills": [
+        "workflows/template-analysis/"
+      ]
+    }
+  ],
+  "canvas_specs": [
+    "DnD5eCanvas"
+  ],
+  "sheet_specs": [
+    "DnD5eSheet_v1"
+  ]
+}

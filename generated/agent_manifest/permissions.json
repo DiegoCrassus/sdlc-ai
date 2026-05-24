@@ -1,0 +1,11 @@
+{
+  "allow": [
+    "specs/**",
+    "backend/**",
+    "apps/**",
+    "services/**"
+  ],
+  "deny": [
+    "generated/**"
+  ]
+}

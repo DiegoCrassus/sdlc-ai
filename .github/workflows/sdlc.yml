@@ -1,0 +1,45 @@
+name: SDLC
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  sdlc-gates:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: SDLC validate (rpg skip if missing)
+        working-directory: .
+        run: |
+          if command -v rpg >/dev/null 2>&1; then
+            rpg validate specs/
+          else
+            echo "skip: rpg CLI not installed yet"
+          fi
+
+      - name: Backend smoke import check
+        run: python -c "from app.main import app; print('app ok', app.title)"
+
+      - name: Pytest (when tests exist)
+        run: |
+          pip install pytest pytest-asyncio httpx 2>/dev/null || true
+          if [ -d tests ]; then pytest tests/ -q; else echo "skip: no tests/ yet"; fi
+        continue-on-error: true

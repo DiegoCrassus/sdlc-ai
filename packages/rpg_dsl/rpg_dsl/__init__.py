@@ -1,0 +1,71 @@
+"""rpg_dsl — RPG-OP declarative spec DSL."""
+
+from ._decorators import (
+    Canvas,
+    Eval,
+    Field,
+    GET,
+    POST,
+    PUT,
+    DELETE,
+    PATCH,
+    Presentation,
+    Region,
+    Sheet,
+    SubAgent,
+    api,
+    assert_contains,
+    assert_not_contains,
+    assert_tool_called,
+    sheet_field,
+)
+from ._models import (
+    ApiSpec,
+    CanvasSpec,
+    EvalAssertion,
+    EvalSpec,
+    FieldSpec,
+    PresentationType,
+    RegionSpec,
+    RouteSpec,
+    SheetSpec,
+    SubAgentSpec,
+)
+from ._registry import all_specs, clear, get_all, register
+
+__all__ = [
+    # Decorators
+    "Canvas",
+    "Eval",
+    "Field",
+    "GET",
+    "POST",
+    "PUT",
+    "DELETE",
+    "PATCH",
+    "Presentation",
+    "Region",
+    "Sheet",
+    "SubAgent",
+    "api",
+    "assert_contains",
+    "assert_not_contains",
+    "assert_tool_called",
+    "sheet_field",
+    # IR models
+    "ApiSpec",
+    "CanvasSpec",
+    "EvalAssertion",
+    "EvalSpec",
+    "FieldSpec",
+    "PresentationType",
+    "RegionSpec",
+    "RouteSpec",
+    "SheetSpec",
+    "SubAgentSpec",
+    # Registry
+    "all_specs",
+    "clear",
+    "get_all",
+    "register",
+]

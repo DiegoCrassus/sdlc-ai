@@ -1,0 +1,76 @@
+# SDLC harness — RPG-OP
+version: 1
+
+project:
+  name: rpg-op
+  docs: docs/
+
+paths:
+  specs: specs/
+  generated: generated/
+  dsl_package: packages/rpg_dsl/
+  backend: backend/
+  frontend: apps/web/
+  product_agent: services/agent/
+  product_skills: skills/
+  sdlc_skills: .sdlc/skills/
+  sdlc_agents: .sdlc/agents/
+
+deep_agent:
+  dev_orchestrator: .sdlc/agents/dev-orchestrator.yaml
+  product_orchestrator_spec: specs/agents/orchestrator.py
+  default_model_env: AGENT_MODEL
+
+commands:
+  validate: ["rpg", "validate", "specs/"]
+  compile_all: ["rpg", "compile", "--target", "all"]
+  test_backend: ["pytest", "backend/", "-q"]
+  smoke_api: ["python", "backend/scripts/smoke_test.py"]
+
+github:
+  mcp_config: .cursor/mcp.json
+  mcp_token_env: GITHUB_PERSONAL_ACCESS_TOKEN
+  cli: gh
+  lifecycle: .sdlc/workflows/github-lifecycle.md
+  scripts:
+    issue_intent: .sdlc/scripts/gh-issue-intent.ps1
+    pr_open: .sdlc/scripts/gh-pr-open.ps1
+    sdlc_status: .sdlc/scripts/gh-sdlc-status.ps1
+    labels_bootstrap: .sdlc/scripts/gh-labels-bootstrap.ps1
+
+integrations:
+  registry: .sdlc/integrations/platforms.yaml
+  github: .sdlc/integrations/github.yaml
+  langsmith: .sdlc/integrations/langsmith.yaml
+
+hooks:
+  cursor: .cursor/hooks.json
+  registry: .sdlc/hooks.yaml
+  deps: .sdlc/requirements-hooks.txt
+  local_log: .sdlc/logs/cursor-hooks.jsonl
+
+gates:
+  pr:
+    - name: validate-spec
+      command: validate
+      required: false  # until rpg_dsl exists
+    - name: compile
+      command: compile_all
+      required: false
+    - name: pytest
+      command: test_backend
+      required: true
+
+policy:
+  generated_readonly: true
+  specs_required_for:
+    - agent behavior
+    - sheet schema
+    - canvas spec
+    - api contract changes
+
+cursor:
+  rules_dir: .cursor/rules/
+  project_skills_dir: .cursor/skills/
+  mcp_config: .cursor/mcp.json
+  hooks: .cursor/hooks.json

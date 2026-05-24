@@ -1,0 +1,37 @@
+---
+description: GitHub MCP, gh CLI e lifecycle SDLC no GitHub
+globs: .github/**/*,.sdlc/integrations/**/*,.sdlc/workflows/github-lifecycle.md
+alwaysApply: false
+---
+
+# GitHub & MCP — SDLC
+
+## MCP (Cursor)
+
+- Config: `.cursor/mcp.json` — server `github` (remote ou Docker)
+- Token: env `GITHUB_PERSONAL_ACCESS_TOKEN`
+- Skill: `.sdlc/skills/github-sdlc/SKILL.md`
+
+## Lifecycle
+
+Intent (issue) → branch → spec → PR → Actions → merge
+
+Workflow: `.sdlc/workflows/github-lifecycle.md`
+
+## Scripts
+
+```powershell
+.sdlc/scripts/gh-issue-intent.ps1 -Title "[Intent] …"
+.sdlc/scripts/gh-pr-open.ps1 -Title "feat: …" -Issue 12
+.sdlc/scripts/gh-sdlc-status.ps1
+.sdlc/scripts/gh-labels-bootstrap.ps1
+```
+
+## Labels SDLC
+
+`sdlc:intent`, `sdlc:spec`, `sdlc:implement`, `sdlc:ready`, `sdlc:blocked`
+
+## Segurança
+
+- PAT nunca no repo
+- Não force-push `main`

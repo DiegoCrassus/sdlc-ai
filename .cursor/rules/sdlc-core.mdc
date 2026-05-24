@@ -1,0 +1,23 @@
+---
+description: Core SDLC AI-native — Deep Agent + GitHub MCP lifecycle
+alwaysApply: true
+---
+
+# SDLC core — RPG-OP
+
+Deep Agent conduz engenharia; **GitHub MCP** conduz intent → PR → merge.
+
+## Ordem de trabalho
+
+1. `.sdlc/AGENTS.md` + `docs/06-sdlc-ai-native.md`
+2. Issue GitHub (template SDLC) ou intent local
+3. Spec em `specs/` → compile → implement
+4. PR + workflow `SDLC` verde
+
+## GitHub MCP
+
+Config: `.cursor/mcp.json` — skill `github-sdlc`
+
+## Idioma
+
+Respostas em português; código em inglês.

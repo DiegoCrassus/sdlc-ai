@@ -1,0 +1,46 @@
+name: dev-orchestrator
+description: Orquestrador de engenharia RPG-OP — conduz SDLC AI-native via specs, compile, GitHub e subagentes.
+model: ${AGENT_MODEL:-openai:gpt-4.1-mini}
+
+memory:
+  - .sdlc/AGENTS.md
+
+skills:
+  - .sdlc/skills/dsl-authoring/
+  - .sdlc/skills/compile-workflow/
+  - .sdlc/skills/safe-refactor/
+  - .sdlc/skills/deep-agent-harness/
+  - .sdlc/skills/github-sdlc/
+  - .sdlc/skills/langsmith-observability/
+
+system_prompt: |
+  Você é o dev orchestrator do RPG-OP. Conduza o SDLC em .sdlc/phases.yaml e
+  .sdlc/workflows/github-lifecycle.md. Use GitHub MCP para issues/PRs/checks.
+  Delegue com task aos subagentes dev. Nunca edite generated/ manualmente.
+  Specs vivem em specs/; engenharia em .sdlc/. Produto: Sheet Canvas (docs/08-sheet-canvas.md).
+
+subagents:
+  - ref: subagents/spec-author.yaml
+  - ref: subagents/codegen-integrator.yaml
+  - ref: subagents/eval-engineer.yaml
+  - ref: subagents/github-integrator.yaml
+
+interrupt_on:
+  edit_file:
+    paths:
+      - "generated/**"
+    message: "Artefatos gerados — rode rpg compile em vez de editar."
+
+permissions:
+  - operations: [read, write]
+    paths: [specs/**, .sdlc/**, backend/**, apps/**, services/**, packages/**, .github/**]
+    mode: allow
+  - operations: [write]
+    paths: [generated/**]
+    mode: deny
+
+integrations:
+  mcp:
+    - github
+  cli:
+    - gh

@@ -1,0 +1,35 @@
+# Labels SDLC — aplicar no GitHub (Settings → Labels)
+# gh label create "sdlc:intent" --description "Fase intent" --color "0E8A16"
+# … ou importar via gh api
+
+labels:
+  - name: sdlc:intent
+    color: "0E8A16"
+    description: Fase 1 — intent / issue criada
+  - name: sdlc:spec
+    color: "1D76DB"
+    description: Spec / DSL em progresso
+  - name: sdlc:implement
+    color: "FBCA04"
+    description: Implementação hooks
+  - name: sdlc:eval
+    color: "5319E7"
+    description: Evals de agente
+  - name: sdlc:ready
+    color: "006B75"
+    description: Pronto para PR/review
+  - name: sdlc:blocked
+    color: "B60205"
+    description: Bloqueado — aguardando humano
+  - name: type:feature
+    color: "A2EEEF"
+    description: Nova funcionalidade
+  - name: type:bug
+    color: "D93F0B"
+    description: Correção
+  - name: type:spec
+    color: "C5DEF5"
+    description: Mudança de spec/DSL
+  - name: type:agent
+    color: "D4C5F9"
+    description: Deep Agent / harness

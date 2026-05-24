@@ -1,0 +1,21 @@
+{
+  "sheets": [
+    {
+      "name": "DnD5eSheet",
+      "version": 1
+    }
+  ],
+  "canvases": [
+    {
+      "name": "DnD5eCanvas",
+      "version": 1,
+      "regions": 4
+    }
+  ],
+  "subagents": [
+    {
+      "name": "sheet-template-analyst"
+    }
+  ],
+  "evals": []
+}
