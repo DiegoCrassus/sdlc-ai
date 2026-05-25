@@ -58,6 +58,57 @@ export interface ExampleSheet {
   template_image_url: string | null;
 }
 
+export interface Character {
+  id: string;
+  name: string;
+  owner_email: string | null;
+}
+
+export interface SheetSummary {
+  id: string;
+  label: string;
+  character: Character;
+  template_version: number;
+  revision: number;
+  updated_at: string;
+  incomplete_fields: string[];
+}
+
+export interface SheetDetail extends ExampleSheet {
+  id: string;
+  character: Character;
+  template_version: number;
+  revision: number;
+}
+
+export interface SheetTemplate {
+  id: string;
+  name: string;
+  version: number;
+  status: string;
+  schema_data: SheetSchema;
+  canvas_spec: CanvasSpec;
+  analysis: { warnings?: string[]; steps?: Array<{ name: string; status: string }> } | null;
+  published_at: string | null;
+}
+
+export interface TemplateAnalysis {
+  template: SheetTemplate;
+  warnings: string[];
+}
+
+export interface SheetRevision {
+  id: string;
+  revision: number;
+  data: Record<string, string | number>;
+  created_at: string;
+}
+
+export interface CampaignSheets {
+  campaign: CampaignDetail;
+  sheets: SheetSummary[];
+}
+
 export interface CreateCampaignInput {
   name: string;
   description: string;
@@ -127,6 +178,72 @@ export async function getExampleSheet(campaignId: string): Promise<ExampleSheet>
   const res = await fetch(`${API}/campaigns/${campaignId}/example-sheet`);
   if (!res.ok) throw new Error(await parseError(res));
   return res.json();
+}
+
+export async function listCampaignSheets(campaignId: string): Promise<CampaignSheets> {
+  const res = await fetch(`${API}/campaigns/${campaignId}/sheets`);
+  if (!res.ok) throw new Error(await parseError(res));
+  return res.json();
+}
+
+export async function getSheet(sheetId: string): Promise<SheetDetail> {
+  const res = await fetch(`${API}/sheets/${sheetId}`);
+  if (!res.ok) throw new Error(await parseError(res));
+  return res.json();
+}
+
+export async function updateSheet(
+  sheetId: string,
+  data: Record<string, string | number>,
+): Promise<SheetDetail> {
+  const res = await fetch(`${API}/sheets/${sheetId}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ data }),
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+  return res.json();
+}
+
+export async function publishTemplate(campaignId: string): Promise<void> {
+  const res = await fetch(`${API}/campaigns/${campaignId}/template/publish`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ confirm: true }),
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+}
+
+export async function uploadTemplateSource(
+  campaignId: string,
+  templateSource: File,
+): Promise<TemplateAnalysis> {
+  const form = new FormData();
+  form.append("template_source", templateSource);
+  const res = await fetch(`${API}/campaigns/${campaignId}/template/source`, {
+    method: "POST",
+    body: form,
+  });
+  if (!res.ok) throw new Error(await parseError(res));
+  return res.json();
+}
+
+export async function listSheetRevisions(sheetId: string): Promise<SheetRevision[]> {
+  const res = await fetch(`${API}/sheets/${sheetId}/revisions`);
+  if (!res.ok) throw new Error(await parseError(res));
+  return res.json();
+}
+
+export async function extendTemplate(
+  campaignId: string,
+  input: { section_title: string; field_key: string; field_label: string; field_type: string },
+): Promise<void> {
+  const res = await fetch(`${API}/campaigns/${campaignId}/template/extend`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(input),
+  });
+  if (!res.ok) throw new Error(await parseError(res));
 }
 
 export function modifier(score: number): string {

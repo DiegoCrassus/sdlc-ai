@@ -272,6 +272,74 @@ a:hover {
   text-transform: uppercase;
 }
 
+.sheet-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.sheet-list li {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto;
+  gap: 0.75rem;
+  align-items: center;
+  padding: 0.65rem 0;
+  border-top: 1px solid var(--border);
+  font-size: 0.9rem;
+}
+
+.sheet-list button {
+  text-align: left;
+  border: 0;
+  background: transparent;
+  color: var(--accent);
+  cursor: pointer;
+  font: inherit;
+  padding: 0;
+}
+
+.template-form {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.template-form input {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  padding: 0.55rem 0.65rem;
+  font: inherit;
+}
+
+.analysis-box {
+  border: 1px dashed var(--border);
+  border-radius: 10px;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.analysis-box ul {
+  margin: 0.5rem 0 0;
+  padding-left: 1.1rem;
+  color: var(--muted);
+}
+
+.revision-strip {
+  margin-top: 0.75rem;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+@media (max-width: 640px) {
+  .template-form,
+  .sheet-list li {
+    grid-template-columns: 1fr;
+  }
+}
+
 .status-pending {
   color: #e6b450;
 }

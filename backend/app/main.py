@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
 from app.database import init_db
 from app.routers.campaigns import router as campaigns_router
+from app.routers.campaigns import sheets_router
 
 
 @asynccontextmanager
@@ -25,6 +26,7 @@ app.add_middleware(
 )
 
 app.include_router(campaigns_router, prefix=settings.api_prefix)
+app.include_router(sheets_router, prefix=settings.api_prefix)
 
 
 @app.get("/health")

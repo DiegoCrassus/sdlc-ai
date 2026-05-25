@@ -63,6 +63,22 @@ def main() -> None:
         example = json.loads(resp.read())
         print("example ok", example["data"]["character_name"])
 
+    with request.urlopen(f"http://127.0.0.1:8000/v1/campaigns/{cid}/sheets") as resp:
+        sheets = json.loads(resp.read())
+        sheet_id = sheets["sheets"][0]["id"]
+        print("sheets ok", len(sheets["sheets"]))
+
+    update_body = json.dumps({"data": {"character_name": "Lyra Updated"}}).encode()
+    req_update = request.Request(
+        f"http://127.0.0.1:8000/v1/sheets/{sheet_id}",
+        data=update_body,
+        method="PUT",
+        headers={"Content-Type": "application/json"},
+    )
+    with request.urlopen(req_update) as resp:
+        updated = json.loads(resp.read())
+        print("update ok", updated["data"]["character_name"], updated["revision"])
+
     inv_body = json.dumps({"email": "a@b.com", "role": "player"}).encode()
     req2 = request.Request(
         f"http://127.0.0.1:8000/v1/campaigns/{cid}/invites",

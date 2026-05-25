@@ -142,10 +142,26 @@ export const bffV1Routes = [
   },
   {
     "method": "POST",
+    "path": "/v1/campaigns/{campaign_id}/template/source",
+    "tag": "campaigns",
+    "response": "TemplateAnalysisDto",
+    "body": "TemplateSourceUploadDto",
+    "stream": false
+  },
+  {
+    "method": "POST",
     "path": "/v1/campaigns/{campaign_id}/template/publish",
     "tag": "campaigns",
     "response": "SheetTemplateDto",
     "body": "PublishTemplateDto",
+    "stream": false
+  },
+  {
+    "method": "POST",
+    "path": "/v1/campaigns/{campaign_id}/template/extend",
+    "tag": "campaigns",
+    "response": "SheetTemplateDto",
+    "body": "ExtendTemplateDto",
     "stream": false
   }
 ] as const;

@@ -24,7 +24,7 @@
     {
       "prefix": "/v1",
       "tag": "campaigns",
-      "routes": 7
+      "routes": 9
     }
   ],
   "evals": []
