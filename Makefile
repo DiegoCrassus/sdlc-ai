@@ -8,9 +8,11 @@ FRONTEND_DIR ?= apps/web
 
 ifeq ($(OS),Windows_NT)
 BACKEND_PY := $(BACKEND_DIR)/.venv/Scripts/python.exe
+BACKEND_LOCAL_PY := .venv/Scripts/python.exe
 POWERSHELL := powershell -NoProfile -ExecutionPolicy Bypass
 else
 BACKEND_PY := $(BACKEND_DIR)/.venv/bin/python
+BACKEND_LOCAL_PY := .venv/bin/python
 POWERSHELL := pwsh -NoProfile
 endif
 
@@ -39,7 +41,7 @@ frontend-install:
 	cd "$(FRONTEND_DIR)" && $(NPM) install
 
 dev-backend:
-	cd "$(BACKEND_DIR)" && ".venv/Scripts/python.exe" -m uvicorn app.main:app --reload --port 8000
+	cd "$(BACKEND_DIR)" && "$(BACKEND_LOCAL_PY)" -m uvicorn app.main:app --reload --port 8000
 
 dev-frontend:
 	cd "$(FRONTEND_DIR)" && $(NPM) run dev
@@ -51,14 +53,14 @@ preview-frontend:
 	cd "$(FRONTEND_DIR)" && $(NPM) run preview -- --host 0.0.0.0 --port 4173
 
 lint:
-	$(UV) run --with ruff ruff check "backend" "packages/rpg_dsl" "specs" ".cursor/hooks"
+	$(UV) run --with ruff ruff check "$(BACKEND_DIR)" "packages/rpg_dsl" "specs" ".cursor/hooks"
 	cd "$(FRONTEND_DIR)" && $(NPM) run build
 
 format:
-	$(UV) run --with ruff ruff format "backend" "packages/rpg_dsl" "specs" ".cursor/hooks"
+	$(UV) run --with ruff ruff format "$(BACKEND_DIR)" "packages/rpg_dsl" "specs" ".cursor/hooks"
 
 test:
-	$(UV) run --with pytest pytest "tests" "backend" -q
+	$(UV) run --with pytest pytest "tests" "$(BACKEND_DIR)" -q
 
 smoke:
 	"$(BACKEND_PY)" "$(BACKEND_DIR)/scripts/smoke_test.py"

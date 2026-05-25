@@ -80,6 +80,13 @@ rpg-op/
 │   ├── agents/                 # Adapters Cursor para agentes canônicos
 │   ├── rules/*.mdc
 │   └── skills/sdlc-orchestrator/
+├── apps/                       # Aplicações runtime
+│   ├── backend/                # FastAPI/Python (alvo; legado atual em backend/)
+│   └── frontend/               # React + Vite (alvo; legado atual em apps/web/)
+├── docs/                       # Arquitetura, infraestrutura, status e roadmap
+│   └── infrastructure/
+├── infra/                      # Infraestrutura, migrations e manifests
+│   └── migrations/
 ├── specs/                      # Fonte da verdade (DSL Python)
 │   ├── templates/              # SheetSchema, CanvasSpec, TemplateAnalysisResult
 │   ├── agents/
@@ -91,9 +98,8 @@ rpg-op/
 ├── packages/
 │   └── rpg_dsl/
 ├── generated/
-├── backend/                    # MVP F1 — FastAPI
-├── apps/web/                   # MVP F1 — React + Vite
-└── services/agent/             # Deep Agent produto (F2+)
+├── tests/
+└── Makefile
 ```
 
 Ver [.sdlc/README.md](../.sdlc/README.md) e [.cursor/README.md](../.cursor/README.md).

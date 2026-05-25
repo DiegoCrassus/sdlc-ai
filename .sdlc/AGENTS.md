@@ -50,6 +50,7 @@ Commands em `.sdlc/commands/` agrupam skills, agentes e procedimentos. Use:
 | Command | Usar quando |
 |---------|-------------|
 | `plane_backlog_plan` | Analisar intent e criar/atualizar tarefas no backlog Plane |
+| `architecture_documentation` | Documentar arquitetura, infra, migrations, testes, Makefile e Plane Infrastructure |
 | `technical_documentation` | Criar ou atualizar documentação técnica versionada |
 | `business_documentation` | Criar ou atualizar documentação de negócio e Plane Pages |
 
