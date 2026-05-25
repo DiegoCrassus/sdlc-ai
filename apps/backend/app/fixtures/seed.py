@@ -83,7 +83,9 @@ async def ensure_example_workspace(session: AsyncSession) -> None:
         await session.commit()
 
     count = await session.execute(
-        select(func.count()).select_from(Character).where(Character.workspace_id == EXAMPLE_WORKSPACE_ID)
+        select(func.count())
+        .select_from(Character)
+        .where(Character.workspace_id == EXAMPLE_WORKSPACE_ID)
     )
     if count.scalar_one() > 0:
         return
