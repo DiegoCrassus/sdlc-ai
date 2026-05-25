@@ -8,27 +8,31 @@ MVP inicial: criar **sandboxes RPG**, enviar modelo de ficha (imagem), convidar 
 
 ```
 rpg-op/
-├── .sdlc/            # Harness dev (agents, skills, workflows, phases)
 ├── .cursor/          # Regras e skills Cursor
-├── specs/            # DSL Python (fonte da verdade)
-├── backend/          # FastAPI (API /v1)
-├── apps/web/         # React + Vite (UI provisória)
-└── docs/             # Arquitetura e roadmap
+├── .sdlc/            # Harness dev (agents, skills, commands, workflows)
+├── apps/             # Alvo: backend Python + frontend React/Vite
+├── docs/             # Arquitetura, status e espelhos Plane
+├── infra/            # Migrations e infraestrutura
+├── packages/         # Pacotes Python internos
+├── specs/            # DSL Python (fonte de contratos)
+├── tests/            # Testes backend/frontend/integração/e2e
+└── Makefile          # Entrada local padrão
 ```
+
+Arquitetura alvo: [docs/infrastructure/project-architecture.md](docs/infrastructure/project-architecture.md). Durante a transição, o backend atual ainda está em `backend/` e o frontend atual ainda está em `apps/web/`.
 
 ## Pré-requisitos
 
 - Python 3.12+
 - Node.js 20+
+- uv
+- make
 
 ## Backend
 
 ```powershell
-cd backend
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-pip install -r requirements.txt
-uvicorn app.main:app --reload --port 8000
+make setup
+make dev-backend
 ```
 
 API: http://127.0.0.1:8000 — docs em http://127.0.0.1:8000/docs
@@ -36,9 +40,7 @@ API: http://127.0.0.1:8000 — docs em http://127.0.0.1:8000/docs
 ## Frontend
 
 ```powershell
-cd apps/web
-npm install
-npm run dev
+make dev-frontend
 ```
 
 UI: http://localhost:5173 (proxy `/v1` → backend)
@@ -50,7 +52,7 @@ UI: http://localhost:5173 (proxy `/v1` → backend)
 
 ## Documentação
 
-Ver [docs/](docs/) — [06-sdlc-ai-native.md](docs/06-sdlc-ai-native.md), [08-sheet-canvas.md](docs/08-sheet-canvas.md).
+Ver [docs/](docs/) — [docs/infrastructure/project-architecture.md](docs/infrastructure/project-architecture.md), [06-sdlc-ai-native.md](docs/06-sdlc-ai-native.md), [08-sheet-canvas.md](docs/08-sheet-canvas.md).
 
 ## SDLC local + GitHub
 
@@ -72,6 +74,16 @@ Ver [docs/](docs/) — [06-sdlc-ai-native.md](docs/06-sdlc-ai-native.md), [08-sh
 4. Teste: "Liste issues deste repo via GitHub MCP"
 
 Docs: [.sdlc/integrations/github.md](.sdlc/integrations/github.md)
+
+### Plane MCP (Cursor) — tarefas e docs
+
+1. Conta em https://app.plane.so — gere API token e anote o **workspace slug**
+2. `.env`: `PLANE_API_KEY`, `PLANE_WORKSPACE_SLUG`
+3. `.cursor/mcp.json` já inclui server `plane` — abra via `.\launch.ps1`
+4. Verifique: `.\.sdlc\scripts\plane-mcp-check.ps1`
+5. Teste: "Liste meus projetos no Plane via MCP"
+
+Docs: [.sdlc/integrations/plane.md](.sdlc/integrations/plane.md)
 
 ### Hooks + LangSmith
 

@@ -73,9 +73,11 @@ rpg-op/
 │   ├── agents/                 # dev-orchestrator + subagentes
 │   ├── skills/                 # dsl-authoring, compile-workflow, …
 │   ├── workflows/
+│   ├── commands/               # comandos agentic + scripts locais
 │   └── scripts/validate.ps1
 ├── .cursor/                    # Regras, skills e hooks Cursor IDE
 │   ├── AGENTS.md               # → .sdlc/AGENTS.md
+│   ├── agents/                 # Adapters Cursor para agentes canônicos
 │   ├── rules/*.mdc
 │   └── skills/sdlc-orchestrator/
 ├── specs/                      # Fonte da verdade (DSL Python)
@@ -203,6 +205,7 @@ Espelha o harness de produto, com skills de SDLC:
 | `spec-author` | Edita `specs/` seguindo convenções DSL |
 | `codegen-integrator` | Roda compile, integra hooks em `services/` |
 | `eval-engineer` | Escreve/atualiza `specs/evals/` |
+| `sdlc-doctor` | Avalia saúde do SDLC AI-native, drift, gates e integrações |
 | `system-author` | Cria plugin `@system` + extensões de cenário |
 
 Skills em `.sdlc/skills/` (também referenciadas em `.cursor/skills/` quando útil):
@@ -211,8 +214,30 @@ Skills em `.sdlc/skills/` (também referenciadas em `.cursor/skills/` quando út
 - `compile-workflow/SKILL.md` — ordem: validate → compile → test → eval.
 - `safe-refactor/SKILL.md` — nunca editar `generated/`.
 - `deep-agent-harness/SKILL.md` — create_deep_agent, subagentes, HITL.
+- `sdlc-doctor/SKILL.md` — diagnóstico de saúde, maturidade e prontidão do SDLC.
+
+### Fronteira `.sdlc/agents` vs `.cursor/agents`
+
+| Camada | Responsabilidade |
+|--------|------------------|
+| `.sdlc/agents/` | Catálogo canônico operacional: YAMLs com `name`, `type`, skills, tools, permissões e `system_prompt`. |
+| `.cursor/agents/` | Adapters de IDE: quando chamar cada agente no Cursor, exemplos de delegação e links para o YAML canônico. |
+| `.cursor/rules/` | Contexto automático da IDE por escopo de arquivo ou workflow. |
+
+Regra: configuração operacional não deve ser duplicada em `.cursor/agents/`.
 
 O **Dev Orchestrator** usa as mesmas primitives Deep Agents (`task`, filesystem, HITL em `edit_file` em `specs/`).
+
+### Commands
+
+Commands em `.sdlc/commands/` agrupam skills, agentes e procedimentos
+reutilizáveis. Eles podem apontar para scripts locais ou playbooks agentic.
+
+| Command | Função |
+|---------|--------|
+| `plane_backlog_plan` | Analisa uma intent e cria/atualiza work items no Plane |
+| `technical_documentation` | Cria ou atualiza documentação técnica versionada |
+| `business_documentation` | Cria ou atualiza documentação de negócio e Plane Pages |
 
 ```mermaid
 flowchart TB

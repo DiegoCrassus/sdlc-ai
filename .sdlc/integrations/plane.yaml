@@ -1,0 +1,50 @@
+platform: plane
+version: 1
+status: active
+
+role: product_tracking_and_docs
+
+mcp:
+  cursor_config: .cursor/mcp.json
+  example_config: .cursor/mcp.json.example
+  server_name: plane
+  official_repo: https://github.com/makeplane/plane-mcp-server
+  docs: https://developers.plane.so/dev-tools/mcp-server
+  hosted_url: https://mcp.plane.so/http/api-key/mcp
+  oauth_url: https://mcp.plane.so/http/mcp
+  token_env: PLANE_API_KEY
+  workspace_env: PLANE_WORKSPACE_SLUG
+  base_url_env: PLANE_BASE_URL
+  base_url_default: https://api.plane.so
+
+transports:
+  recommended: http_pat
+  options:
+    - id: http_pat
+      description: Remote hosted MCP with API key headers (agent-friendly)
+    - id: http_oauth
+      description: Remote hosted MCP with browser OAuth (simplest for individuals)
+    - id: stdio
+      description: Local uvx subprocess (self-hosted Plane or offline dev)
+
+capabilities:
+  tasks:
+    - work_items
+    - cycles
+    - modules
+    - states
+    - labels
+    - comments
+    - relations
+  docs:
+    - workspace_pages
+    - project_pages
+
+lifecycle:
+  workflow: .sdlc/workflows/plane-lifecycle.md
+  skill: .sdlc/skills/plane-sdlc/SKILL.md
+
+security:
+  never_commit:
+    - PLANE_API_KEY
+    - .env

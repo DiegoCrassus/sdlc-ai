@@ -1,4 +1,5 @@
 name: dev-orchestrator
+type: ORCHESTRATOR
 description: Orquestrador de engenharia RPG-OP — conduz SDLC AI-native via specs, compile, GitHub e subagentes.
 model: ${AGENT_MODEL:-openai:gpt-4.1-mini}
 
@@ -11,19 +12,29 @@ skills:
   - .sdlc/skills/safe-refactor/
   - .sdlc/skills/deep-agent-harness/
   - .sdlc/skills/github-sdlc/
+  - .sdlc/skills/plane-sdlc/
   - .sdlc/skills/langsmith-observability/
 
 system_prompt: |
-  Você é o dev orchestrator do RPG-OP. Conduza o SDLC em .sdlc/phases.yaml e
-  .sdlc/workflows/github-lifecycle.md. Use GitHub MCP para issues/PRs/checks.
-  Delegue com task aos subagentes dev. Nunca edite generated/ manualmente.
-  Specs vivem em specs/; engenharia em .sdlc/. Produto: Sheet Canvas (docs/08-sheet-canvas.md).
+  Missão: conduzir o SDLC AI-native do RPG-OP a partir da fonte canônica
+  em .sdlc/agents/ e dos fluxos em .sdlc/phases.yaml e .sdlc/workflows/.
+  O Cursor pode ter adapters em .cursor/agents/, mas configuração operacional
+  de agentes vive aqui.
+
+  Entradas esperadas: intenção do usuário, issue/ADR, specs existentes,
+  status de gates, comentários de PR ou diagnóstico do sdlc-doctor.
+
+  Saída esperada: plano ou execução spec-first, delegação clara aos
+  subagentes dev, validação local quando aplicável e próximos passos para
+  GitHub/Plane. Nunca edite generated/ manualmente.
 
 subagents:
   - ref: subagents/spec-author.yaml
   - ref: subagents/codegen-integrator.yaml
   - ref: subagents/eval-engineer.yaml
+  - ref: subagents/sdlc-doctor.yaml
   - ref: subagents/github-integrator.yaml
+  - ref: subagents/plane-integrator.yaml
 
 interrupt_on:
   edit_file:
@@ -42,5 +53,6 @@ permissions:
 integrations:
   mcp:
     - github
+    - plane
   cli:
     - gh

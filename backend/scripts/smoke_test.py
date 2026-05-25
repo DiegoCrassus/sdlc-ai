@@ -1,4 +1,5 @@
 """Smoke test for campaign API."""
+
 import json
 import struct
 import zlib
@@ -15,7 +16,16 @@ def tiny_png() -> bytes:
     idat_chunk = b"IDAT" + compressed
     idat_crc = struct.pack(">I", zlib.crc32(idat_chunk) & 0xFFFFFFFF)
     iend = struct.pack(">I", 0) + b"IEND" + struct.pack(">I", zlib.crc32(b"IEND") & 0xFFFFFFFF)
-    return sig + struct.pack(">I", 13) + ihdr_chunk + ihdr_crc + struct.pack(">I", len(compressed)) + idat_chunk + idat_crc + iend
+    return (
+        sig
+        + struct.pack(">I", 13)
+        + ihdr_chunk
+        + ihdr_crc
+        + struct.pack(">I", len(compressed))
+        + idat_chunk
+        + idat_crc
+        + iend
+    )
 
 
 def main() -> None:

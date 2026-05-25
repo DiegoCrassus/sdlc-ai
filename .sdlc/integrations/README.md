@@ -5,6 +5,7 @@ Plataformas conectadas ao harness Deep Agent via **MCP**, **CLI** e **CI**.
 | Plataforma | MCP | CLI | CI | Status |
 |------------|-----|-----|-----|--------|
 | [GitHub](github.md) | `.cursor/mcp.json` | `gh` | `.github/workflows/` | **ativo** |
+| [Plane](plane.md) | `.cursor/mcp.json` | — | — | **ativo** |
 | [LangSmith](langsmith.md) | — | hooks Python | eval gate | **ativo** (Cursor) |
 | Linear | futuro | — | — | backlog |
 
@@ -17,6 +18,17 @@ Configuração central: [platforms.yaml](platforms.yaml)
 3. Copie `.cursor/mcp.json.example` → `.cursor/mcp.json` se necessário
 4. Reinicie o Cursor; verifique MCP verde em Settings → MCP
 5. `gh auth login` para comandos locais
+
+## Setup rápido Plane
+
+1. Conta em https://app.plane.so — gere API token (Profile ou Workspace Settings)
+2. Anote o **workspace slug** da URL (`https://app.plane.so/<slug>/`)
+3. `.env`: `PLANE_API_KEY`, `PLANE_WORKSPACE_SLUG`
+4. `.cursor/mcp.json` já inclui server `plane` (ver `mcp.json.example`)
+5. `.\launch.ps1` → Settings → MCP → `plane` verde
+6. Verifique: `.\.sdlc\scripts\plane-mcp-check.ps1`
+
+Doc completa: [plane.md](plane.md)
 
 ## Setup rápido LangSmith
 

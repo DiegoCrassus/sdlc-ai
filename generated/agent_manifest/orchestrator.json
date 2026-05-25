@@ -2,6 +2,14 @@
   "version": 1,
   "subagents": [
     {
+      "name": "orchestrator",
+      "response_model": "OrchestratorResult",
+      "skills": [
+        "workflows/sheet-canvas/",
+        "workflows/template-publish/"
+      ]
+    },
+    {
       "name": "sheet-template-analyst",
       "response_model": "TemplateAnalysisResult",
       "skills": [

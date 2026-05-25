@@ -1,0 +1,17 @@
+name: supabase
+kind: mcp
+status: active
+config: .cursor/mcp.json
+server: supabase
+docs: .sdlc/integrations/supabase.md
+
+env:
+  token: SUPABASE_ACCESS_TOKEN
+  project_ref: SUPABASE_PROJECT_REF
+
+security:
+  read_only: true
+  notes:
+    - Use a dedicated Supabase PAT for Cursor MCP.
+    - Do not commit SUPABASE_ACCESS_TOKEN.
+    - Avoid connecting destructive tools to production data.

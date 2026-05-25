@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from ._models import ApiSpec, CanvasSpec, EvalSpec, SheetSpec, SubAgentSpec
+    pass
 
 _registry: dict[str, list] = {
     "canvas": [],

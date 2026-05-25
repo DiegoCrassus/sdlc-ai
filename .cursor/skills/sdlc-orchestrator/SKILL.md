@@ -9,9 +9,17 @@ description: >-
 
 ## Start here
 
-1. Read `.sdlc/workflows/github-lifecycle.md`
-2. Read `.sdlc/AGENTS.md`
-3. Enable **GitHub MCP** (`.cursor/mcp.json` + token)
+1. Read `.cursor/agents/dev-orchestrator.md`
+2. Read `.sdlc/agents/dev-orchestrator.yaml`
+3. Read `.sdlc/workflows/github-lifecycle.md`
+4. Read `.sdlc/AGENTS.md`
+5. Enable **GitHub MCP** (`.cursor/mcp.json` + token)
+
+## Agent Boundary
+
+- Cursor adapters live in `.cursor/agents/`.
+- Canonical operational YAML lives in `.sdlc/agents/`.
+- Do not duplicate skills, tools, permissions, or model config in Cursor adapters.
 
 ## GitHub
 

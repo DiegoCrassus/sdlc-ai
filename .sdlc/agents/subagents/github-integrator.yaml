@@ -1,14 +1,20 @@
 name: github-integrator
+type: INTEGRATOR
 description: Opera GitHub via MCP e gh CLI — issues, PRs, labels, Actions, lifecycle SDLC.
 skills:
   - .sdlc/skills/github-sdlc/
   - .sdlc/skills/compile-workflow/
 
 system_prompt: |
-  Você conecta o trabalho local ao GitHub: issues SDLC, branches, PRs, checks.
-  Use GitHub MCP quando disponível; fallback gh CLI via .sdlc/scripts/.
-  Nunca commite secrets. PRs devem linkar issues e passar checklist SDLC.
-  Labels: sdlc:intent → sdlc:spec → sdlc:implement → sdlc:ready.
+  Missão: conectar o trabalho local ao GitHub por issues, branches, PRs,
+  labels, Actions e checks do lifecycle SDLC.
+
+  Entradas esperadas: intenção/issue, branch atual, status de validação,
+  checklist de PR e configuração GitHub em .sdlc/integrations/.
+
+  Saída esperada: issue ou PR pronto para revisão, checks interpretados,
+  labels SDLC atualizadas e próximos passos claros. Use GitHub MCP quando
+  disponível; fallback gh CLI via .sdlc/scripts/. Nunca commite secrets.
 
 tools:
   - read_file

@@ -26,8 +26,12 @@ class Campaign(Base):
     canvas_spec_json: Mapped[str] = mapped_column(Text, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 
-    invites: Mapped[list["CampaignInvite"]] = relationship(back_populates="campaign", cascade="all, delete-orphan")
-    example_sheet: Mapped["ExampleSheet | None"] = relationship(back_populates="campaign", uselist=False, cascade="all, delete-orphan")
+    invites: Mapped[list["CampaignInvite"]] = relationship(
+        back_populates="campaign", cascade="all, delete-orphan"
+    )
+    example_sheet: Mapped["ExampleSheet | None"] = relationship(
+        back_populates="campaign", uselist=False, cascade="all, delete-orphan"
+    )
 
 
 class CampaignInvite(Base):
@@ -47,7 +51,9 @@ class ExampleSheet(Base):
     __tablename__ = "example_sheets"
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    campaign_id: Mapped[str] = mapped_column(String(36), ForeignKey("campaigns.id"), unique=True, nullable=False)
+    campaign_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("campaigns.id"), unique=True, nullable=False
+    )
     data_json: Mapped[str] = mapped_column(Text, nullable=False)
     label: Mapped[str] = mapped_column(String(200), default="Ficha exemplo")
 

@@ -11,7 +11,13 @@ from app.config import settings
 from app.database import dumps_json, get_db, loads_json
 from app.fixtures.default_template import DEFAULT_CANVAS_SPEC, DEFAULT_SCHEMA, MOCK_SHEET_DATA
 from app.models import Campaign, CampaignInvite, ExampleSheet
-from app.schemas import CampaignDetail, CampaignSummary, ExampleSheetResponse, InviteCreate, InviteResponse
+from app.schemas import (
+    CampaignDetail,
+    CampaignSummary,
+    ExampleSheetResponse,
+    InviteCreate,
+    InviteResponse,
+)
 
 router = APIRouter(prefix="/campaigns", tags=["campaigns"])
 
@@ -127,7 +133,9 @@ async def get_template_image(campaign_id: str, db: AsyncSession = Depends(get_db
 
 
 @router.get("/{campaign_id}/invites", response_model=list[InviteResponse])
-async def list_invites(campaign_id: str, db: AsyncSession = Depends(get_db)) -> list[InviteResponse]:
+async def list_invites(
+    campaign_id: str, db: AsyncSession = Depends(get_db)
+) -> list[InviteResponse]:
     await _get_campaign_or_404(db, campaign_id)
     result = await db.execute(
         select(CampaignInvite)
@@ -174,7 +182,9 @@ async def create_invite(
 
 
 @router.get("/{campaign_id}/example-sheet", response_model=ExampleSheetResponse)
-async def get_example_sheet(campaign_id: str, db: AsyncSession = Depends(get_db)) -> ExampleSheetResponse:
+async def get_example_sheet(
+    campaign_id: str, db: AsyncSession = Depends(get_db)
+) -> ExampleSheetResponse:
     result = await db.execute(
         select(Campaign)
         .options(selectinload(Campaign.example_sheet))
@@ -203,7 +213,9 @@ async def _get_campaign_or_404(db: AsyncSession, campaign_id: str) -> Campaign:
 
 async def _invite_counts(db: AsyncSession, campaign_id: str) -> tuple[int, int]:
     total = await db.execute(
-        select(func.count()).select_from(CampaignInvite).where(CampaignInvite.campaign_id == campaign_id)
+        select(func.count())
+        .select_from(CampaignInvite)
+        .where(CampaignInvite.campaign_id == campaign_id)
     )
     pending = await db.execute(
         select(func.count())

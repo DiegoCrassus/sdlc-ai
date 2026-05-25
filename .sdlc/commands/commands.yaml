@@ -1,6 +1,101 @@
 # SDLC command registry — RPG-OP
 version: 1
 
+agent_commands:
+  plane_backlog_plan:
+    title: Analisar e criar tarefas no backlog Plane
+    description: Decompõe uma intenção em work items Plane acionáveis, alinhados ao SDLC e ao GitHub quando aplicável.
+    owner: plane-integrator
+    adapter: .cursor/agents/subagents/plane-integrator.md
+    playbook: .sdlc/commands/plane-backlog-plan.md
+    skills:
+      - .sdlc/skills/plane-sdlc/
+      - .sdlc/skills/github-sdlc/
+    inputs:
+      - intent
+      - contexto de produto ou negócio
+      - links de issues/PRs quando existirem
+    outputs:
+      - backlog analisado
+      - work items Plane propostos ou criados
+      - comentários/links de rastreabilidade
+    guardrails:
+      - Não deletar work items sem confirmação humana.
+      - Não expor PLANE_API_KEY.
+      - Specs técnicas continuam em specs/; Plane guarda resumo, links e documentação de produto.
+
+  technical_documentation:
+    title: Criar ou atualizar documentação técnica
+    description: Produz documentação técnica versionada no repo a partir de specs, arquitetura, decisões e diffs.
+    owner: spec-author
+    adapter: .cursor/agents/subagents/spec-author.md
+    playbook: .sdlc/commands/technical-documentation.md
+    skills:
+      - .sdlc/skills/dsl-authoring/
+      - .sdlc/skills/deep-agent-harness/
+      - .sdlc/skills/safe-refactor/
+    inputs:
+      - mudança técnica
+      - specs e arquitetura impactadas
+      - decisões ou ADRs existentes
+    outputs:
+      - docs técnicos atualizados
+      - links para specs/código
+      - lacunas ou próximos passos
+    guardrails:
+      - Documentar comportamento e contratos, não copiar implementação inteira.
+      - Não editar generated/ manualmente.
+      - Preferir docs versionados em docs/ ou .sdlc/ quando forem decisões de engenharia.
+
+  architecture_documentation:
+    title: Documentar arquitetura do projeto
+    description: Mantém a arquitetura alvo do monorepo, Makefile, infra, migrations, testes e espelho Plane Infrastructure.
+    owner: spec-author
+    adapter: .cursor/agents/subagents/spec-author.md
+    playbook: .sdlc/commands/architecture-documentation.md
+    skills:
+      - .sdlc/skills/plane-sdlc/
+      - .sdlc/skills/plane-task-creation/
+      - .sdlc/skills/safe-refactor/
+    inputs:
+      - decisão arquitetural
+      - estrutura real do repositório
+      - documentação Plane Infrastructure
+      - requisitos de execução local
+    outputs:
+      - docs/infrastructure/project-architecture.md atualizado
+      - página Plane Infrastructure sincronizada
+      - Makefile e estrutura local alinhados
+      - pendências de migração documentadas
+    guardrails:
+      - Plane Infrastructure é a fonte colaborativa de verdade.
+      - Não tratar backend/ e apps/web/ como arquitetura final.
+      - Usar uv para dependências e comandos Python.
+      - Registrar gaps de migração em vez de esconder drift.
+
+  business_documentation:
+    title: Criar ou atualizar documentação de negócio
+    description: Converte intenção, escopo e decisões de produto em documentação de negócio clara e rastreável.
+    owner: plane-integrator
+    adapter: .cursor/agents/subagents/plane-integrator.md
+    playbook: .sdlc/commands/business-documentation.md
+    skills:
+      - .sdlc/skills/plane-sdlc/
+      - .sdlc/skills/github-sdlc/
+    inputs:
+      - objetivo de negócio
+      - personas ou usuários impactados
+      - critérios de sucesso
+      - links de backlog/issue quando existirem
+    outputs:
+      - documentação de negócio em Plane Page ou docs/
+      - resumo executivo
+      - escopo, não escopo e critérios de aceitação
+    guardrails:
+      - Não duplicar specs técnicas completas no Plane.
+      - Linkar fontes canônicas no repo.
+      - Separar decisão de negócio de detalhe de implementação.
+
 local:
   validate:
     windows: .sdlc/scripts/validate.ps1
@@ -36,9 +131,36 @@ github_cli:
 
 mcp:
   config: .cursor/mcp.json
-  server: github
-  skill: .sdlc/skills/github-sdlc/SKILL.md
+  servers:
+    github:
+      skill: .sdlc/skills/github-sdlc/SKILL.md
+    plane:
+      skill: .sdlc/skills/plane-sdlc/SKILL.md
 
 ci:
   workflow: .github/workflows/sdlc.yml
   triggers: [pull_request, push]
+
+lint:
+  check_python:
+    command: ["ruff", "check", "backend/", "packages/rpg_dsl/", "specs/", ".cursor/hooks/"]
+    description: Verifica erros Python com ruff
+  fix_python:
+    command: ["ruff", "check", "--fix", "--unsafe-fixes", "backend/", "packages/rpg_dsl/", "specs/", ".cursor/hooks/"]
+    description: Auto-corrige erros Python com ruff
+  format_python:
+    command: ["ruff", "format", "backend/", "packages/rpg_dsl/", "specs/", ".cursor/hooks/"]
+    description: Formata codigo Python
+  check_typescript:
+    command: ["npx", "tsc", "--noEmit"]
+    cwd: apps/web
+    description: Verifica erros TypeScript
+  trigger_fix_agent:
+    description: Dispara o agente lint-fix no GitHub Actions
+    github_workflow: lint-fix.yml
+    inputs: [branch, issue_number, commit_sha]
+    command: >
+      gh workflow run lint-fix.yml
+      --field branch=<BRANCH>
+      --field issue_number=<ISSUE>
+      --field commit_sha=<SHA>

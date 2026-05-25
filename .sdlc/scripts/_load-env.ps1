@@ -20,3 +20,9 @@ foreach ($line in Get-Content $envFile) {
 }
 
 Write-Host "info: .env loaded from $envFile"
+
+# gh CLI usa GH_TOKEN — aponta para o classic PAT que tem scopes completos
+$classic = [System.Environment]::GetEnvironmentVariable("GITHUB_PERSONAL_ACCESS_TOKEN_CLASSIC", "Process")
+if ($classic) {
+    [System.Environment]::SetEnvironmentVariable("GH_TOKEN", $classic, "Process")
+}

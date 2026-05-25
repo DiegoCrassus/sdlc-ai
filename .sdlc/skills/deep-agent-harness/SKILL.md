@@ -16,7 +16,7 @@ description: >-
 ## Engineering (SDLC)
 
 - Dev orchestrator: `.sdlc/agents/dev-orchestrator.yaml`
-- Subagents: spec-author, codegen-integrator, eval-engineer
+- Subagents: spec-author, codegen-integrator, eval-engineer, sdlc-doctor, github-integrator, plane-integrator
 
 ## create_deep_agent checklist
 

@@ -2,9 +2,9 @@ name: SDLC
 
 on:
   push:
-    branches: [main, develop]
+    branches: [main, master, staging, develop]
   pull_request:
-    branches: [main, develop]
+    branches: [main, master, staging, develop]
 
 jobs:
   sdlc-gates:
@@ -12,6 +12,16 @@ jobs:
     defaults:
       run:
         working-directory: backend
+
+    env:
+      LANGSMITH_API_KEY:   ${{ secrets.LANGSMITH_API_KEY }}
+      LANGSMITH_TRACING:   ${{ vars.LANGSMITH_TRACING }}
+      LANGSMITH_ENDPOINT:  ${{ vars.LANGSMITH_ENDPOINT }}
+      LANGSMITH_PROJECT:   ${{ vars.LANGSMITH_PROJECT }}
+      OPENAI_API_KEY:      ${{ secrets.OPENAI_API_KEY }}
+      AGENT_MODEL:         ${{ secrets.AGENT_MODEL }}
+      # PATs — use SDLC_PAT_CLASSIC para operacoes que precisam de token com scopes completos
+      SDLC_PAT_CLASSIC:    ${{ secrets.SDLC_PAT_CLASSIC }}
 
     steps:
       - uses: actions/checkout@v4
@@ -26,14 +36,13 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: SDLC validate (rpg skip if missing)
+      - name: Install rpg_dsl
         working-directory: .
-        run: |
-          if command -v rpg >/dev/null 2>&1; then
-            rpg validate specs/
-          else
-            echo "skip: rpg CLI not installed yet"
-          fi
+        run: pip install -e packages/rpg_dsl
+
+      - name: SDLC validate
+        working-directory: .
+        run: python -m rpg_dsl._cli validate specs/
 
       - name: Backend smoke import check
         run: python -c "from app.main import app; print('app ok', app.title)"

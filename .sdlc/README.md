@@ -14,7 +14,7 @@ Este diretório é o **harness de engenharia** do projeto. O [Deep Agent](https:
 ├── workflows/            # Playbooks executáveis pelo agente
 ├── evals/                # Suites e config de evals
 ├── integrations/         # GitHub MCP, plataformas (platforms.yaml)
-├── commands/             # Registry de comandos + gh reference
+├── commands/             # Registry de comandos, playbooks e gh reference
 ├── templates/            # ADR, intent, PR
 └── scripts/              # validate, gh-issue-intent, gh-pr-open, …
 ```
@@ -34,16 +34,27 @@ Ver [integrations/github.md](integrations/github.md) e [workflows/github-lifecyc
 |--------|------|-------|
 | **Declarativo** | `specs/` (repo root) | DSL Python — fonte da verdade |
 | **Harness SDLC** | `.sdlc/` | Como o agente desenvolve o repo |
-| **IDE + MCP** | `.cursor/` | Regras, skills, GitHub MCP |
+| **Agentes canônicos** | `.sdlc/agents/` | YAMLs operacionais: prompts, skills, tools, permissões e delegação |
+| **IDE + MCP** | `.cursor/` | Regras, adapters, skills de atalho, hooks e MCP |
+| **Adapters Cursor** | `.cursor/agents/` | Quando chamar cada agente no Cursor; não duplica configuração operacional |
 | **Remote** | `.github/` | Issues, PRs, Actions |
 
 ## Comandos (quando `rpg_dsl` estiver instalado)
+
+Commands combinam skills, agentes e procedimentos. Alguns são scripts locais;
+outros são playbooks para delegação agentic.
 
 ```bash
 rpg validate specs/
 rpg compile --target all
 pytest backend/ packages/
 ```
+
+Playbooks iniciais:
+
+- `.sdlc/commands/plane-backlog-plan.md`
+- `.sdlc/commands/technical-documentation.md`
+- `.sdlc/commands/business-documentation.md`
 
 ## Documentação
 

@@ -15,7 +15,7 @@ def _cmd_validate(args: argparse.Namespace) -> int:
         print(f"error: specs directory not found: {specs_dir}", file=sys.stderr)
         return 1
 
-    ok, errors, summary = validate_dir(specs_dir)
+    _ok, errors, summary = validate_dir(specs_dir)
 
     if errors:
         for err in errors:
@@ -28,12 +28,14 @@ def _cmd_validate(args: argparse.Namespace) -> int:
         return 0
 
     spec_counts = ", ".join(f"{k}={v}" for k, v in summary["specs"].items())
-    print(f"validate ok — {summary['files']} file(s) loaded  [{spec_counts or 'no specs registered'}]")
+    print(
+        f"validate ok — {summary['files']} file(s) loaded  [{spec_counts or 'no specs registered'}]"
+    )
     return 0
 
 
 def _cmd_compile(args: argparse.Namespace) -> int:
-    from ._compiler import compile_all, TARGETS
+    from ._compiler import TARGETS, compile_all
     from ._validator import validate_dir
 
     specs_dir = Path(args.specs_dir)
@@ -55,7 +57,9 @@ def _cmd_compile(args: argparse.Namespace) -> int:
         targets = [t.strip() for t in args.target.split(",")]
         unknown = [t for t in targets if t not in TARGETS]
         if unknown:
-            print(f"error: unknown target(s): {unknown}. Available: {list(TARGETS)}", file=sys.stderr)
+            print(
+                f"error: unknown target(s): {unknown}. Available: {list(TARGETS)}", file=sys.stderr
+            )
             return 1
 
     results = compile_all(out_dir, targets)
@@ -89,7 +93,7 @@ def main() -> None:
     p_comp.add_argument(
         "--target",
         default="all",
-        help="Comma-separated targets: pydantic,jsonschema,agent_manifest,evals,registry,skills,all",
+        help="Comma-separated targets: pydantic,jsonschema,typescript,openapi,agent_manifest,evals,registry,skills,all",
     )
     p_comp.add_argument(
         "--out",

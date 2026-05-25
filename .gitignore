@@ -13,6 +13,8 @@ secrets/
 data/
 backend/data/
 !backend/data/.gitkeep
+apps/backend/data/
+!apps/backend/data/.gitkeep
 
 # =============================================================================
 # Python
@@ -29,6 +31,7 @@ venv/
 env/
 ENV/
 backend/.venv/
+apps/backend/.venv/
 
 # Build / dist
 build/
@@ -66,6 +69,10 @@ apps/web/node_modules/
 apps/web/dist/
 apps/web/.next/
 apps/web/build/
+apps/frontend/node_modules/
+apps/frontend/dist/
+apps/frontend/.next/
+apps/frontend/build/
 *.tsbuildinfo
 
 # =============================================================================
