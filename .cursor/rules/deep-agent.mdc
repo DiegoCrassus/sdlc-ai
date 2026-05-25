@@ -1,15 +1,22 @@
 ---
 description: LangChain Deep Agents — product and dev harness
-globs: services/agent/**/*,.sdlc/agents/**/*
+globs: services/agent/**/*,.sdlc/agents/**/*,.cursor/agents/**/*
 alwaysApply: false
 ---
 
 # Deep Agent
 
 - Produto: `create_deep_agent` + `sheet-template-analyst`
-- Dev: `.sdlc/agents/dev-orchestrator.yaml` + subagentes em `subagents/`
+- Dev canônico: `.sdlc/agents/dev-orchestrator.yaml` + subagentes em `.sdlc/agents/subagents/`
+- Cursor adapters: `.cursor/agents/` espelha a árvore para instruções de uso na IDE
 - Skills: `skills/` (produto) e `.sdlc/skills/` (engenharia)
 - Manifest compilado: `generated/agent_manifest/` (futuro)
+
+## Fronteira Cursor vs SDLC
+
+- `.sdlc/agents/`: configuração operacional de agentes, prompts, skills, tools e permissões.
+- `.cursor/agents/`: quando chamar cada agente no Cursor e como delegar.
+- Não duplique config operacional em `.cursor/agents/`.
 
 ## Tools
 

@@ -7,7 +7,7 @@ import textwrap
 from pathlib import Path
 from typing import Any
 
-from ._models import CanvasSpec, EvalSpec, FieldSpec, SheetSpec, SubAgentSpec
+from ._models import ApiSpec, CanvasSpec, EvalSpec, FieldSpec, RouteSpec, SheetSpec, SubAgentSpec
 from ._registry import get_all
 
 # ---------------------------------------------------------------------------
@@ -20,6 +20,22 @@ _PY_TYPES: dict[str, str] = {
     "float": "float",
     "boolean": "bool",
     "text": "str",
+}
+
+_JSON_TYPES: dict[str, dict[str, str]] = {
+    "string": {"type": "string"},
+    "integer": {"type": "integer"},
+    "float": {"type": "number"},
+    "boolean": {"type": "boolean"},
+    "text": {"type": "string"},
+}
+
+_TS_TYPES: dict[str, str] = {
+    "string": "string",
+    "integer": "number",
+    "float": "number",
+    "boolean": "boolean",
+    "text": "string",
 }
 
 
@@ -42,6 +58,7 @@ def _default_expr(field: FieldSpec) -> str:
 # ---------------------------------------------------------------------------
 # Target: pydantic
 # ---------------------------------------------------------------------------
+
 
 def emit_pydantic(out_dir: Path) -> list[Path]:
     sheets: list[SheetSpec] = get_all("sheet")
@@ -80,6 +97,7 @@ def emit_pydantic(out_dir: Path) -> list[Path]:
 # ---------------------------------------------------------------------------
 # Target: jsonschema
 # ---------------------------------------------------------------------------
+
 
 def emit_jsonschema(out_dir: Path) -> list[Path]:
     sheets: list[SheetSpec] = get_all("sheet")
@@ -132,8 +150,183 @@ def emit_jsonschema(out_dir: Path) -> list[Path]:
 
 
 # ---------------------------------------------------------------------------
+# Target: typescript
+# ---------------------------------------------------------------------------
+
+
+def emit_typescript(out_dir: Path) -> list[Path]:
+    sheets: list[SheetSpec] = get_all("sheet")
+    canvases: list[CanvasSpec] = get_all("canvas")
+    apis: list[ApiSpec] = get_all("api")
+    if not sheets and not canvases and not apis:
+        return []
+
+    target = out_dir / "typescript"
+    target.mkdir(parents=True, exist_ok=True)
+    file_path = target / "api.ts"
+
+    lines: list[str] = [
+        "/* Auto-generated from specs/. Do not edit manually. */",
+        "",
+    ]
+
+    for spec in sheets:
+        class_name = spec.source_class.__name__ if spec.source_class else spec.name
+        interface_name = f"{class_name}V{spec.version}"
+        lines.append(f"export interface {interface_name} {{")
+        for field in spec.fields:
+            optional = "" if field.required else "?"
+            lines.append(f"  {field.key}{optional}: {_ts_type(field)};")
+        lines.append("}")
+        lines.append("")
+
+    if canvases:
+        lines.extend(
+            [
+                'export type PresentationType = "field_grid" | "stat_row" | "rich_text";',
+                "",
+                "export interface CanvasRegion {",
+                "  id: string;",
+                "  title: string;",
+                "  order: number;",
+                "  presentation: PresentationType;",
+                "  fields: string[];",
+                "  columns: number;",
+                "}",
+                "",
+                "export interface CanvasSpec {",
+                "  name: string;",
+                "  version: number;",
+                "  regions: CanvasRegion[];",
+                "}",
+                "",
+            ]
+        )
+        for canvas in canvases:
+            const_name = _to_const_name(canvas.name)
+            payload = {
+                "name": canvas.name,
+                "version": canvas.version,
+                "regions": [
+                    {
+                        "id": region.id,
+                        "title": region.title,
+                        "order": region.order,
+                        "presentation": region.presentation.value,
+                        "fields": region.fields,
+                        "columns": region.columns,
+                    }
+                    for region in canvas.regions
+                ],
+            }
+            lines.append(
+                f"export const {const_name}: CanvasSpec = {json.dumps(payload, indent=2, ensure_ascii=False)};"
+            )
+            lines.append("")
+
+    for api in apis:
+        const_name = _to_const_name(
+            f"{api.source_class.__name__ if api.source_class else api.tag}Routes"
+        )
+        route_payload = [
+            {
+                "method": route.method,
+                "path": f"{api.prefix}{route.path}",
+                "tag": api.tag,
+                "response": route.response,
+                "body": route.body,
+                "stream": route.stream,
+            }
+            for route in api.routes
+        ]
+        lines.append(
+            f"export const {const_name} = {json.dumps(route_payload, indent=2, ensure_ascii=False)} as const;"
+        )
+        lines.append("")
+
+    file_path.write_text("\n".join(lines), encoding="utf-8")
+    return [file_path]
+
+
+# ---------------------------------------------------------------------------
+# Target: openapi
+# ---------------------------------------------------------------------------
+
+
+def emit_openapi(out_dir: Path) -> list[Path]:
+    apis: list[ApiSpec] = get_all("api")
+    sheets: list[SheetSpec] = get_all("sheet")
+    if not apis:
+        return []
+
+    target = out_dir / "openapi"
+    target.mkdir(parents=True, exist_ok=True)
+    file_path = target / "bff_v1.yaml"
+
+    components: dict[str, Any] = {"schemas": {}}
+    for spec in sheets:
+        class_name = spec.source_class.__name__ if spec.source_class else spec.name
+        components["schemas"][f"{class_name}V{spec.version}"] = _sheet_json_schema(spec, class_name)
+
+    route_dtos = {route.response for api in apis for route in api.routes if route.response} | {
+        route.body for api in apis for route in api.routes if route.body
+    }
+    for dto in sorted(route_dtos):
+        components["schemas"].setdefault(dto, _placeholder_schema(dto))
+
+    paths: dict[str, Any] = {}
+    for api in apis:
+        for route in api.routes:
+            full_path = f"{api.prefix}{route.path}"
+            path_item = paths.setdefault(full_path, {})
+            operation: dict[str, Any] = {
+                "tags": [api.tag],
+                "operationId": _operation_id(route),
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                    }
+                },
+            }
+            parameters = _path_parameters(full_path)
+            if parameters:
+                operation["parameters"] = parameters
+            if route.response:
+                operation["responses"]["200"]["content"] = {
+                    "application/json": {
+                        "schema": {"$ref": f"#/components/schemas/{route.response}"}
+                    }
+                }
+            if route.body:
+                operation["requestBody"] = {
+                    "required": True,
+                    "content": {
+                        "application/json": {
+                            "schema": {"$ref": f"#/components/schemas/{route.body}"}
+                        }
+                    },
+                }
+            if route.stream:
+                operation["x-streaming"] = True
+            path_item[route.method.lower()] = operation
+
+    document = {
+        "openapi": "3.1.0",
+        "info": {
+            "title": "RPG-OP BFF API",
+            "version": "1.0.0",
+        },
+        "paths": paths,
+        "components": components,
+    }
+    file_path.write_text(json.dumps(document, indent=2, ensure_ascii=False), encoding="utf-8")
+    return [file_path]
+
+
+# ---------------------------------------------------------------------------
 # Target: agent_manifest
 # ---------------------------------------------------------------------------
+
 
 def emit_agent_manifest(out_dir: Path) -> list[Path]:
     subagents: list[SubAgentSpec] = get_all("subagent")
@@ -177,6 +370,7 @@ def emit_agent_manifest(out_dir: Path) -> list[Path]:
 # Target: evals
 # ---------------------------------------------------------------------------
 
+
 def emit_evals(out_dir: Path) -> list[Path]:
     evals: list[EvalSpec] = get_all("eval")
     if not evals:
@@ -210,6 +404,7 @@ def emit_evals(out_dir: Path) -> list[Path]:
 # Target: registry
 # ---------------------------------------------------------------------------
 
+
 def emit_registry(out_dir: Path) -> list[Path]:
     target = out_dir / "registry"
     target.mkdir(parents=True, exist_ok=True)
@@ -218,11 +413,22 @@ def emit_registry(out_dir: Path) -> list[Path]:
     canvases: list[CanvasSpec] = get_all("canvas")
     subagents: list[SubAgentSpec] = get_all("subagent")
     evals: list[EvalSpec] = get_all("eval")
+    apis: list[ApiSpec] = get_all("api")
 
     manifest: dict[str, Any] = {
         "sheets": [{"name": s.name, "version": s.version} for s in sheets],
-        "canvases": [{"name": c.name, "version": c.version, "regions": len(c.regions)} for c in canvases],
+        "canvases": [
+            {"name": c.name, "version": c.version, "regions": len(c.regions)} for c in canvases
+        ],
         "subagents": [{"name": s.name} for s in subagents],
+        "apis": [
+            {
+                "prefix": api.prefix,
+                "tag": api.tag,
+                "routes": len(api.routes),
+            }
+            for api in apis
+        ],
         "evals": list({e.suite for e in evals}),
     }
 
@@ -235,6 +441,7 @@ def emit_registry(out_dir: Path) -> list[Path]:
 # Target: skills
 # ---------------------------------------------------------------------------
 
+
 def emit_skills(out_dir: Path) -> list[Path]:
     subagents: list[SubAgentSpec] = get_all("subagent")
     if not subagents:
@@ -245,7 +452,9 @@ def emit_skills(out_dir: Path) -> list[Path]:
         skill_dir = out_dir / "skills" / spec.name
         skill_dir.mkdir(parents=True, exist_ok=True)
         skill_path = skill_dir / "SKILL.md"
-        content = textwrap.dedent(f"""\
+        skills = "\n".join(f"- `{s}`" for s in spec.skills) or "- (none)"
+        content = textwrap.dedent(
+            f"""\
             ---
             name: {spec.name}
             generated: true
@@ -262,8 +471,9 @@ def emit_skills(out_dir: Path) -> list[Path]:
 
             ## Skills referenced
 
-            {chr(10).join(f'- `{s}`' for s in spec.skills) or '- (none)'}
-            """)
+            """
+        )
+        content += f"{skills}\n"
         skill_path.write_text(content, encoding="utf-8")
         written.append(skill_path)
 
@@ -277,6 +487,8 @@ def emit_skills(out_dir: Path) -> list[Path]:
 TARGETS = {
     "pydantic": emit_pydantic,
     "jsonschema": emit_jsonschema,
+    "typescript": emit_typescript,
+    "openapi": emit_openapi,
     "agent_manifest": emit_agent_manifest,
     "evals": emit_evals,
     "registry": emit_registry,
@@ -298,7 +510,71 @@ def compile_all(out_dir: Path, targets: list[str] | None = None) -> dict[str, li
 # Internal helpers
 # ---------------------------------------------------------------------------
 
+
 def _to_snake(name: str) -> str:
     import re
+
     s1 = re.sub(r"(.)([A-Z][a-z]+)", r"\1_\2", name)
     return re.sub(r"([a-z0-9])([A-Z])", r"\1_\2", s1).lower()
+
+
+def _to_const_name(name: str) -> str:
+    snake = _to_snake(name)
+    parts = [p for p in snake.split("_") if p]
+    return parts[0] + "".join(p.capitalize() for p in parts[1:]) if parts else "value"
+
+
+def _ts_type(field: FieldSpec) -> str:
+    return _TS_TYPES.get(field.type, "unknown")
+
+
+def _sheet_json_schema(spec: SheetSpec, title: str) -> dict[str, Any]:
+    properties: dict[str, Any] = {}
+    required: list[str] = []
+    for field in spec.fields:
+        prop = {"title": field.label, **_JSON_TYPES.get(field.type, {"type": "string"})}
+        if field.type == "integer":
+            if field.min is not None:
+                prop["minimum"] = field.min
+            if field.max is not None:
+                prop["maximum"] = field.max
+        properties[field.key] = prop
+        if field.required:
+            required.append(field.key)
+
+    schema: dict[str, Any] = {
+        "title": title,
+        "type": "object",
+        "properties": properties,
+    }
+    if required:
+        schema["required"] = required
+    return schema
+
+
+def _placeholder_schema(name: str) -> dict[str, Any]:
+    return {
+        "title": name,
+        "type": "object",
+        "additionalProperties": True,
+    }
+
+
+def _operation_id(route: RouteSpec) -> str:
+    cleaned = route.path.strip("/").replace("{", "").replace("}", "")
+    parts = [route.method.lower(), *[p for p in cleaned.replace("-", "_").split("/") if p]]
+    return "_".join(parts) if parts else route.method.lower()
+
+
+def _path_parameters(path: str) -> list[dict[str, Any]]:
+    import re
+
+    return [
+        {
+            "name": match,
+            "in": "path",
+            "required": True,
+            "schema": {"type": "string"},
+        }
+        for match in re.findall(r"{([^}]+)}", path)
+    ]

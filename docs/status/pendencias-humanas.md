@@ -6,14 +6,15 @@ Este documento cobre **somente o que você precisa fazer**.
 
 ---
 
-## 1. Git — commit inicial
+## 1. Git — commit das mudanças atuais
 
-Nenhum commit existe ainda. Sem isso o histórico e o CI não funcionam.
+O repositório já tem `HEAD` e `origin` configurados, mas há mudanças locais
+pendentes. Sem commit/push, o CI remoto não valida o estado atual.
 
 ```powershell
 # Na raiz do projeto
 git add .
-git commit -m "chore: scaffold inicial SDLC AI-native RPG-OP"
+git commit -m "chore: organize SDLC and Cursor agents"
 ```
 
 ---
@@ -232,7 +233,7 @@ AGENT_MODEL=openai:gpt-4.1-mini
 ## Checklist rápido (ordem recomendada)
 
 ```
-[ ] 1. git commit inicial
+[ ] 1. git commit das mudanças atuais
 [ ] 2. winget install GitHub.cli
 [ ] 3. Criar PAT no GitHub
 [ ] 4a. Preencher .env com GITHUB_PERSONAL_ACCESS_TOKEN

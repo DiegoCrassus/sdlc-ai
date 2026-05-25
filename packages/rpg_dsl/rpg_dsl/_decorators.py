@@ -26,6 +26,7 @@ Presentation = PresentationType
 # Field helpers
 # ---------------------------------------------------------------------------
 
+
 class Field:
     """Used inside @Canvas regions: Field.key("character_name")."""
 
@@ -65,6 +66,7 @@ class Field:
 # Region
 # ---------------------------------------------------------------------------
 
+
 class Region:
     def __init__(
         self,
@@ -92,6 +94,7 @@ class Region:
 # ---------------------------------------------------------------------------
 # @Canvas
 # ---------------------------------------------------------------------------
+
 
 class Canvas:
     def __init__(self, *, version: int = 1) -> None:
@@ -122,6 +125,7 @@ class Canvas:
 # ---------------------------------------------------------------------------
 # @Sheet — declarative sheet schema
 # ---------------------------------------------------------------------------
+
 
 def sheet_field(
     key: str,
@@ -179,6 +183,7 @@ class Sheet:
 # @SubAgent
 # ---------------------------------------------------------------------------
 
+
 class SubAgent:
     def __init__(self, *, name: str, response_model: str) -> None:
         self._name = name
@@ -200,6 +205,7 @@ class SubAgent:
 # ---------------------------------------------------------------------------
 # @Eval + assertion builders
 # ---------------------------------------------------------------------------
+
 
 def assert_contains(value: str) -> EvalAssertion:
     return EvalAssertion(type="contains", value=value)
@@ -236,8 +242,11 @@ class Eval:
 # @api + HTTP verb decorators
 # ---------------------------------------------------------------------------
 
+
 def _http_method(method: str):
-    def decorator(path: str, *, response: str | None = None, stream: bool = False, body: str | None = None):
+    def decorator(
+        path: str, *, response: str | None = None, stream: bool = False, body: str | None = None
+    ):
         def inner(fn):
             fn._rpg_route = RouteSpec(
                 method=method,
@@ -247,7 +256,9 @@ def _http_method(method: str):
                 body=body,
             )
             return fn
+
         return inner
+
     return decorator
 
 
@@ -258,7 +269,7 @@ DELETE = _http_method("DELETE")
 PATCH = _http_method("PATCH")
 
 
-class api:
+class api:  # noqa: N801
     def __init__(self, *, prefix: str, tag: str) -> None:
         self._prefix = prefix
         self._tag = tag

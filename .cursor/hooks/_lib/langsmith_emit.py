@@ -72,20 +72,13 @@ def append_local(event: str, payload: dict[str, Any]) -> None:
 
 def _project() -> str:
     # LangSmith SDK novo usa LANGSMITH_PROJECT; SDK antigo usa LANGCHAIN_PROJECT
-    return (
-        os.getenv("LANGSMITH_PROJECT")
-        or os.getenv("LANGCHAIN_PROJECT")
-        or "rpg-op-cursor"
-    )
+    return os.getenv("LANGSMITH_PROJECT") or os.getenv("LANGCHAIN_PROJECT") or "rpg-op-cursor"
 
 
 def _client():
     load_env()
     # Suporta tanto nomenclatura nova (LANGSMITH_*) quanto antiga (LANGCHAIN_*)
-    api_key = (
-        os.getenv("LANGSMITH_API_KEY")
-        or os.getenv("LANGCHAIN_API_KEY")
-    )
+    api_key = os.getenv("LANGSMITH_API_KEY") or os.getenv("LANGCHAIN_API_KEY")
     project = _project()
     if not api_key:
         return None, project
@@ -93,7 +86,7 @@ def _client():
         from langsmith import Client
 
         return Client(api_key=api_key), project
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         print(json.dumps({"langsmith_warning": str(exc)}), file=sys.stderr)
         return None, project
 
@@ -146,7 +139,7 @@ def emit_run(
             end_time=datetime.now(timezone.utc) if outputs is not None else None,
         )
         return run_id
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         print(json.dumps({"langsmith_error": str(exc)}), file=sys.stderr)
         return None
 
@@ -161,13 +154,15 @@ def emit_pre(event: str, hook_input: dict[str, Any], extra: dict[str, Any] | Non
             {
                 "session_id": str(uuid.uuid4()),
                 "root_run_id": run_id,
-                "project": project,
+                "project": _project(),
                 "started_at": datetime.now(timezone.utc).isoformat(),
             }
         )
 
 
-def emit_post(event: str, hook_input: dict[str, Any], hook_output: dict[str, Any] | None = None) -> None:
+def emit_post(
+    event: str, hook_input: dict[str, Any], hook_output: dict[str, Any] | None = None
+) -> None:
     session = get_session()
     payload = {"hook_input": hook_input, "hook_output": hook_output or {}}
     emit_run(

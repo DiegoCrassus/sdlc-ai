@@ -33,3 +33,6 @@ labels:
   - name: type:agent
     color: "D4C5F9"
     description: Deep Agent / harness
+  - name: sdlc:lint-fail
+    color: "E4E669"
+    description: Lint falhou — aguardando auto-fix do agente

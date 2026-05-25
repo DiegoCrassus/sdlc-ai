@@ -1,124 +1,150 @@
-# Roadmap — foco Sheet Canvas
+﻿# Roadmap de MVPs — RPG-OP
 
-Roadmap alinhado ao MVP: **ficha visual**, **template do exemplo do mestre**, **um subagente analista**. Cenários extras (combat, chat, plugins D&D) ficam fora até validar o core.
+Roadmap realista para chegar ao objetivo final do ciclo atual: **interface funcional para mestre e jogador**, **backend com BFF**, persistência estruturada e base preparada para o subagente `sheet-template-analyst`.
 
-Documento central: [08-sheet-canvas.md](08-sheet-canvas.md).
+O norte do produto continua sendo o mesmo: o mestre envia uma ficha real da mesa, o sistema transforma isso em `SheetSchema` + `CanvasSpec`, e os jogadores usam a ficha em um canvas visual fiel ao modelo original.
 
-## Visão geral
+## Premissas
 
-```mermaid
-gantt
-    title MVP RPG-OP
-    dateFormat YYYY-MM-DD
-    section SDLC
-    S0 DSL CanvasSchema     :s0, 2026-05-19, 7d
-    section Core
-    F1 Template + CRUD      :f1, after s0, 21d
-    F2 Template analyst     :f2, after f1, 21d
-    F3 GM dashboard         :f3, after f2, 14d
-    F4 Extend template      :f4, after f3, 10d
-    section Depois
-    F5 Assistente chat      :f5, after f4, 21d
-    F6 Plugins registry     :f6, after f5, 21d
-```
+- O MVP deve validar primeiro a experiência de ficha visual, mesmo antes do LLM.
+- O backend expõe uma API BFF estável para a UI; lógica de domínio e validação ficam fora do agente.
+- A DSL em `specs/` é fonte de verdade para contratos, schemas, canvas e agent manifest.
+- O subagente propõe drafts; publicação de template sempre passa pelo mestre.
+- Plugins por sistema, chat amplo, OCR em massa e app móvel ficam fora do ciclo principal.
 
----
+## Estado atual
 
-## S0 — DSL `SheetSchema` + `CanvasSpec` (~1 semana)
+| Área | Estado |
+|------|--------|
+| SDLC AI-native | Harness `.sdlc/` e `.cursor/` ativos |
+| DSL | Base mínima implementada; specs de canvas, sheet e subagente existem |
+| Artefatos gerados | Pydantic, JSON Schema, manifest de agente, skills e registry parciais |
+| Backend | FastAPI scaffolded; dependências locais ainda precisam ser instaladas |
+| Frontend | React/Vite scaffolded; UI provisória |
+| Plane/GitHub/LangSmith | Integrações documentadas; confirmação operacional depende de credenciais locais |
 
-**Entregas**
+## MVP 0 — Fundação SDLC e contratos
 
-- [ ] IR na DSL: `Field`, `Section`, `CanvasRegion`, `PresentationType`.
-- [ ] `rpg compile --target pydantic|typescript`.
-- [ ] Tipos TS para props do `SheetCanvas`.
+**Objetivo:** consolidar a base técnica que permite evoluir sem duplicar schema entre backend, frontend e agente.
 
-**Critério de saída:** spec estática de exemplo compila para Pydantic + TS.
+**Entregas principais**
 
----
+- DSL `rpg_dsl` mínima instalada e executável via `rpg`.
+- Specs em `specs/templates/` para ficha e canvas D&D 5e de referência.
+- Spec do subagente `sheet-template-analyst`.
+- `rpg validate specs/` e `rpg compile` funcionando localmente.
+- Targets gerados prioritários: Pydantic, JSON Schema, TypeScript, OpenAPI e agent manifest.
+- CI local via `.sdlc/scripts/validate.ps1`.
 
-## F1 — Campanha, template manual, canvas estático (2–3 semanas)
+**Critério de saída**
 
-**Objetivo:** GM e jogador veem ficha no canvas **sem LLM** (schema/canvas colados manualmente ou fixture).
+Uma spec versionada compila para artefatos consumíveis pelo backend e frontend, sem edição manual em `generated/`.
 
-**Entregas**
+## MVP 1 — Backend/BFF e UI funcional sem LLM
 
-- [ ] Postgres: `campaigns`, `sheet_templates`, `characters`, `sheets`, `sheet_revisions`.
-- [ ] Domain API + BFF (rotas template + sheets).
-- [ ] `SheetCanvas` com `stat_row`, `field_grid`, `rich_text`.
-- [ ] GM dashboard: lista fichas da campanha.
-- [ ] Jogador: edita própria ficha.
-- [ ] Docker Compose.
+**Objetivo:** entregar o primeiro fluxo usável de campanha e ficha visual, usando template fixture/manual, sem depender ainda do subagente.
 
-**Critério de saída:** campanha piloto com template fixture; jogadores preenchem no canvas.
+**Entregas principais**
 
----
+- Modelo de dados inicial: `campaigns`, `campaign_members`, `sheet_templates`, `characters`, `sheets`, `sheet_revisions`, `attachments`.
+- BFF `/v1` com rotas de campanha, template publicado e fichas.
+- Payload agregado para UI: `sheet` + `schema_json` + `canvas_spec_json` + `template_version`.
+- Validação de dados da ficha contra JSON Schema do template.
+- `SheetCanvas` React com apresentações mínimas: `field_grid`, `stat_row`, `rich_text`.
+- Fluxo jogador: abrir a própria ficha, editar campos permitidos e salvar.
+- Fluxo mestre: ver fichas da campanha em dashboard simples.
+- Seed/fixture de campanha piloto para testar ponta a ponta.
 
-## F2 — Subagente `sheet-template-analyst` (2–3 semanas)
+**Critério de saída**
 
-**Objetivo:** GM envia ficha exemplo → análise passo a passo → draft schema + canvas.
+Um mestre consegue abrir uma campanha piloto, ver fichas dos jogadores, e um jogador consegue editar a própria ficha no canvas. Tudo funciona com BFF + persistência, sem LLM.
 
-**Entregas**
+## MVP 2 — Upload, análise e publicação de template
 
-- [ ] Upload `template/source`.
-- [ ] Agent + subagente multimodal (`read_file` PDF/imagem).
-- [ ] Skill `template-analysis`.
-- [ ] UI revisão: passos + preview canvas lado a lado com imagem original.
-- [ ] `POST template/publish` com HITL.
-- [ ] LangSmith + eval smoke (2 fixtures anonimizados).
+**Objetivo:** transformar a ficha exemplo do mestre em um template revisável, mantendo HITL antes da publicação.
 
-**Critério de saída:** GM publica template derivado do PDF real da mesa sem editar JSON à mão.
+**Entregas principais**
 
----
+- Upload de ficha exemplo (`PDF`, `PNG`, `JPG`) em `template/source`.
+- Serviço de agente com orquestrador leve e subagente `sheet-template-analyst`.
+- Skill `template-analysis` com passos: segmentar regiões, listar campos, inferir tipos, montar canvas e emitir warnings.
+- Persistência de `analysis_json`, `schema_json` e `canvas_spec_json` como draft.
+- UI de revisão com passos da análise + preview do canvas ao lado do exemplo.
+- Correções manuais do mestre antes de publicar.
+- Endpoint `template/publish` com confirmação humana.
+- Evals smoke com 2 fixtures anonimizadas e trace LangSmith.
 
-## F3 — Polish GM / jogador (1–2 semanas)
+**Critério de saída**
 
-**Entregas**
+O mestre envia uma ficha real, revisa a análise, publica um template e passa a usar esse template no mesmo fluxo funcional do MVP 1.
 
-- [ ] `role_overrides` no canvas (GM edita XP, jogador não).
-- [ ] Indicadores de campos vazios / incompletos no dashboard GM.
-- [ ] Histórico básico de revisões da ficha.
-- [ ] Responsivo (tablet na mesa).
+## MVP 3 — Campanha pronta para sessão real
 
-**Critério de saída:** GM controla visão da campanha numa sessão real.
+**Objetivo:** fechar lacunas de uso em mesa para mestre e jogador.
 
----
+**Entregas principais**
 
-## F4 — Extensão de template ( ~1–2 semanas)
+- `role_overrides` no canvas: campos somente GM, campos somente leitura e permissões por papel.
+- Indicadores no dashboard do mestre: fichas incompletas, versão do template e último update.
+- Histórico básico de revisões por ficha.
+- Layout responsivo para notebook/tablet.
+- Estados de erro e loading para upload, análise, publish e save.
+- Testes focados nos fluxos principais do BFF e componentes críticos do canvas.
 
-**Entregas**
+**Critério de saída**
 
-- [ ] `POST template/extend` + modo `extend` do subagente.
-- [ ] Nova versão de template; migração soft (defaults em fichas existentes).
-- [ ] UI: “Adicionar seção/campo”.
+Uma campanha pequena consegue usar o RPG-OP em uma sessão real com mestre e jogadores, sem edição de JSON ou intervenção técnica.
 
-**Critério de saída:** GM adiciona campo sem reupload do PDF.
+## MVP 4 — Extensão controlada de template
 
----
+**Objetivo:** permitir que o mestre evolua o template sem reenviar a ficha original.
 
-## F5+ — Backlog (não MVP)
+**Entregas principais**
+
+- Endpoint `template/extend`.
+- Modo `extend` do `sheet-template-analyst` para propor novos campos/seções.
+- Nova versão de template a partir de patch append-only.
+- Defaults para fichas existentes quando novos campos forem adicionados.
+- UI "Adicionar campo/seção" com preview antes de publicar.
+- Confirmação explícita para remoção de campos com dados.
+
+**Critério de saída**
+
+O mestre adiciona pelo menos uma seção ou campo novo, publica uma nova versão do template, e fichas existentes continuam válidas.
+
+## Depois do ciclo principal
 
 | Fase | Conteúdo |
 |------|----------|
-| F5 | Chat assistente sobre a ficha |
-| F6 | System registry com presets (D&D, Tormenta) como atalho |
-| — | Import OCR de fichas preenchidas de jogadores |
-| — | App móvel, async analysis, RAG regras |
+| F5 | Assistente conversacional sobre a ficha e ações assistidas |
+| F6 | Registry global com presets D&D/Tormenta como atalhos opcionais |
+| F7 | Import OCR de fichas preenchidas antigas |
+| F8 | App móvel e experiência offline parcial |
+| F9 | RAG de regras, automações avançadas e subagentes por cenário |
 
----
+## Sequência recomendada
 
-## Riscos
+1. Fechar MVP 0: instalar `rpg_dsl`, validar specs e garantir compile dos targets essenciais.
+2. Implementar MVP 1: priorizar BFF + `SheetCanvas` funcional com fixture.
+3. Só então iniciar MVP 2: adicionar o agente de análise ao fluxo já funcional.
+4. Usar MVP 3 para preparar piloto real.
+5. Implementar MVP 4 após validar que a estrutura de template publicado está estável.
+
+## Riscos e mitigação
 
 | Risco | Mitigação |
 |-------|-----------|
-| Análise errada do PDF | UI de passos + preview; GM corrige antes de publish |
-| Canvas não fiel ao papel | `presentation` types + ordem de regiões do analyst |
-| Schema instável | Versionamento de template; PATCH validado |
-| Custo LLM | Análise só no setup; edição de ficha sem agente |
+| Canvas não ficar fiel ao modelo real | Começar com poucos `presentation` types e evoluir a partir de fichas reais |
+| LLM gerar schema errado | Passos visíveis, warnings, preview e correção pelo mestre antes do publish |
+| Backend e frontend divergirem nos contratos | Specs DSL + compile para Pydantic/JSON Schema/TypeScript/OpenAPI |
+| Escopo crescer para chat e regras cedo demais | MVP 1 valida ficha visual sem agente; MVP 2 limita o agente ao template |
+| Migração de template quebrar fichas existentes | Versionamento, patches append-only e defaults para novos campos |
 
----
+## Definição de sucesso do ciclo
 
-## Próximos passos
-
-1. GM fornece **PDF/foto real** da ficha da mesa (anonimizada) para fixture de eval.
-2. Implementar **S0 + F1** — canvas + CRUD sem agente.
-3. **F2** — subagente analista sobre o exemplo real.
+- Mestre cria ou seleciona uma campanha.
+- Mestre publica um template de ficha a partir de fixture ou upload analisado.
+- Jogador preenche e salva a própria ficha no canvas.
+- Mestre acompanha todas as fichas da campanha.
+- Backend/BFF, UI e specs estão alinhados por artefatos gerados.
+- O produto está pronto para piloto com uma mesa pequena.

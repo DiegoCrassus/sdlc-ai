@@ -313,50 +313,28 @@ attachments (id, campaign_id, storage_key, mime, kind: template_source|other)
 
 
 ```
-
 rpg-op/
-
-├── specs/
-
-│   ├── templates/           # SheetSchema, CanvasSpec IR
-
-│   ├── agents/
-
-│   │   ├── orchestrator.py
-
-│   │   └── sheet_template_analyst.py
-
-│   └── api/
-
-├── packages/
-
-│   └── rpg_dsl/
-
-├── generated/
-
+├── .cursor/                 # Regras, adapters, skills e hooks Cursor
+├── .sdlc/                   # Harness SDLC, commands, workflows e agentes canônicos
 ├── apps/
-
-│   └── web/
-
-│       └── components/
-
-│           └── SheetCanvas/   # stat_row, field_grid, rich_text, ...
-
-├── services/
-
-│   ├── domain/
-
-│   └── agent/
-
-├── skills/workflows/
-
-│   ├── template-analysis/
-
-│   └── template-extend/
-
-└── docs/
-
+│   ├── backend/             # FastAPI/Python (alvo)
+│   └── frontend/            # React + TypeScript + Vite (alvo)
+├── docs/
+│   ├── infrastructure/      # Espelho versionado da documentação Plane Infrastructure
+│   └── status/
+├── infra/
+│   └── migrations/          # Migrations e notas de banco
+├── packages/
+│   └── rpg_dsl/             # DSL Python interna
+├── specs/                   # Fonte declarativa de contratos
+├── tests/                   # Backend, frontend, integração e e2e
+├── generated/               # Saída derivada por compile
+└── Makefile                 # Entrada operacional local
 ```
+
+Fonte de verdade da estrutura: [infrastructure/project-architecture.md](infrastructure/project-architecture.md), sincronizada para Plane em `Infrastructure / Project Architecture`.
+
+Transição atual: o FastAPI ainda vive em `backend/` e o Vite ainda vive em `apps/web/`. Esses caminhos devem ser migrados para `apps/backend/` e `apps/frontend/` em tarefa própria, com CI, lint, scripts e rules atualizados no mesmo PR.
 
 
 

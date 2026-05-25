@@ -4,6 +4,7 @@ version: 1
 project:
   name: rpg-op
   docs: docs/
+  architecture_doc: docs/infrastructure/project-architecture.md
 
 paths:
   specs: specs/
@@ -11,6 +12,11 @@ paths:
   dsl_package: packages/rpg_dsl/
   backend: backend/
   frontend: apps/web/
+  backend_target: apps/backend/
+  frontend_target: apps/frontend/
+  infra: infra/
+  migrations: infra/migrations/
+  tests: tests/
   product_agent: services/agent/
   product_skills: skills/
   sdlc_skills: .sdlc/skills/
@@ -38,9 +44,26 @@ github:
     sdlc_status: .sdlc/scripts/gh-sdlc-status.ps1
     labels_bootstrap: .sdlc/scripts/gh-labels-bootstrap.ps1
 
+plane:
+  mcp_config: .cursor/mcp.json
+  mcp_token_env: PLANE_API_KEY
+  workspace_env: PLANE_WORKSPACE_SLUG
+  lifecycle: .sdlc/workflows/plane-lifecycle.md
+  scripts:
+    mcp_check: .sdlc/scripts/plane-mcp-check.ps1
+
+supabase:
+  mcp_config: .cursor/mcp.json
+  mcp_token_env: SUPABASE_ACCESS_TOKEN
+  project_ref_env: SUPABASE_PROJECT_REF
+  integration: .sdlc/integrations/supabase.md
+  read_only: true
+
 integrations:
   registry: .sdlc/integrations/platforms.yaml
   github: .sdlc/integrations/github.yaml
+  plane: .sdlc/integrations/plane.yaml
+  supabase: .sdlc/integrations/supabase.yaml
   langsmith: .sdlc/integrations/langsmith.yaml
 
 hooks:

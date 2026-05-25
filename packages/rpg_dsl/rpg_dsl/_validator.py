@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import importlib.util
-import sys
 import textwrap
 import traceback
 from pathlib import Path
@@ -31,7 +30,6 @@ def validate_dir(specs_dir: Path) -> tuple[bool, list[str], dict]:
     Validate all *.py files in specs_dir (recursive, excludes __init__.py).
     Returns (ok, errors, summary).
     """
-    import textwrap
 
     clear()
     errors: list[str] = []

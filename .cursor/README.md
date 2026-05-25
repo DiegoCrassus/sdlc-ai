@@ -1,12 +1,14 @@
 # Cursor — RPG-OP
 
-Integração IDE com harness SDLC AI-native (Deep Agent) + **GitHub MCP**.
+Integração IDE com harness SDLC AI-native (Deep Agent), adapters de agentes,
+hooks e MCP (GitHub, Plane, Supabase).
 
 ## Layout
 
 ```
 .cursor/
 ├── AGENTS.md
+├── agents/                 # adapters Cursor para agentes canônicos em .sdlc/agents/
 ├── hooks.json              # pre/post hooks → LangSmith
 ├── hooks/                  # scripts Python
 ├── mcp.json
@@ -15,6 +17,16 @@ Integração IDE com harness SDLC AI-native (Deep Agent) + **GitHub MCP**.
 ├── skills/
 └── hooks.json
 ```
+
+## Agents
+
+| Camada | Papel |
+|--------|-------|
+| `.sdlc/agents/` | Fonte canônica operacional: YAMLs com prompts, skills, tools, permissões e refs. |
+| `.cursor/agents/` | Camada de adaptação do Cursor: quando chamar cada agente e como delegar. |
+
+Não duplique configuração operacional em `.cursor/agents/`. Alterações em
+modelo, tools, skills, permissões ou `system_prompt` pertencem a `.sdlc/agents/`.
 
 ## GitHub MCP — setup
 
@@ -25,6 +37,15 @@ Integração IDE com harness SDLC AI-native (Deep Agent) + **GitHub MCP**.
 5. Teste no chat: "Liste issues abertas neste repositório"
 
 Alternativa local: Docker — ver `.sdlc/integrations/github.md`
+
+## Supabase MCP — setup
+
+1. Crie um PAT em https://supabase.com/dashboard/account/tokens
+2. Defina `SUPABASE_ACCESS_TOKEN` e `SUPABASE_PROJECT_REF` no `.env`
+3. Abra o Cursor via `.\launch.ps1`
+4. Reinicie Cursor → Settings → Tools & MCP → indicador verde em `supabase`
+
+Detalhes: `.sdlc/integrations/supabase.md`
 
 ## gh CLI
 

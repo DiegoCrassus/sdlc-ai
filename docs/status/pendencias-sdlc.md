@@ -1,7 +1,7 @@
 # Pendências SDLC AI-native — RPG-OP
 
-**Data da validação:** 2026-05-24  
-**Maturidade atual:** L0 → **meta L2** (ao fim da F2)  
+**Data da validação:** 2026-05-24
+**Maturidade atual:** L1 → **meta L2** (ao fim da F2)
 **Validação:** `.sdlc/scripts/validate.ps1` passou (exit 0)
 
 ---
@@ -11,42 +11,42 @@
 ```
 Camada               Status
 ─────────────────────────────────────────────────────
-.sdlc/ harness       ✅ Completo (42 arquivos)
-.cursor/ IDE         ✅ Completo (28 arquivos, hooks ativos)
+.sdlc/ harness       ✅ Ativo (agentes canônicos em .sdlc/agents/)
+.cursor/ IDE         ✅ Ativo (adapters em .cursor/agents/, hooks ativos)
 Hooks Cursor         ✅ Funcionando (logs em .sdlc/logs/)
 GitHub Actions CI    ✅ Scaffolded (.github/workflows/sdlc.yml)
-packages/rpg_dsl     ❌ Não implementado (só README)
-specs/               ❌ Vazio (só READMEs)
-generated/           ❌ Vazio (derivado — aguarda rpg_dsl)
+packages/rpg_dsl     ✅ Mínimo implementado (validate/compile via python -m)
+specs/               ✅ 3 specs carregadas (canvas, sheet, subagent)
+generated/           ✅ Artefatos gerados para pydantic/schema/agent/registry/skills
 gh CLI               ❌ Não instalada localmente
 Backend deps         ⚠️  Não instaladas no env global
-Git commits          ⚠️  Branch master sem nenhum commit
-LangSmith remoto     ⚠️  Modo fallback JSONL (LANGCHAIN_API_KEY ausente)
-GitHub MCP           ⚠️  Configurado, aguarda GITHUB_PERSONAL_ACCESS_TOKEN
+Git commits          ✅ HEAD e origin configurados
+LangSmith remoto     ⚠️  Configurado via env; confirmar traces no dashboard
+GitHub MCP           ⚠️  Configurado; confirmar conexão no Cursor
 ```
 
 ---
 
-## 1. DSL `rpg_dsl` — bloqueador principal de L1
+## 1. DSL `rpg_dsl` — base mínima de L1
 
 **Caminho:** `packages/rpg_dsl/`  
-**Por que bloqueia:** sem o pacote, `rpg compile` e `rpg validate` não existem — specs não podem ser compiladas para nenhum artefato gerado.
+**Estado atual:** pacote mínimo implementado; `.sdlc/scripts/validate.ps1` consegue validar specs via `python -m rpg_dsl._cli`. O executável `rpg` ainda precisa estar no PATH com `pip install -e packages/rpg_dsl`.
 
 ### Pendências
 
 | # | Item | Critério de conclusão |
 |---|------|-----------------------|
-| 1.1 | Decorador `@Field` com `label`, `type`, `computed` | `rpg validate specs/` passa sem erros |
-| 1.2 | Decorador `@Canvas` com `Region` e `PresentationType` | Spec de exemplo compila |
-| 1.3 | CLI `rpg validate specs/` | Roda sem `rpg_dsl pending` no validate.ps1 |
-| 1.4 | CLI `rpg compile --target pydantic` | Emite `generated/pydantic/` |
+| 1.1 | Decorador `@Field` com `label`, `type`, `computed` | ✅ Base implementada |
+| 1.2 | Decorador `@Canvas` com `Region` e `PresentationType` | ✅ Spec de exemplo compila |
+| 1.3 | CLI `rpg validate specs/` | ⚠️ Funciona via `python -m`; falta `rpg` no PATH local |
+| 1.4 | CLI `rpg compile --target pydantic` | ✅ Emite `generated/pydantic/` |
 | 1.5 | CLI `rpg compile --target typescript` | Emite `generated/typescript/api.ts` |
 | 1.6 | CLI `rpg compile --target openapi` | Emite `generated/openapi/bff_v1.yaml` |
-| 1.7 | CLI `rpg compile --target agent_manifest` | Emite `generated/agent_manifest/orchestrator.json` |
-| 1.8 | CLI `rpg compile --target skills` | Emite `generated/skills/` |
+| 1.7 | CLI `rpg compile --target agent_manifest` | ✅ Emite `generated/agent_manifest/orchestrator.json` |
+| 1.8 | CLI `rpg compile --target skills` | ✅ Emite `generated/skills/` |
 | 1.9 | CLI `rpg compile --target evals` | Emite `generated/evals/*.json` |
 | 1.10 | CLI `rpg compile --target all` | Todos os targets acima de uma vez |
-| 1.11 | Decorador `@SubAgent` → manifest | `create_deep_agent(subagents=...)` funciona |
+| 1.11 | Decorador `@SubAgent` → manifest | ✅ Manifest contém `sheet-template-analyst` |
 | 1.12 | Decorador `@Eval` com assertions | Upload dataset LangSmith |
 | 1.13 | `SheetSpec.version` + `migrations_from` | Compilador emite `SheetMigrator` |
 | 1.14 | Decorador `@api` com `@GET` / `@POST` | Emite `RouteSpec` para OpenAPI |
@@ -55,19 +55,19 @@ GitHub MCP           ⚠️  Configurado, aguarda GITHUB_PERSONAL_ACCESS_TOKEN
 
 ---
 
-## 2. Specs `specs/` — depende de 1
+## 2. Specs `specs/` — base MVP existente
 
 **Caminho:** `specs/`  
-Atualmente contém apenas `README.md` em cada subpasta.
+Atualmente contém specs MVP para D&D 5e e `sheet-template-analyst`.
 
 ### Pendências
 
 | # | Item | Arquivo alvo |
 |---|------|--------------|
-| 2.1 | Spec do canvas D&D 5e (MVP) | `specs/templates/dnd5e_canvas.py` |
-| 2.2 | Spec do schema de ficha D&D 5e | `specs/templates/dnd5e_sheet.py` |
+| 2.1 | Spec do canvas D&D 5e (MVP) | ✅ `specs/templates/dnd5e_canvas.py` |
+| 2.2 | Spec do schema de ficha D&D 5e | ✅ `specs/templates/dnd5e_sheet.py` |
 | 2.3 | Spec do orchestrator de produto | `specs/agents/orchestrator.py` |
-| 2.4 | Spec do `sheet-template-analyst` | `specs/agents/sheet_template_analyst.py` |
+| 2.4 | Spec do `sheet-template-analyst` | ✅ `specs/agents/sheet_template_analyst.py` |
 | 2.5 | Contrato BFF v1 | `specs/api/bff_v1.py` |
 | 2.6 | Evals smoke (2 fixtures mínimos) | `specs/evals/template_analysis/` |
 | 2.7 | Fixture de ficha D&D 5e anonimizada | `specs/evals/fixtures/dnd5e_fighter.json` |
@@ -76,24 +76,24 @@ Atualmente contém apenas `README.md` em cada subpasta.
 
 ---
 
-## 3. Artefatos gerados `generated/` — depende de 1 e 2
+## 3. Artefatos gerados `generated/` — parcialmente emitidos
 
 **Caminho:** `generated/`  
-Vazio; derivado exclusivamente via `rpg compile`.
+Derivado exclusivamente via compile; não editar manualmente.
 
 ### Pendências (emitidos automaticamente após 1 e 2)
 
 | # | Artefato | Gerado por |
 |---|----------|------------|
-| 3.1 | `generated/pydantic/sheets/dnd5e_v1.py` | `--target pydantic` |
-| 3.2 | `generated/schemas/dnd5e_v1.json` | `--target jsonschema` |
+| 3.1 | `generated/pydantic/sheets/dn_d5e_sheet_v1.py` | ✅ `--target pydantic` |
+| 3.2 | `generated/schemas/dn_d5e_sheet_v1.json` | ✅ `--target jsonschema` |
 | 3.3 | `generated/openapi/bff_v1.yaml` | `--target openapi` |
 | 3.4 | `generated/typescript/api.ts` | `--target typescript` |
-| 3.5 | `generated/agent_manifest/orchestrator.json` | `--target agent_manifest` |
-| 3.6 | `generated/agent_manifest/permissions.json` | `--target permissions` |
-| 3.7 | `generated/skills/template-analysis/SKILL.md` | `--target skills` |
+| 3.5 | `generated/agent_manifest/orchestrator.json` | ✅ `--target agent_manifest` |
+| 3.6 | `generated/agent_manifest/permissions.json` | ✅ `--target agent_manifest` |
+| 3.7 | `generated/skills/sheet-template-analyst/SKILL.md` | ✅ `--target skills` |
 | 3.8 | `generated/evals/template_analysis.json` | `--target evals` |
-| 3.9 | `generated/registry/manifest.json` | `--target registry` |
+| 3.9 | `generated/registry/manifest.json` | ✅ `--target registry` |
 | 3.10 | `.cursor/rules/generated-*.mdc` (derivados) | `--target cursor_rules` |
 
 **Política:** commitar `generated/` para PRs legíveis; nunca editar à mão (hook `preToolUse` bloqueia).
@@ -183,6 +183,19 @@ Vazio; derivado exclusivamente via `rpg compile`.
 |-------|--------|
 | `sdlc-orchestrator/SKILL.md` | ✅ |
 | `github-sdlc/SKILL.md` | ✅ |
+| `plane-sdlc/SKILL.md` | ✅ |
+
+### 5.4 Agent adapters `.cursor/agents/`
+
+| Adapter | Status |
+|---------|--------|
+| `dev-orchestrator.md` | ✅ |
+| `subagents/spec-author.md` | ✅ |
+| `subagents/codegen-integrator.md` | ✅ |
+| `subagents/eval-engineer.md` | ✅ |
+| `subagents/sdlc-doctor.md` | ✅ |
+| `subagents/github-integrator.md` | ✅ |
+| `subagents/plane-integrator.md` | ✅ |
 
 ---
 
@@ -255,8 +268,8 @@ Passo  O que fazer                               Desbloqueia
 
 | Nível | Critério | Estado |
 |-------|----------|--------|
-| **L0** | Harness scaffolded; specs só para schema de ficha | ✅ **Atual** |
-| **L1** | + manifest de agente gerado (`rpg compile` funcional) | ❌ Aguarda item 1 |
+| **L0** | Harness scaffolded; specs só para schema de ficha | ✅ Concluído |
+| **L1** | + manifest de agente gerado (`rpg compile` funcional) | ✅ **Atual** |
 | **L2** | + evals smoke em CI (LangSmith) | ❌ Aguarda itens 1, 2, 6 |
 | L3 | + dev harness wired ao runtime Deep Agent | backlog |
 | L4 | + migrações de sheet geradas; RAG rules na DSL | backlog |

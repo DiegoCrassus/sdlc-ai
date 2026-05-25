@@ -14,7 +14,17 @@
   ],
   "subagents": [
     {
+      "name": "orchestrator"
+    },
+    {
       "name": "sheet-template-analyst"
+    }
+  ],
+  "apis": [
+    {
+      "prefix": "/v1",
+      "tag": "campaigns",
+      "routes": 7
     }
   ],
   "evals": []

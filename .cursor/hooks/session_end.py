@@ -9,6 +9,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from _lib.langsmith_emit import clear_session, emit_post, get_session, read_stdin, respond
 
+
 def main() -> None:
     data = read_stdin()
     session = get_session()

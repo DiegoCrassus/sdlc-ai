@@ -18,11 +18,24 @@ platforms:
       cursor: rpg-op-cursor
       runtime: rpg-op
 
+  plane:
+    role: product_tracking_and_docs
+    integration: .sdlc/integrations/plane.yaml
+    mcp: true
+    status: active
+
+  supabase:
+    role: database_and_project_docs
+    integration: .sdlc/integrations/supabase.yaml
+    mcp: true
+    status: active
+    mode: read_only
+
   linear:
     role: product_tracking
     mcp: planned
     status: backlog
-    note: Opcional se GitHub Issues bastar
+    note: Opcional — Plane cobre backlog + docs
 
   docker:
     role: local_stack
