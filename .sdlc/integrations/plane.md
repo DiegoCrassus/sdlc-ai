@@ -150,7 +150,7 @@ Resposta `200` confirma API key válida.
 
 ## Sincronizar docs do repo para a wiki
 
-**Importante:** a **Wiki** fica no nivel do **workspace** (menu lateral Wiki).  
+**Importante:** a **Wiki** fica no nivel do **workspace** (menu lateral Wiki).
 **Pages** dentro de um **projeto** (ex.: RPG → Pages) e outra secao — nao confundir.
 
 ```powershell

@@ -1,7 +1,7 @@
 # Pendências SDLC AI-native — RPG-OP
 
-**Data da validação:** 2026-05-24  
-**Maturidade atual:** L1 → **meta L2** (ao fim da F2)  
+**Data da validação:** 2026-05-24
+**Maturidade atual:** L1 → **meta L2** (ao fim da F2)
 **Validação:** `.sdlc/scripts/validate.ps1` passou (exit 0)
 
 ---

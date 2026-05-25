@@ -452,7 +452,9 @@ def emit_skills(out_dir: Path) -> list[Path]:
         skill_dir = out_dir / "skills" / spec.name
         skill_dir.mkdir(parents=True, exist_ok=True)
         skill_path = skill_dir / "SKILL.md"
-        content = textwrap.dedent(f"""\
+        skills = "\n".join(f"- `{s}`" for s in spec.skills) or "- (none)"
+        content = textwrap.dedent(
+            f"""\
             ---
             name: {spec.name}
             generated: true
@@ -469,8 +471,9 @@ def emit_skills(out_dir: Path) -> list[Path]:
 
             ## Skills referenced
 
-            {chr(10).join(f"- `{s}`" for s in spec.skills) or "- (none)"}
-            """)
+            """
+        )
+        content += f"{skills}\n"
         skill_path.write_text(content, encoding="utf-8")
         written.append(skill_path)
 

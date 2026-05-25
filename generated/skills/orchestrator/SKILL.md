@@ -1,18 +1,18 @@
-            ---
-            name: orchestrator
-            generated: true
-            response_model: OrchestratorResult
-            ---
+---
+name: orchestrator
+generated: true
+response_model: OrchestratorResult
+---
 
-            # orchestrator
+# orchestrator
 
-            > Auto-generated from `specs/agents/`. Do not edit manually — run `rpg compile`.
+> Auto-generated from `specs/agents/`. Do not edit manually — run `rpg compile`.
 
-            ## Response model
+## Response model
 
-            `OrchestratorResult`
+`OrchestratorResult`
 
-            ## Skills referenced
+## Skills referenced
 
-            - `workflows/sheet-canvas/`
+- `workflows/sheet-canvas/`
 - `workflows/template-publish/`
