@@ -79,12 +79,10 @@ function RichText({
 
 function RegionBody({
   region,
-  spec,
   schema,
   data,
 }: {
   region: CanvasSpec["regions"][0];
-  spec: CanvasSpec;
   schema: Record<string, SchemaField>;
   data: Record<string, string | number>;
 }) {
@@ -131,7 +129,7 @@ export function SheetCanvas({ sheet }: Props) {
         {regions.map((region) => (
           <section key={region.id} className="canvas-region">
             <h3>{region.title}</h3>
-            <RegionBody region={region} spec={sheet.canvas_spec} schema={schema} data={sheet.data} />
+            <RegionBody region={region} schema={schema} data={sheet.data} />
           </section>
         ))}
       </article>
