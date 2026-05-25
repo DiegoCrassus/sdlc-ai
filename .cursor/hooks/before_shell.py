@@ -43,7 +43,12 @@ def main() -> None:
             }
         )
 
-    if branch and "git push" in command and not branch_is_valid(branch) and not is_protected_branch(branch):
+    if (
+        branch
+        and "git push" in command
+        and not branch_is_valid(branch)
+        and not is_protected_branch(branch)
+    ):
         respond(
             {
                 "permission": "ask",

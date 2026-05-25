@@ -204,7 +204,9 @@ def _session_context(event: str, raw_hook_input: dict[str, Any] | None) -> dict[
 
     if event == "sessionStart" or not session:
         session = {
-            "session_id": str(data.get("session_id") or data.get("conversation_id") or uuid.uuid4()),
+            "session_id": str(
+                data.get("session_id") or data.get("conversation_id") or uuid.uuid4()
+            ),
             "started_at": now,
             "project": _project(),
             "event_sequence": 0,
