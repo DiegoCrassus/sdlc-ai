@@ -51,6 +51,10 @@ Commands em `.sdlc/commands/` agrupam skills, agentes e procedimentos. Use:
 |---------|-------------|
 | `plane_backlog_plan` | Analisar intent e criar/atualizar tarefas no backlog Plane |
 | `architecture_documentation` | Documentar arquitetura, infra, migrations, testes, Makefile e Plane Infrastructure |
+| `plane_card_execution` | Mover card Plane, executar tarefa e registrar evidência |
+| `pr_code_review` | Revisar PR no momento da criação/atualização |
+| `pr_approval_watch` | Acompanhar aprovação e Actions até `develop` ficar verde |
+| `issue_resolution` | Resolver issue gerada por CI, hook ou review |
 | `technical_documentation` | Criar ou atualizar documentação técnica versionada |
 | `business_documentation` | Criar ou atualizar documentação de negócio e Plane Pages |
 
@@ -64,6 +68,9 @@ Commands em `.sdlc/commands/` agrupam skills, agentes e procedimentos. Use:
 | `sdlc-doctor` | Diagnóstico de saúde SDLC AI-native |
 | `github-integrator` | Issues, PRs, Actions |
 | `plane-integrator` | Work items, sprints, Pages |
+| `code-reviewer` | Revisão técnica de PR |
+| `pr-approver` | Aprovação/watch de PR e Actions |
+| `issue-resolver` | Correção autônoma de issues geradas |
 
 ## Preferências
 

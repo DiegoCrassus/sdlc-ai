@@ -23,3 +23,6 @@ Não duplique configuração operacional aqui. Se precisar alterar skills, tools
 - `subagents/sdlc-doctor.md` — diagnóstico de saúde SDLC.
 - `subagents/github-integrator.md` — GitHub lifecycle.
 - `subagents/plane-integrator.md` — Plane lifecycle.
+- `subagents/code-reviewer.md` — revisão técnica de PR.
+- `subagents/pr-approver.md` — aprovação e acompanhamento de Actions.
+- `subagents/issue-resolver.md` — resolução de issues geradas por CI/hooks/review.

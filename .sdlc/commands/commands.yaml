@@ -96,6 +96,93 @@ agent_commands:
       - Linkar fontes canônicas no repo.
       - Separar decisão de negócio de detalhe de implementação.
 
+  plane_card_execution:
+    title: Executar card Plane com evidência
+    description: Move work items Plane durante execução, registra evidências e mantém rastreabilidade GitHub/SDLC.
+    owner: plane-integrator
+    adapter: .cursor/agents/subagents/plane-integrator.md
+    playbook: .sdlc/commands/plane-card-execution.md
+    skills:
+      - .sdlc/skills/plane-card-execution/
+      - .sdlc/skills/plane-sdlc/
+      - .sdlc/skills/github-sdlc/
+    inputs:
+      - Plane work item identifier
+      - branch ou issue relacionada
+      - evidências de validação
+    outputs:
+      - card movido para estado correto
+      - comentário de evidência no Plane
+      - links GitHub atualizados
+    guardrails:
+      - Mover para In Progress antes de executar.
+      - Mover para Done apenas com aceite satisfeito.
+      - Criar skill/command se faltar procedimento.
+
+  pr_code_review:
+    title: Revisar PR SDLC
+    description: Revisa PRs no momento da criação ou atualização, priorizando bugs, riscos, testes e aderência ao SDLC.
+    owner: code-reviewer
+    adapter: .cursor/agents/subagents/code-reviewer.md
+    playbook: .sdlc/commands/pr-code-review.md
+    skills:
+      - .sdlc/skills/pr-code-review/
+      - .sdlc/skills/github-sdlc/
+      - .sdlc/skills/plane-card-execution/
+    inputs:
+      - PR URL ou número
+      - issue e cards Plane relacionados
+    outputs:
+      - comentário de review
+      - bloqueios ou aprovação recomendada
+      - issue corretiva quando aplicável
+    guardrails:
+      - Não aprovar PR com checks falhos.
+      - Não aceitar generated/ editado manualmente.
+
+  pr_approval_watch:
+    title: Acompanhar aprovação e Actions do PR
+    description: Após PR aprovada ou pronta para develop, acompanha Actions até verde e registra evidências.
+    owner: pr-approver
+    adapter: .cursor/agents/subagents/pr-approver.md
+    playbook: .sdlc/commands/pr-approval-watch.md
+    skills:
+      - .sdlc/skills/pr-approval-watch/
+      - .sdlc/skills/github-sdlc/
+      - .sdlc/skills/plane-card-execution/
+    inputs:
+      - PR URL ou número
+      - branch base
+      - cards Plane relacionados
+    outputs:
+      - checks acompanhados
+      - evidência registrada
+      - handoff para issue-resolver em falha
+    guardrails:
+      - Não burlar branch protection.
+      - Não encerrar com Actions pendentes.
+
+  issue_resolution:
+    title: Resolver issue gerada por CI/hook/review
+    description: Triagem e correção autônoma de issues geradas por lint, Actions, hooks ou revisão.
+    owner: issue-resolver
+    adapter: .cursor/agents/subagents/issue-resolver.md
+    playbook: .sdlc/commands/issue-resolution.md
+    skills:
+      - .sdlc/skills/issue-resolution/
+      - .sdlc/skills/github-sdlc/
+      - .sdlc/skills/plane-card-execution/
+    inputs:
+      - issue URL ou número
+      - run/PR/branch relacionados
+    outputs:
+      - causa raiz
+      - correção ou PR
+      - evidência e fechamento da issue
+    guardrails:
+      - Não fechar issue sem evidência.
+      - Não enfraquecer checks para passar CI.
+
 local:
   validate:
     windows: .sdlc/scripts/validate.ps1

@@ -35,6 +35,9 @@ subagents:
   - ref: subagents/sdlc-doctor.yaml
   - ref: subagents/github-integrator.yaml
   - ref: subagents/plane-integrator.yaml
+  - ref: subagents/code-reviewer.yaml
+  - ref: subagents/pr-approver.yaml
+  - ref: subagents/issue-resolver.yaml
 
 interrupt_on:
   edit_file:
