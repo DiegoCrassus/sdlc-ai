@@ -13,7 +13,7 @@ from _lib.langsmith_emit import emit_pre, read_stdin, respond, sanitize
 def main() -> None:
     data = read_stdin()
     command = str(data.get("command") or "")
-    emit_pre("beforeShellExecution", {"command": sanitize(command, 400)})
+    emit_pre("beforeShellExecution", {"command": sanitize(command, 400)}, raw_hook_input=data)
 
     if "git push" in command and ("--force" in command or "-f " in command):
         if "main" in command or "master" in command:

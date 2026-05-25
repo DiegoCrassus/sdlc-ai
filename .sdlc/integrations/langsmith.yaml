@@ -32,5 +32,30 @@ events:
     - afterMCPExecution
 
 run_naming: "cursor/{event}"
+metadata:
+  source: cursor-hook
+  context:
+    - conversation_id
+    - generation_id
+    - session_id
+    - model
+    - cursor_version
+    - workspace_roots
+    - git_branch
+    - tool_name
+    - tool_use_id
+  iteration:
+    - event_sequence
+    - generation_iteration
+    - actor_index
+    - actor_tag
+tags:
+  static: [cursor, cursor-hook]
+  dynamic:
+    - cursor-event-{event}
+    - cursor-iteration-{generation_iteration}
+    - cursor-tool-{tool_name}
+    - cursor-model-{model}
+    - cursor-subagent-{actor_index}
 
 docs: .sdlc/integrations/langsmith.md

@@ -13,7 +13,7 @@ from _lib.langsmith_emit import clear_session, emit_post, get_session, read_stdi
 def main() -> None:
     data = read_stdin()
     session = get_session()
-    emit_post("sessionEnd", {**data, "session": session})
+    emit_post("sessionEnd", {**data, "session": session}, raw_hook_input=data)
     clear_session()
     respond({})
 

@@ -43,6 +43,13 @@ Cada hook emite runs `cursor/{evento}`:
 - `beforeMCPExecution` / `afterMCPExecution` — GitHub MCP
 - `stop` — fim de resposta
 
+Cada run também recebe:
+
+- `metadata.source`, `metadata.sdlc_system` e `metadata.event`
+- `metadata.cursor` com `conversation_id`, `generation_id`, `session_id`, `model`, `tool_name`, `tool_use_id`, `cursor_version`, `workspace_roots`, `cwd`, branch git e repo
+- `metadata.iteration` com `event_sequence`, `generation_iteration`, `actor_index` e `actor_tag`
+- tags como `cursor`, `cursor-hook`, `cursor-event-pretooluse`, `cursor-iteration-3`, `cursor-tool-read`, `cursor-model-gpt-5-5`, `cursor-subagent-1`
+
 **Redação automática:** tokens `sk-`, `ghp_`, keys em texto.
 
 ## Fallback local

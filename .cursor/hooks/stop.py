@@ -12,7 +12,7 @@ from _lib.langsmith_emit import emit_post, read_stdin, respond
 
 def main() -> None:
     data = read_stdin()
-    emit_post("stop", data)
+    emit_post("stop", data, raw_hook_input=data)
     respond({})
 
 

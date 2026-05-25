@@ -18,7 +18,7 @@ SESSION_CONTEXT = (
 def main() -> None:
     data = read_stdin()
     clear_session()
-    emit_pre("sessionStart", data, extra={"project": "rpg-op-cursor"})
+    emit_pre("sessionStart", data, extra={"project": "rpg-op-cursor"}, raw_hook_input=data)
     respond({"continue": True, "additional_context": SESSION_CONTEXT})
 
 

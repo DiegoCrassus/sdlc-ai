@@ -21,6 +21,7 @@ def main() -> None:
             "server": server,
             "input": sanitize(data.get("tool_input") or data.get("arguments") or {}),
         },
+        raw_hook_input=data,
     )
     respond({"permission": "allow"})
 
