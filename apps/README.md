@@ -1,18 +1,20 @@
 # Apps
 
-Application runtimes belong under `apps/`.
-
-Target layout:
-
 ```text
 apps/
-├── backend/
-└── frontend/
+├── backend/     # FastAPI — BFF + Domain API
+└── frontend/    # React + Vite — dashboard, workspace, SheetCanvas
 ```
 
-Current transition:
+## Local dev
 
-- `backend/` still contains the FastAPI application.
-- `apps/web/` still contains the React + Vite application.
+```bash
+make setup
+./dev.sh
+# or: make dev-backend && make dev-frontend
+```
 
-Do not treat those legacy paths as the final architecture. A dedicated migration task should move them to `apps/backend/` and `apps/frontend/` with CI, docs, commands, and Cursor rules updated in the same PR.
+- Backend: http://127.0.0.1:8000  
+- Frontend: http://127.0.0.1:5173  
+
+Legacy `backend/` and `apps/web/` — redirect READMEs only.

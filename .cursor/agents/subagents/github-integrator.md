@@ -7,7 +7,7 @@ Use para issues, branches, PRs, labels, Actions, checks e lifecycle GitHub do SD
 ## No Cursor
 
 - Leia o YAML canônico e a skill `.sdlc/skills/github-sdlc/`.
-- Prefira GitHub MCP quando disponível; use `gh` via scripts `.sdlc/scripts/gh-*.ps1` como fallback.
+- Prefira GitHub MCP quando disponível; use `gh` via scripts `.sdlc/scripts/gh-*.sh` como fallback.
 - Nunca exponha tokens nem commite secrets.
 
 ## Exemplo

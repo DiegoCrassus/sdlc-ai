@@ -45,4 +45,4 @@ platforms:
   fly_railway:
     role: deploy_target
     status: backlog
-    docs: docs/04-infraestrutura.md
+    docs: docs/infrastructure/stack.md

@@ -8,7 +8,7 @@ alwaysApply: false
 
 - Specs declarativas em `specs/` (Python tipado, futuro `rpg_dsl`)
 - Harness dev em `.sdlc/agents/*.yaml` e `.sdlc/skills/`
-- IR: SheetSchema, CanvasSpec, TemplateAnalysisResult — ver docs/06
+- IR: SheetSchema, CanvasSpec, TemplateAnalysisResult — ver docs/sdlc/ai-native.md
 
 ## Ao editar specs
 

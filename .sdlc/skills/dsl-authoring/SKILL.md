@@ -36,5 +36,5 @@ strength: int = Field(min=1, max=30, label="FOR", ui_group="attributes")
 
 ## References
 
-- [docs/06-sdlc-ai-native.md](../../docs/06-sdlc-ai-native.md)
-- [docs/08-sheet-canvas.md](../../docs/08-sheet-canvas.md)
+- [docs/product/sheet-canvas.md](../../docs/product/sheet-canvas.md)
+- [docs/sdlc/ai-native.md](../../docs/sdlc/ai-native.md)

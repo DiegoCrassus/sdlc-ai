@@ -48,12 +48,12 @@ jobs:
       - name: ruff fix
         id: ruff-fix
         run: |
-          ruff check --fix --unsafe-fixes backend/ packages/rpg_dsl/ specs/ .cursor/hooks/ || true
-          ruff format backend/ packages/rpg_dsl/ specs/ .cursor/hooks/ || true
+          ruff check --fix --unsafe-fixes apps/backend/ packages/rpg_dsl/ specs/ .cursor/hooks/ || true
+          ruff format apps/backend/ packages/rpg_dsl/ specs/ .cursor/hooks/ || true
 
           # Verifica se ainda há erros após o fix
           set +e
-          REMAINING=$(ruff check backend/ packages/rpg_dsl/ specs/ .cursor/hooks/ 2>&1)
+          REMAINING=$(ruff check apps/backend/ packages/rpg_dsl/ specs/ .cursor/hooks/ 2>&1)
           STILL_FAILING=$( [ $? -ne 0 ] && echo true || echo false )
           ESCAPED="${REMAINING//$'\n'/'%0A'}"
           echo "still_failing=${STILL_FAILING}" >> $GITHUB_OUTPUT
@@ -64,15 +64,15 @@ jobs:
         with:
           node-version: "20"
           cache: npm
-          cache-dependency-path: apps/web/package.json
+          cache-dependency-path: apps/frontend/package.json
 
       - name: npm install (TypeScript check)
-        working-directory: apps/web
+        working-directory: apps/frontend
         run: npm install
 
       - name: tsc --noEmit (check remaining)
         id: tsc-check
-        working-directory: apps/web
+        working-directory: apps/frontend
         run: |
           set +e
           OUTPUT=$(npx tsc --noEmit 2>&1)

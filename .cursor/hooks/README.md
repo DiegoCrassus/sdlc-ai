@@ -41,15 +41,15 @@ Cursor → Settings → Hooks → output channel.
 
 Teste manual:
 
-```powershell
+```bash
 echo '{}' | python .cursor/hooks/session_start.py
-Get-Content .sdlc/logs/cursor-hooks.jsonl -Tail 3
+tail -n 3 .sdlc/logs/cursor-hooks.jsonl
 ```
 
-## Windows
+## WSL / Linux
 
-Use `python` no PATH ou ajuste `hooks.json` para caminho do venv:
+Use `python3` no PATH ou ajuste `hooks.json` para caminho do venv:
 
 ```json
-"command": "backend/.venv/Scripts/python.exe .cursor/hooks/session_start.py"
+"command": "apps/backend/.venv/bin/python .cursor/hooks/session_start.py"
 ```

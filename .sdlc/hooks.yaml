@@ -17,6 +17,8 @@ pre:
   beforeShellExecution:
     script: .cursor/hooks/before_shell.py
     asks: force_push_main
+    blocks: commit_on_protected_branch
+    asks: push_invalid_branch_name
   beforeMCPExecution:
     script: .cursor/hooks/before_mcp.py
 
@@ -25,6 +27,7 @@ post:
     script: .cursor/hooks/session_end.py
   stop:
     script: .cursor/hooks/stop.py
+    reminds: uncommitted_changes_and_branch_policy
   postToolUse:
     script: .cursor/hooks/post_tool_use.py
   postToolUseFailure:

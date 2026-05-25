@@ -124,8 +124,8 @@ Para self-hosted, `PLANE_BASE_URL` deve apontar para a URL pública da sua inst�
 2. Confirme que `.cursor/mcp.json` inclui o server `plane`
 3. **Reinicie o Cursor com variáveis carregadas:**
 
-   ```powershell
-   .\launch.ps1
+   ```bash
+   ./launch.sh
    ```
 
    O script carrega o `.env` e abre o Cursor — necessário para `${env:PLANE_*}` funcionar.
@@ -133,17 +133,17 @@ Para self-hosted, `PLANE_BASE_URL` deve apontar para a URL pública da sua inst�
 4. Settings → **MCP** → server `plane` deve aparecer **verde**
 5. No chat Agent, peça: *"Liste meus projetos no Plane"* — deve chamar `list_projects`
 
-### Verificar credenciais (PowerShell)
+### Verificar credenciais (bash)
 
-```powershell
-. .\.sdlc\scripts\_load-env.ps1
-.\.sdlc\scripts\plane-mcp-check.ps1
+```bash
+source .sdlc/scripts/_load-env.sh
+.sdlc/scripts/plane-mcp-check.sh
 ```
 
 Ou manualmente:
 
-```powershell
-curl -H "x-api-key: $env:PLANE_API_KEY" "https://api.plane.so/api/v1/users/me/"
+```bash
+curl -H "x-api-key: $PLANE_API_KEY" "https://api.plane.so/api/v1/users/me/"
 ```
 
 Resposta `200` confirma API key válida.
@@ -153,12 +153,12 @@ Resposta `200` confirma API key válida.
 **Importante:** a **Wiki** fica no nivel do **workspace** (menu lateral Wiki).
 **Pages** dentro de um **projeto** (ex.: RPG → Pages) e outra secao — nao confundir.
 
-```powershell
+```bash
 # Roadmap na Wiki do workspace (recomendado)
-.\.sdlc\scripts\plane-sync-wiki-doc.ps1 -DocPath docs/05-roadmap.md
+.sdlc/scripts/plane-sync-wiki-doc.sh docs/05-roadmap.md
 
 # Alternativa: page vinculada ao projeto RPG
-.\.sdlc\scripts\plane-sync-wiki-doc.ps1 -DocPath docs/05-roadmap.md -Scope project
+.sdlc/scripts/plane-sync-wiki-doc.sh docs/05-roadmap.md project
 ```
 
 Onde encontrar na UI do Plane:
@@ -170,8 +170,8 @@ Onde encontrar na UI do Plane:
 
 Diagnostico:
 
-```powershell
-.\.sdlc\scripts\plane-wiki-diagnose.ps1
+```bash
+.sdlc/scripts/plane-wiki-diagnose.sh
 ```
 
 Converte Markdown para HTML (`plane_md_to_html.py`) e cria/atualiza via `POST /api/v1/workspaces/{slug}/pages/`.
@@ -225,7 +225,7 @@ Fluxo típico: `list_projects` → obter `project_id` → `retrieve_work_item_by
 |---------|----------------|---------|
 | MCP vermelho / auth failed | Token inválido ou revogado | Regenerar token no Plane |
 | 404 workspace | Slug errado | Conferir URL do workspace |
-| `${env:PLANE_*}` não resolve | Cursor aberto sem `.env` | Usar `.\launch.ps1` |
+| `${env:PLANE_*}` não resolve | Cursor aberto sem `.env` | Usar `./launch.sh` |
 | Tools não aparecem | MCP desabilitado | Settings → MCP → enable `plane` |
 | Self-hosted falha | URL incorreta | Ajustar `PLANE_BASE_URL` |
 

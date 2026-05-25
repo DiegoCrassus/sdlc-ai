@@ -1,72 +1,71 @@
-# Local development entrypoint for RPG-OP.
+#!/usr/bin/env bash
+# Local development — all targets delegate to .sh scripts (Linux / WSL / macOS).
+
+SHELL := bash
 
 UV ?= uv
 NPM ?= npm
-PYTHON_VERSION ?= 3.12
-BACKEND_DIR ?= backend
-FRONTEND_DIR ?= apps/web
 
-ifeq ($(OS),Windows_NT)
-BACKEND_PY := $(BACKEND_DIR)/.venv/Scripts/python.exe
-BACKEND_LOCAL_PY := .venv/Scripts/python.exe
-POWERSHELL := powershell -NoProfile -ExecutionPolicy Bypass
-else
-BACKEND_PY := $(BACKEND_DIR)/.venv/bin/python
-BACKEND_LOCAL_PY := .venv/bin/python
-POWERSHELL := pwsh -NoProfile
-endif
-
-.PHONY: help setup backend-venv backend-sync frontend-install dev-backend dev-frontend build-frontend preview-frontend lint format test smoke validate plane-sync-infrastructure
+.PHONY: help setup dev dev-backend dev-frontend test smoke validate lint format bootstrap-linux plane-sync-infrastructure plane-sync-roadmap plane-sync-poc plane-create-phase1
 
 help:
-	@echo "RPG-OP local commands"
-	@echo "  make setup                     Install local backend/frontend dependencies"
-	@echo "  make dev-backend               Run FastAPI locally"
-	@echo "  make dev-frontend              Run React + Vite locally"
-	@echo "  make test                      Run test suite"
-	@echo "  make lint                      Run Python and TypeScript checks"
-	@echo "  make format                    Format Python code"
-	@echo "  make validate                  Run SDLC validation script"
+	@echo "RPG-OP — shell-only toolchain"
+	@echo "  make setup                     Install dependencies"
+	@echo "  make dev                       Backend + frontend"
+	@echo "  make dev-backend               FastAPI :8000"
+	@echo "  make dev-frontend              Vite :5173"
+	@echo "  make test                      pytest"
+	@echo "  make smoke                     API smoke (backend running)"
+	@echo "  make validate                  SDLC validate"
+	@echo "  make bootstrap-linux           Ubuntu/WSL prerequisites"
 	@echo "  make plane-sync-infrastructure Sync architecture doc to Plane"
+	@echo "  make plane-sync-roadmap        Sync docs/05-roadmap.md to Plane wiki"
+	@echo "  make plane-sync-poc            Sync PoC index to Plane wiki"
+	@echo "  make plane-create-phase1       Create Fase 1 work items in Plane"
+	@echo ""
+	@echo "Shortcut: ./dev.sh"
 
-setup: backend-sync frontend-install
+setup:
+	bash .sdlc/scripts/setup.sh
 
-backend-venv:
-	$(UV) venv "$(BACKEND_DIR)/.venv" --python "$(PYTHON_VERSION)"
-
-backend-sync: backend-venv
-	$(UV) pip sync --python "$(BACKEND_PY)" "$(BACKEND_DIR)/requirements.txt"
-
-frontend-install:
-	cd "$(FRONTEND_DIR)" && $(NPM) install
+dev:
+	bash .sdlc/scripts/dev-all.sh
 
 dev-backend:
-	cd "$(BACKEND_DIR)" && "$(BACKEND_LOCAL_PY)" -m uvicorn app.main:app --reload --port 8000
+	bash .sdlc/scripts/dev-backend.sh
 
 dev-frontend:
-	cd "$(FRONTEND_DIR)" && $(NPM) run dev
-
-build-frontend:
-	cd "$(FRONTEND_DIR)" && $(NPM) run build
-
-preview-frontend:
-	cd "$(FRONTEND_DIR)" && $(NPM) run preview -- --host 0.0.0.0 --port 4173
-
-lint:
-	$(UV) run --with ruff ruff check "$(BACKEND_DIR)" "packages/rpg_dsl" "specs" ".cursor/hooks"
-	cd "$(FRONTEND_DIR)" && $(NPM) run build
-
-format:
-	$(UV) run --with ruff ruff format "$(BACKEND_DIR)" "packages/rpg_dsl" "specs" ".cursor/hooks"
+	cd apps/frontend && $(NPM) run dev
 
 test:
-	$(UV) run --with pytest pytest "tests" "$(BACKEND_DIR)" -q
+	bash .sdlc/scripts/run-tests.sh
 
 smoke:
-	"$(BACKEND_PY)" "$(BACKEND_DIR)/scripts/smoke_test.py"
+	bash .sdlc/scripts/smoke.sh
 
 validate:
-	$(POWERSHELL) -File ".sdlc/scripts/validate.ps1"
+	bash .sdlc/scripts/validate.sh
+
+lint:
+	$(UV) run --with ruff ruff check apps/backend packages/rpg_dsl specs .cursor/hooks
+	cd apps/frontend && $(NPM) run build
+
+format:
+	$(UV) run --with ruff ruff format apps/backend packages/rpg_dsl specs .cursor/hooks
+
+bootstrap-linux:
+	bash .sdlc/scripts/bootstrap-linux.sh
 
 plane-sync-infrastructure:
-	$(POWERSHELL) -File ".sdlc/scripts/plane-sync-wiki-doc.ps1" -DocPath "docs/infrastructure/project-architecture.md" -PageName "Infrastructure - Project Architecture"
+	bash .sdlc/scripts/plane-sync-wiki-doc.sh docs/infrastructure/project-architecture.md "Infrastructure - Project Architecture"
+
+plane-sync-roadmap:
+	bash .sdlc/scripts/plane-sync-wiki-doc.sh docs/05-roadmap.md "Roadmap - foco Sheet Canvas"
+
+plane-sync-poc:
+	bash .sdlc/scripts/plane-sync-wiki-doc.sh docs/poc/00-indice-poc.md "PoC - Proof of Concept"
+	bash .sdlc/scripts/plane-sync-wiki-doc.sh docs/poc/status-resumo.md "PoC - Status resumo"
+	bash .sdlc/scripts/plane-sync-wiki-doc.sh docs/README.md "Docs - Indice"
+
+plane-create-phase1:
+	bash .sdlc/scripts/plane-create-phase1-tasks.sh

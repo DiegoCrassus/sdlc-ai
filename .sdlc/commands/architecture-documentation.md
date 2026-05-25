@@ -65,10 +65,8 @@ rpg-op/
 8. Garantir que infra, migrations e testes tenham ownership claro.
 9. Sincronizar o espelho local para o Plane:
 
-```powershell
-.\.sdlc\scripts\plane-sync-wiki-doc.ps1 `
-  -DocPath docs/infrastructure/project-architecture.md `
-  -PageName "Infrastructure - Project Architecture"
+```bash
+.sdlc/scripts/plane-sync-wiki-doc.sh docs/infrastructure/project-architecture.md "Infrastructure - Project Architecture"
 ```
 
 10. Reportar o link da página Plane, arquivos alterados e qualquer pendência de migração.

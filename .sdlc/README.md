@@ -58,5 +58,5 @@ Playbooks iniciais:
 
 ## Documentação
 
-- [docs/06-sdlc-ai-native.md](../docs/06-sdlc-ai-native.md)
+- [docs/sdlc/ai-native.md](../docs/sdlc/ai-native.md)
 - [workflows/intent-to-deploy.md](workflows/intent-to-deploy.md)

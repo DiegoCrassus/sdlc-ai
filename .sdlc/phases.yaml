@@ -25,7 +25,7 @@ phases:
   - id: implement
     name: Implement
     description: Hooks manuais mínimos em backend/, apps/, services/
-    gate: pytest + validate.ps1 verde
+    gate: pytest + validate.sh verde
     owner: codegen-integrator
     github_label: sdlc:implement
 
@@ -49,5 +49,5 @@ phases:
     gate: smoke pós-deploy
     integration: github_actions
 
-current_maturity: L0
+current_maturity: L1
 target_maturity: L2

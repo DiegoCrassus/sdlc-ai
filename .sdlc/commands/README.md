@@ -10,6 +10,8 @@ subagentes com contexto e saídas padronizadas.
 
 | Command | Playbook | Agente |
 |---------|----------|--------|
+| `start_change` | [start-change.md](start-change.md) | `dev-orchestrator` |
+| `finish_change` | [finish-change.md](finish-change.md) | `github-integrator` |
 | `plane_backlog_plan` | [plane-backlog-plan.md](plane-backlog-plan.md) | `plane-integrator` |
 | `technical_documentation` | [technical-documentation.md](technical-documentation.md) | `spec-author` |
 | `architecture_documentation` | [architecture-documentation.md](architecture-documentation.md) | `spec-author` |
@@ -19,8 +21,8 @@ subagentes com contexto e saídas padronizadas.
 
 | Script | Descrição |
 |--------|-----------|
-| `.sdlc/scripts/validate.ps1` | validate + smoke API |
-| `.sdlc/scripts/validate.sh` | idem (Unix) |
+| `.sdlc/scripts/validate.sh` | validate + smoke API |
+| `make validate` | atalho Makefile |
 
 ## Scripts Locais
 
@@ -28,9 +30,10 @@ subagentes com contexto e saídas padronizadas.
 
 | Script | Descrição |
 |--------|-----------|
-| `.sdlc/scripts/gh-issue-intent.ps1` | Cria issue SDLC |
-| `.sdlc/scripts/gh-pr-open.ps1` | Abre PR com template |
-| `.sdlc/scripts/gh-sdlc-status.ps1` | Issues abertas por label |
+| `.sdlc/scripts/gh-branch-start.sh` | Branch SDLC `feature/RPG-N` ou `bugfix/RPG-N` |
+| `.sdlc/scripts/gh-issue-intent.sh` | Cria issue SDLC |
+| `.sdlc/scripts/gh-pr-open.sh` | Abre PR com template |
+| `.sdlc/scripts/gh-sdlc-status.sh` | Issues abertas por label |
 
 Detalhes: [github.md](github.md)
 

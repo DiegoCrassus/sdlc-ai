@@ -25,8 +25,8 @@ Configuração central: [platforms.yaml](platforms.yaml)
 2. Anote o **workspace slug** da URL (`https://app.plane.so/<slug>/`)
 3. `.env`: `PLANE_API_KEY`, `PLANE_WORKSPACE_SLUG`
 4. `.cursor/mcp.json` já inclui server `plane` (ver `mcp.json.example`)
-5. `.\launch.ps1` → Settings → MCP → `plane` verde
-6. Verifique: `.\.sdlc\scripts\plane-mcp-check.ps1`
+5. `./launch.sh` → Settings → MCP → `plane` verde
+6. Verifique: `.sdlc/scripts/plane-mcp-check.sh`
 
 Doc completa: [plane.md](plane.md)
 

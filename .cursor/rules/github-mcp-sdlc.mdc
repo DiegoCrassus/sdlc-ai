@@ -14,17 +14,21 @@ alwaysApply: false
 
 ## Lifecycle
 
-Intent (issue) → branch → spec → PR → Actions → merge
+Intent (issue) → **start_change** (branch) → spec → **finish_change** (PR) → Actions → merge
 
-Workflow: `.sdlc/workflows/github-lifecycle.md`
+Workflows:
+- `.sdlc/workflows/change-lifecycle.md` (toda alteração)
+- `.sdlc/workflows/github-lifecycle.md`
+- `.sdlc/workflows/lint-bug-resolution.md`
 
 ## Scripts
 
-```powershell
-.sdlc/scripts/gh-issue-intent.ps1 -Title "[Intent] …"
-.sdlc/scripts/gh-pr-open.ps1 -Title "feat: …" -Issue 12
-.sdlc/scripts/gh-sdlc-status.ps1
-.sdlc/scripts/gh-labels-bootstrap.ps1
+```bash
+.sdlc/scripts/gh-branch-start.sh feature RPG-123
+.sdlc/scripts/gh-issue-intent.sh "[Intent] …"
+.sdlc/scripts/gh-pr-open.sh "feat: …" 12
+.sdlc/scripts/gh-sdlc-status.sh
+.sdlc/scripts/gh-labels-bootstrap.sh
 ```
 
 ## Labels SDLC

@@ -2,6 +2,57 @@
 version: 1
 
 agent_commands:
+  start_change:
+    title: Iniciar alteração com branch SDLC
+    description: Cria branch feature/RPG-N ou bugfix/RPG-N, move card Plane para In Progress e prepara rastreabilidade GitHub.
+    owner: dev-orchestrator
+    adapter: .cursor/agents/dev-orchestrator.md
+    playbook: .sdlc/commands/start-change.md
+    skills:
+      - .sdlc/skills/branch-naming/
+      - .sdlc/skills/plane-sdlc/
+      - .sdlc/skills/plane-task-creation/
+      - .sdlc/skills/plane-card-execution/
+      - .sdlc/skills/github-sdlc/
+    inputs:
+      - plane_task_identifier
+      - feature ou bugfix
+      - issue GitHub opcional
+    outputs:
+      - branch criada e checked out
+      - card Plane In Progress
+      - próximos passos de implementação
+    guardrails:
+      - Não codar em main/develop/master.
+      - Não criar branch sem identificador Plane.
+      - Enriquecer descrição Plane se incompleta (plane-task-creation).
+
+  finish_change:
+    title: Finalizar alteração com commit e PR
+    description: Valida, commita, faz push e abre PR; atualiza Plane e delega review.
+    owner: github-integrator
+    adapter: .cursor/agents/subagents/github-integrator.md
+    playbook: .sdlc/commands/finish-change.md
+    skills:
+      - .sdlc/skills/github-sdlc/
+      - .sdlc/skills/branch-naming/
+      - .sdlc/skills/plane-card-execution/
+      - .sdlc/skills/pr-code-review/
+    inputs:
+      - branch atual
+      - plane_task_identifier
+      - mensagem de commit
+      - issue GitHub opcional
+    outputs:
+      - commit e push
+      - PR aberto ou atualizado
+      - Plane In Review
+      - handoff pr_code_review
+    guardrails:
+      - make validate verde antes de push.
+      - Não mergear autonomamente.
+      - Não marcar Plane Done antes do merge.
+
   plane_backlog_plan:
     title: Analisar e criar tarefas no backlog Plane
     description: Decompõe uma intenção em work items Plane acionáveis, alinhados ao SDLC e ao GitHub quando aplicável.
@@ -209,23 +260,27 @@ agent_commands:
       - Comentar motivo quando não houver merge autônomo.
 
 local:
+  branch_start:
+    script: .sdlc/scripts/gh-branch-start.sh
+    requires: [git]
+    description: Create SDLC branch feature/RPG-N or bugfix/RPG-N from develop
+
   validate:
-    windows: .sdlc/scripts/validate.ps1
-    unix: .sdlc/scripts/validate.sh
+    script: .sdlc/scripts/validate.sh
     description: Run SDLC gates locally before push
 
   issue_intent:
-    windows: .sdlc/scripts/gh-issue-intent.ps1
+    script: .sdlc/scripts/gh-issue-intent.sh
     requires: [gh]
     description: Create GitHub issue from SDLC intent
 
   pr_open:
-    windows: .sdlc/scripts/gh-pr-open.ps1
+    script: .sdlc/scripts/gh-pr-open.sh
     requires: [gh]
     description: Open PR with SDLC checklist body
 
   sdlc_status:
-    windows: .sdlc/scripts/gh-sdlc-status.ps1
+    script: .sdlc/scripts/gh-sdlc-status.sh
     requires: [gh]
     description: List open SDLC-tagged issues
 

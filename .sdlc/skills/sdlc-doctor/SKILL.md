@@ -16,18 +16,18 @@ Check the engineering harness, not product gameplay behavior:
 
 - `.sdlc/config.yaml` and `.sdlc/phases.yaml`
 - `.sdlc/agents/` and `.sdlc/skills/`
-- `.sdlc/scripts/validate.ps1`
+- `.sdlc/scripts/validate.sh`
 - `.cursor/hooks.json`, `.cursor/rules/`, and `.cursor/mcp.json`
 - `specs/`, `packages/rpg_dsl/`, and `generated/`
 - `.github/workflows/sdlc.yml` and PR/issue templates
-- `docs/06-sdlc-ai-native.md`, `docs/status/pendencias-sdlc.md`, and `docs/status/pendencias-humanas.md`
+- `docs/sdlc/ai-native.md`, `docs/status/pendencias-sdlc.md`, and `docs/status/pendencias-humanas.md`
 
 ## Diagnostic Order
 
-1. Read `.sdlc/AGENTS.md`, `.sdlc/config.yaml`, and `docs/06-sdlc-ai-native.md`.
+1. Read `.sdlc/AGENTS.md`, `.sdlc/config.yaml`, and `docs/sdlc/ai-native.md`.
 2. Inspect current declarative sources in `specs/` and `.sdlc/agents/`.
 3. Compare `generated/` against the expected compiler targets without hand-editing generated files.
-4. Run `.sdlc/scripts/validate.ps1` when execution is allowed.
+4. Run `.sdlc/scripts/validate.sh` when execution is allowed.
 5. Check integration readiness for GitHub, Plane, LangSmith, Cursor hooks, and CI.
 6. Review status docs for stale claims, blockers, and human-only tasks.
 

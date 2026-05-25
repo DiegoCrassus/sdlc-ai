@@ -17,7 +17,7 @@ Configure via `LANGCHAIN_PROJECT` no `.env`.
 2. API key: Settings → API Keys → `LANGCHAIN_API_KEY`
 3. Instalar deps dos hooks:
 
-```powershell
+```bash
 pip install -r .sdlc/requirements-hooks.txt
 ```
 

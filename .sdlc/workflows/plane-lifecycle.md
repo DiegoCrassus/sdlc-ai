@@ -19,7 +19,7 @@ flowchart LR
 ### 1. Intent
 
 - Criar work item no Plane (Backlog)
-- Criar issue GitHub espelhada (`gh-issue-intent.ps1` ou GitHub MCP)
+- Criar issue GitHub espelhada (`gh-issue-intent.sh` ou GitHub MCP)
 - Linkar nos dois: comentário no Plane com `#N` GitHub; issue GitHub com link Plane
 
 ### 2. Spec
@@ -30,8 +30,8 @@ flowchart LR
 
 ### 3. Implement
 
-- Work item → In Progress
-- Branch `feat/<issue>-<slug>` no GitHub
+- Work item → In Progress (command `start_change`)
+- Branch `feature/RPG-N` ou `bugfix/RPG-N` — skill branch-naming
 - Comentários de progresso via `create_work_item_comment`
 
 ### 4. Review / Done
@@ -51,9 +51,9 @@ flowchart LR
 
 ## Verificação
 
-```powershell
-.\launch.ps1          # Cursor com .env
-.\.sdlc\scripts\plane-mcp-check.ps1
+```bash
+./launch.sh
+.sdlc/scripts/plane-mcp-check.sh
 ```
 
 Setup completo: [.sdlc/integrations/plane.md](../integrations/plane.md)

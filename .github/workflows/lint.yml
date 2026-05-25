@@ -32,7 +32,7 @@ jobs:
         id: ruff
         run: |
           set +e
-          OUTPUT=$(ruff check backend/ packages/rpg_dsl/ specs/ .cursor/hooks/ 2>&1)
+          OUTPUT=$(ruff check apps/backend/ packages/rpg_dsl/ specs/ .cursor/hooks/ 2>&1)
           EXIT=$?
           echo "failed=$( [ $EXIT -ne 0 ] && echo true || echo false )" >> $GITHUB_OUTPUT
           # escape newlines for output
@@ -52,7 +52,7 @@ jobs:
         id: ruff-fmt
         run: |
           set +e
-          OUTPUT=$(ruff format --check backend/ packages/rpg_dsl/ specs/ .cursor/hooks/ 2>&1)
+          OUTPUT=$(ruff format --check apps/backend/ packages/rpg_dsl/ specs/ .cursor/hooks/ 2>&1)
           EXIT=$?
           echo "$OUTPUT"
           exit $EXIT
@@ -72,15 +72,15 @@ jobs:
         with:
           node-version: "20"
           cache: npm
-          cache-dependency-path: apps/web/package.json
+          cache-dependency-path: apps/frontend/package.json
 
       - name: Install deps
-        working-directory: apps/web
+        working-directory: apps/frontend
         run: npm install
 
       - name: tsc --noEmit
         id: tsc
-        working-directory: apps/web
+        working-directory: apps/frontend
         run: |
           set +e
           OUTPUT=$(npx tsc --noEmit 2>&1)

@@ -39,5 +39,5 @@ create_deep_agent(
 
 ## Docs
 
-- [docs/03-deep-agent-harness.md](../../docs/03-deep-agent-harness.md)
+- [docs/product/sheet-canvas.md](../../docs/product/sheet-canvas.md)
 - [LangChain Deep Agents](https://docs.langchain.com/oss/python/deepagents/index)

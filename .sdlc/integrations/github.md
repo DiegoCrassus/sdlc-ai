@@ -73,7 +73,7 @@ Instalação: https://cli.github.com/
 
 Autenticação:
 
-```powershell
+```bash
 gh auth login
 gh auth setup-git
 ```
