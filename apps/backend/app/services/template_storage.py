@@ -27,7 +27,9 @@ def save_template_source(workspace_id: str, upload: UploadFile) -> tuple[str, st
         "image/gif": ".gif",
         "application/pdf": ".pdf",
     }
-    ext = ext_map.get(upload.content_type or "", Path(upload.filename or "").suffix.lower() or ".png")
+    ext = ext_map.get(
+        upload.content_type or "", Path(upload.filename or "").suffix.lower() or ".png"
+    )
     dest_dir = settings.upload_dir / workspace_id
     dest_dir.mkdir(parents=True, exist_ok=True)
     filename = f"template{ext}"

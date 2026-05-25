@@ -48,9 +48,7 @@ def _default_for_type(ftype: str, spec: dict[str, Any]) -> Any:
     return ""
 
 
-def _coerce_value(
-    raw: Any, ftype: str, spec: dict[str, Any], key: str, errors: list[str]
-) -> Any:
+def _coerce_value(raw: Any, ftype: str, spec: dict[str, Any], key: str, errors: list[str]) -> Any:
     label = spec.get("label", key)
     if ftype == "integer":
         try:

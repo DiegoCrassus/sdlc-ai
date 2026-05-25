@@ -32,9 +32,7 @@ async def migrate_sheets_to_template(
     *,
     previous_field_keys: set[str],
 ) -> None:
-    result = await db.execute(
-        select(Sheet).where(Sheet.workspace_id == workspace.id)
-    )
+    result = await db.execute(select(Sheet).where(Sheet.workspace_id == workspace.id))
     now = datetime.now(timezone.utc)
     for sheet in result.scalars().all():
         data = loads_json(sheet.data_json)
@@ -45,9 +43,7 @@ async def migrate_sheets_to_template(
         sheet.template_version = workspace.template_version
         sheet.updated_at = now
 
-    ex = await db.execute(
-        select(ExampleSheet).where(ExampleSheet.workspace_id == workspace.id)
-    )
+    ex = await db.execute(select(ExampleSheet).where(ExampleSheet.workspace_id == workspace.id))
     example = ex.scalar_one_or_none()
     if example:
         data = loads_json(example.data_json)

@@ -8,8 +8,8 @@ from sqlalchemy.orm import selectinload
 
 from app.database import dumps_json, get_db, loads_json
 from app.deps.session import require_session
-from app.models import Character, Sheet, Workspace
-from app.routers.workspaces import _get_workspace_or_404, template_image_url
+from app.models import Character, Sheet
+from app.routers.workspaces import _get_workspace_or_404
 from app.schemas import CharacterCreate, CharacterSummary, WorkspaceDashboard
 from app.services.provisioning import empty_defaults
 from app.services.sheet_validation import missing_required_fields
@@ -130,7 +130,9 @@ async def create_character(
 
     workspace = await _get_workspace_or_404(db, workspace_id)
     if workspace.template_status != "published":
-        raise HTTPException(status_code=400, detail="Publique o template antes de criar personagens.")
+        raise HTTPException(
+            status_code=400, detail="Publique o template antes de criar personagens."
+        )
 
     schema = loads_json(workspace.schema_json)
     if not isinstance(schema, dict):

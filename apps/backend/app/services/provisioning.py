@@ -87,9 +87,7 @@ def provision_from_json(sheet_json: str) -> tuple[dict[str, Any], dict[str, Any]
     else:
         raise HTTPException(
             status_code=400,
-            detail=(
-                "JSON deve conter 'schema' + 'canvas_spec', ou um objeto schema com 'fields'."
-            ),
+            detail=("JSON deve conter 'schema' + 'canvas_spec', ou um objeto schema com 'fields'."),
         )
 
     if not isinstance(schema, dict) or "fields" not in schema:

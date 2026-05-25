@@ -52,7 +52,9 @@ class WorkspaceInvite(Base):
     __tablename__ = "workspace_invites"
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    workspace_id: Mapped[str] = mapped_column(String(36), ForeignKey("workspaces.id"), nullable=False)
+    workspace_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("workspaces.id"), nullable=False
+    )
     email: Mapped[str] = mapped_column(String(320), nullable=False)
     role: Mapped[str] = mapped_column(String(20), default="player")
     status: Mapped[str] = mapped_column(String(20), default="pending")
@@ -78,7 +80,9 @@ class Character(Base):
     __tablename__ = "characters"
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    workspace_id: Mapped[str] = mapped_column(String(36), ForeignKey("workspaces.id"), nullable=False)
+    workspace_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("workspaces.id"), nullable=False
+    )
     name: Mapped[str] = mapped_column(String(200), nullable=False)
     player_email: Mapped[str] = mapped_column(String(320), nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
@@ -93,7 +97,9 @@ class Sheet(Base):
     __tablename__ = "sheets"
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    workspace_id: Mapped[str] = mapped_column(String(36), ForeignKey("workspaces.id"), nullable=False)
+    workspace_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("workspaces.id"), nullable=False
+    )
     character_id: Mapped[str] = mapped_column(
         String(36), ForeignKey("characters.id"), unique=True, nullable=False
     )
@@ -104,7 +110,9 @@ class Sheet(Base):
 
     character: Mapped["Character"] = relationship(back_populates="sheet")
     revisions: Mapped[list["SheetRevision"]] = relationship(
-        back_populates="sheet", cascade="all, delete-orphan", order_by="SheetRevision.created_at.desc()"
+        back_populates="sheet",
+        cascade="all, delete-orphan",
+        order_by="SheetRevision.created_at.desc()",
     )
 
 
@@ -125,7 +133,9 @@ class TemplateExtension(Base):
     __tablename__ = "template_extensions"
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    workspace_id: Mapped[str] = mapped_column(String(36), ForeignKey("workspaces.id"), nullable=False)
+    workspace_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("workspaces.id"), nullable=False
+    )
     from_version: Mapped[int] = mapped_column(Integer, nullable=False)
     to_version: Mapped[int | None] = mapped_column(Integer, nullable=True)
     patch_json: Mapped[str] = mapped_column(Text, nullable=False)

@@ -64,9 +64,7 @@ def analyze_template(
                 finding=f"{len(schema.get('fields', {}))} campos inferidos a partir da descrição.",
             ),
         ]
-        warnings.append(
-            "Análise textual usa heurística MVP2; revise campos antes de publicar."
-        )
+        warnings.append("Análise textual usa heurística MVP2; revise campos antes de publicar.")
         confidence = "medium"
     elif has_image or sheet_source == "file":
         schema = DEFAULT_SCHEMA
