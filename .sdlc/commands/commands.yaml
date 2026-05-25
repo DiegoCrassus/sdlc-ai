@@ -183,6 +183,31 @@ agent_commands:
       - Não fechar issue sem evidência.
       - Não enfraquecer checks para passar CI.
 
+  issue_resolution_validation:
+    title: Validar resolução de issue até develop
+    description: Valida fix de issue após resolução, reaciona code-reviewer, confere Actions e mergeia em develop quando permitido.
+    owner: pr-approver
+    adapter: .cursor/agents/subagents/pr-approver.md
+    playbook: .sdlc/commands/issue-resolution-validation.md
+    skills:
+      - .sdlc/skills/issue-resolution-validation/
+      - .sdlc/skills/pr-code-review/
+      - .sdlc/skills/pr-approval-watch/
+      - .sdlc/skills/github-sdlc/
+      - .sdlc/skills/plane-card-execution/
+    inputs:
+      - issue URL ou número
+      - PR URL ou número
+      - Plane card relacionado
+    outputs:
+      - validação pós-correção
+      - aprovação/merge em develop ou comentário de bloqueio
+      - issue fechada ou justificativa para permanecer aberta
+    guardrails:
+      - Validar somente contra o head SHA atual.
+      - Não mergear em main/staging diretamente.
+      - Comentar motivo quando não houver merge autônomo.
+
 local:
   validate:
     windows: .sdlc/scripts/validate.ps1

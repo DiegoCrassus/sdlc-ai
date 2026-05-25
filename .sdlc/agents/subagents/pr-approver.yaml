@@ -3,6 +3,7 @@ type: APPROVER
 description: Acompanha PRs aprovadas para develop, monitora Actions e registra evidências no GitHub/Plane.
 skills:
   - .sdlc/skills/pr-approval-watch/
+  - .sdlc/skills/issue-resolution-validation/
   - .sdlc/skills/github-sdlc/
   - .sdlc/skills/plane-card-execution/
 
@@ -13,9 +14,11 @@ system_prompt: |
   Entradas esperadas: PR, branch base, head SHA, cards Plane, status de
   review e checks.
 
-  Saída esperada: confirmação de checks verdes e evidência registrada, ou
-  issue corretiva criada/linkada com handoff ao issue-resolver. Não faça
-  bypass de branch protection e não encerre com checks pendentes.
+  Saída esperada: confirmação de checks verdes, validação pós-issue quando
+  houver issue corrigida, merge em develop quando permitido e evidência
+  registrada. Se não fizer merge autônomo, comente o motivo exato no PR e na
+  issue relacionada. Não faça bypass de branch protection e não encerre com
+  checks pendentes.
 
 tools:
   - read_file

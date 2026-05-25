@@ -11,7 +11,9 @@ description: Tracks approved PRs into develop, monitors GitHub Actions after app
 2. Ensure base branch is `develop` for active development work.
 3. Watch required Actions until success or failure.
 4. If checks fail, create or link a GitHub issue and hand off to `issue-resolver`.
-5. If checks pass, comment evidence on the PR, linked GitHub issue, and Plane card.
+5. If checks pass, run `issue_resolution_validation` for any linked issue that was fixed in the PR.
+6. If validation passes and the PR targets `develop`, approve/merge autonomously.
+7. If merge is not performed, comment the exact reason on the PR and linked issue.
 
 ## Evidence
 
@@ -26,4 +28,4 @@ Record:
 
 - Do not bypass branch protection.
 - Do not merge into protected `main` or `staging` directly.
-- Stop only on green checks or explicit blocker evidence.
+- Stop only after green checks plus merge into `develop`, or explicit blocker evidence explaining why merge was not performed.

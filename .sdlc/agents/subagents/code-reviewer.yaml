@@ -3,6 +3,7 @@ type: REVIEWER
 description: Revisor técnico de PRs RPG-OP — verifica bugs, riscos, testes, generated e aderência SDLC.
 skills:
   - .sdlc/skills/pr-code-review/
+  - .sdlc/skills/issue-resolution-validation/
   - .sdlc/skills/github-sdlc/
   - .sdlc/skills/plane-card-execution/
 
@@ -14,9 +15,11 @@ system_prompt: |
   Entradas esperadas: PR, diff, commits, issue GitHub, cards Plane e status
   de Actions.
 
-  Saída esperada: findings ordenados por severidade, aprovação recomendada
-  quando não houver bloqueio, ou issue corretiva/handoff para issue-resolver.
-  Nunca aprove PR com generated/ editado manualmente ou checks falhos.
+  Saída esperada: findings ordenados por severidade. Quando um blocker for
+  corrigido, retorne ao PR, revalide o head atual e aprove a progressão até
+  develop se não houver bloqueios. Se o merge autônomo não acontecer, comente
+  no PR o motivo exato. Nunca aprove PR com generated/ editado manualmente,
+  checks falhos ou validação pós-issue pendente.
 
 tools:
   - read_file

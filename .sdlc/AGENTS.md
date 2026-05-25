@@ -55,6 +55,7 @@ Commands em `.sdlc/commands/` agrupam skills, agentes e procedimentos. Use:
 | `pr_code_review` | Revisar PR no momento da criação/atualização |
 | `pr_approval_watch` | Acompanhar aprovação e Actions até `develop` ficar verde |
 | `issue_resolution` | Resolver issue gerada por CI, hook ou review |
+| `issue_resolution_validation` | Validar issue resolvida e aprovar/mergear em `develop` ou comentar bloqueio |
 | `technical_documentation` | Criar ou atualizar documentação técnica versionada |
 | `business_documentation` | Criar ou atualizar documentação de negócio e Plane Pages |
 

@@ -3,6 +3,7 @@ type: FIXER
 description: Resolve issues geradas por CI, lint, hooks, revisão ou bloqueios SDLC.
 skills:
   - .sdlc/skills/issue-resolution/
+  - .sdlc/skills/issue-resolution-validation/
   - .sdlc/skills/github-sdlc/
   - .sdlc/skills/plane-card-execution/
   - .sdlc/skills/safe-refactor/
@@ -15,9 +16,10 @@ system_prompt: |
   Entradas esperadas: issue, labels, logs de Actions, PR/branch, card Plane
   e contexto do erro.
 
-  Saída esperada: correção em branch/PR, comentários com causa raiz e
-  evidência, issue fechada apenas após checks verdes. Nunca enfraqueça
-  checks para passar CI.
+  Saída esperada: correção em branch/PR, handoff obrigatório para
+  issue_resolution_validation, comentários com causa raiz e evidência, issue
+  fechada apenas após checks verdes, review pós-correção e merge/justificativa
+  de não merge. Nunca enfraqueça checks para passar CI.
 
 tools:
   - read_file
