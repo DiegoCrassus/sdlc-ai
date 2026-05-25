@@ -37,3 +37,75 @@ class ExampleSheetResponse(BaseModel):
     canvas_spec: dict
     data: dict
     template_image_url: str | None
+
+
+class SheetTemplateResponse(BaseModel):
+    id: str
+    name: str
+    version: int
+    status: str
+    schema_data: dict
+    canvas_spec: dict
+    analysis: dict | None = None
+    published_at: datetime | None = None
+
+
+class CharacterResponse(BaseModel):
+    id: str
+    name: str
+    owner_email: str | None = None
+
+
+class SheetSummary(BaseModel):
+    id: str
+    label: str
+    character: CharacterResponse
+    template_version: int
+    revision: int
+    updated_at: datetime
+    incomplete_fields: list[str] = []
+
+
+class SheetDetail(BaseModel):
+    id: str
+    label: str
+    character: CharacterResponse
+    schema_data: dict
+    canvas_spec: dict
+    data: dict
+    template_version: int
+    revision: int
+    template_image_url: str | None
+
+
+class CampaignSheetsResponse(BaseModel):
+    campaign: CampaignDetail
+    sheets: list[SheetSummary]
+
+
+class SheetUpdate(BaseModel):
+    data: dict
+
+
+class SheetRevisionResponse(BaseModel):
+    id: str
+    revision: int
+    data: dict
+    created_at: datetime
+
+
+class PublishTemplateRequest(BaseModel):
+    confirm: bool = False
+
+
+class ExtendTemplateRequest(BaseModel):
+    section_title: str
+    field_key: str
+    field_label: str
+    field_type: str = Field(default="string", pattern="^(string|integer|float|boolean|text)$")
+    default: str | int | float | bool | None = None
+
+
+class TemplateAnalysisResponse(BaseModel):
+    template: SheetTemplateResponse
+    warnings: list[str] = []
