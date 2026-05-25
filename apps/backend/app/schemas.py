@@ -17,6 +17,7 @@ class WorkspaceSummary(BaseModel):
     template_image_url: str | None
     created_at: datetime
 
+
 class WorkspaceDetail(WorkspaceSummary):
     invite_count: int
     pending_invites: int

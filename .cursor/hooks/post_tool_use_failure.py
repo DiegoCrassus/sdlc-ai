@@ -15,7 +15,10 @@ def main() -> None:
     emit_post(
         "postToolUseFailure",
         sanitize(data),
-        {"status": "error", "error": sanitize(str(data.get("error") or data.get("error_message") or ""), 500)},
+        {
+            "status": "error",
+            "error": sanitize(str(data.get("error") or data.get("error_message") or ""), 500),
+        },
         raw_hook_input=data,
     )
     respond({})
