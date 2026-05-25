@@ -59,6 +59,21 @@ supabase:
   integration: .sdlc/integrations/supabase.md
   read_only: true
 
+plane:
+  mcp_config: .cursor/mcp.json
+  mcp_token_env: PLANE_API_KEY
+  workspace_env: PLANE_WORKSPACE_SLUG
+  lifecycle: .sdlc/workflows/plane-lifecycle.md
+  scripts:
+    mcp_check: .sdlc/scripts/plane-mcp-check.ps1
+
+supabase:
+  mcp_config: .cursor/mcp.json
+  mcp_token_env: SUPABASE_ACCESS_TOKEN
+  project_ref_env: SUPABASE_PROJECT_REF
+  integration: .sdlc/integrations/supabase.md
+  read_only: true
+
 integrations:
   registry: .sdlc/integrations/platforms.yaml
   github: .sdlc/integrations/github.yaml

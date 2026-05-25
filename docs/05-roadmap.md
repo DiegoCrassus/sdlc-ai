@@ -28,7 +28,7 @@ O norte permanece: o mestre envia uma ficha real da mesa, o sistema deriva `Shee
 
 Detalhe por fase: [docs/poc/](poc/00-indice-poc.md).
 
----
+## Estado atual
 
 ## Premissas do roadmap pós-PoC
 
@@ -37,7 +37,12 @@ Detalhe por fase: [docs/poc/](poc/00-indice-poc.md).
 - PostgreSQL e auth real são pré-requisitos de alpha fechado, não do PoC.
 - Plane continua como backlog de produto; GitHub como SDLC de código.
 
----
+- DSL `rpg_dsl` mínima instalada e executável via `rpg`.
+- Specs em `specs/templates/` para ficha e canvas D&D 5e de referência.
+- Spec do subagente `sheet-template-analyst`.
+- `rpg validate specs/` e `rpg compile` funcionando localmente.
+- Targets gerados prioritários: Pydantic, JSON Schema, TypeScript, OpenAPI e agent manifest.
+- CI local via `.sdlc/scripts/validate.ps1`.
 
 ## Fase 1 — Hardening (4–6 semanas)
 
@@ -53,7 +58,14 @@ Detalhe por fase: [docs/poc/](poc/00-indice-poc.md).
 
 **Saída:** demo repetível para investidor/mesa interna; L2 no SDLC Doctor.
 
----
+- Modelo de dados inicial: `campaigns`, `campaign_members`, `sheet_templates`, `characters`, `sheets`, `sheet_revisions`, `attachments`.
+- BFF `/v1` com rotas de campanha, template publicado e fichas.
+- Payload agregado para UI: `sheet` + `schema_json` + `canvas_spec_json` + `template_version`.
+- Validação de dados da ficha contra JSON Schema do template.
+- `SheetCanvas` React com apresentações mínimas: `field_grid`, `stat_row`, `rich_text`.
+- Fluxo jogador: abrir a própria ficha, editar campos permitidos e salvar.
+- Fluxo mestre: ver fichas da campanha em dashboard simples.
+- Seed/fixture de campanha piloto para testar ponta a ponta.
 
 ## Fase 2 — Alpha fechado (6–8 semanas)
 
@@ -70,7 +82,14 @@ Detalhe por fase: [docs/poc/](poc/00-indice-poc.md).
 
 **Saída:** mesas externas usam o produto sem suporte técnico contínuo.
 
----
+- Upload de ficha exemplo (`PDF`, `PNG`, `JPG`) em `template/source`.
+- Serviço de agente com orquestrador leve e subagente `sheet-template-analyst`.
+- Skill `template-analysis` com passos: segmentar regiões, listar campos, inferir tipos, montar canvas e emitir warnings.
+- Persistência de `analysis_json`, `schema_json` e `canvas_spec_json` como draft.
+- UI de revisão com passos da análise + preview do canvas ao lado do exemplo.
+- Correções manuais do mestre antes de publicar.
+- Endpoint `template/publish` com confirmação humana.
+- Evals smoke com 2 fixtures anonimizadas e trace LangSmith.
 
 ## Fase 3 — Beta (8–12 semanas)
 
@@ -87,7 +106,7 @@ Detalhe por fase: [docs/poc/](poc/00-indice-poc.md).
 
 **Saída:** product-market fit inicial com fichas visuais customizadas.
 
----
+**Entregas principais**
 
 ## Fase 4 — Produto (12+ semanas)
 
@@ -101,7 +120,7 @@ Horizonte após beta estável. Priorização via Plane com base em feedback das 
 | **F4.4 Mobile** | PWA ou app nativo; leitura offline parcial |
 | **F4.5 Automações** | RAG de regras, subagentes por cenário, integrações VTT |
 
----
+## Sequência recomendada
 
 ## Sequência recomendada
 
@@ -130,7 +149,7 @@ PoC 0–4 ✅  →  Fase 1 Hardening  →  Fase 2 Alpha  →  Fase 3 Beta  →  
 | Escopo para chat/mobile cedo | Roadmap por fases; Plane prioriza Fase 1–2 |
 | Migração de template quebra fichas | Versionamento append-only (já provado no PoC 4) |
 
----
+## Definição de sucesso do ciclo
 
 ## Definição de sucesso por marco
 

@@ -23,6 +23,16 @@ jobs:
       # PATs — use SDLC_PAT_CLASSIC para operacoes que precisam de token com scopes completos
       SDLC_PAT_CLASSIC:    ${{ secrets.SDLC_PAT_CLASSIC }}
 
+    env:
+      LANGSMITH_API_KEY:   ${{ secrets.LANGSMITH_API_KEY }}
+      LANGSMITH_TRACING:   ${{ vars.LANGSMITH_TRACING }}
+      LANGSMITH_ENDPOINT:  ${{ vars.LANGSMITH_ENDPOINT }}
+      LANGSMITH_PROJECT:   ${{ vars.LANGSMITH_PROJECT }}
+      OPENAI_API_KEY:      ${{ secrets.OPENAI_API_KEY }}
+      AGENT_MODEL:         ${{ secrets.AGENT_MODEL }}
+      # PATs — use SDLC_PAT_CLASSIC para operacoes que precisam de token com scopes completos
+      SDLC_PAT_CLASSIC:    ${{ secrets.SDLC_PAT_CLASSIC }}
+
     steps:
       - uses: actions/checkout@v4
 
