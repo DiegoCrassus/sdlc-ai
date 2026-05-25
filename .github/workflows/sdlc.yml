@@ -11,7 +11,17 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: backend
+        working-directory: apps/backend
+
+    env:
+      LANGSMITH_API_KEY:   ${{ secrets.LANGSMITH_API_KEY }}
+      LANGSMITH_TRACING:   ${{ vars.LANGSMITH_TRACING }}
+      LANGSMITH_ENDPOINT:  ${{ vars.LANGSMITH_ENDPOINT }}
+      LANGSMITH_PROJECT:   ${{ vars.LANGSMITH_PROJECT }}
+      OPENAI_API_KEY:      ${{ secrets.OPENAI_API_KEY }}
+      AGENT_MODEL:         ${{ secrets.AGENT_MODEL }}
+      # PATs — use SDLC_PAT_CLASSIC para operacoes que precisam de token com scopes completos
+      SDLC_PAT_CLASSIC:    ${{ secrets.SDLC_PAT_CLASSIC }}
 
     env:
       LANGSMITH_API_KEY:   ${{ secrets.LANGSMITH_API_KEY }}
@@ -31,7 +41,7 @@ jobs:
         with:
           python-version: "3.12"
           cache: pip
-          cache-dependency-path: backend/requirements.txt
+          cache-dependency-path: apps/backend/requirements.txt
 
       - name: Install dependencies
         run: pip install -r requirements.txt

@@ -23,5 +23,5 @@
 
 ## Referências
 
-- docs/08-sheet-canvas.md
+- docs/product/sheet-canvas.md
 - .sdlc/workflows/intent-to-deploy.md

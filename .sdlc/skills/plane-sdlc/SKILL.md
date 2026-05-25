@@ -37,6 +37,7 @@ description: >-
 - Projeto Plane sugerido: mesmo nome do repo ou produto (`RPG-OP`)
 - Título de work item: `[Intent] …`, `[Spec] …`, `[Implement] …` (espelha GitHub)
 - Ao criar tarefas, carregar e seguir [.sdlc/skills/plane-task-creation/SKILL.md](../plane-task-creation/SKILL.md)
+- Antes de implementar: command `start_change` + [.sdlc/workflows/change-lifecycle.md](../../workflows/change-lifecycle.md)
 - Ao abrir PR no GitHub, comentar no work item Plane com link do PR
 - Pages: usar para documentação de produto; specs declarativas continuam em `specs/`
 

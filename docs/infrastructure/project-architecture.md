@@ -112,11 +112,14 @@ Frontend TypeScript com React + Vite:
 
 ### `docs/`
 
-Documentação versionada:
-
-- Arquitetura e decisões técnicas.
-- Status, pendências e guias operacionais.
-- Espelhos de documentação do Plane quando necessário.
+| Subpasta | Conteúdo |
+|----------|----------|
+| `product/` | Visão, arquitetura de produto, Sheet Canvas |
+| `poc/` | Proof of Concept entregue (fases 0–4) |
+| `sdlc/` | SDLC AI-native |
+| `status/` | Pendências operacionais |
+| `infrastructure/` | Arquitetura técnica e stack |
+| `05-roadmap.md` | Roadmap pós-PoC |
 
 ### `infra/`
 
@@ -173,7 +176,7 @@ members = [
 
 O `Makefile` na raiz é a entrada operacional padrão:
 
-```powershell
+```bash
 make setup
 make dev-backend
 make dev-frontend

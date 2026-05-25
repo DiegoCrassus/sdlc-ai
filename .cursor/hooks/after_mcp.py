@@ -17,6 +17,7 @@ def main() -> None:
         "afterMCPExecution",
         {"tool": tool, "server": str(data.get("server") or "")},
         {"result_preview": sanitize(data.get("result") or data.get("output") or {}, 800)},
+        raw_hook_input=data,
     )
     respond({})
 

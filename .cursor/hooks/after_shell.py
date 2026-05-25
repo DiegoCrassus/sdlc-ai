@@ -16,6 +16,7 @@ def main() -> None:
         "afterShellExecution",
         {"command": sanitize(str(data.get("command") or ""), 400)},
         {"output_preview": sanitize(str(data.get("output") or data.get("stdout") or ""), 800)},
+        raw_hook_input=data,
     )
     respond({})
 

@@ -26,7 +26,7 @@ description: >-
 ## MCP workflow (agent)
 
 1. **Read** open issues with label `sdlc:intent` or assigned to current work
-2. **Create branch** naming `feat/<issue>-<slug>` or use `gh issue develop`
+2. **Create branch** — `.sdlc/scripts/gh-branch-start.sh feature RPG-123` (skill [branch-naming](../skills/branch-naming/SKILL.md))
 3. After spec/implement, **open PR** linking `Closes #N`
 4. **Check** Actions / PR checks before asking human to merge
 5. **Comment** on issue with summary when phase completes
@@ -39,7 +39,7 @@ description: >-
 
 ## SDLC
 - [ ] Spec updated in specs/ (if applicable)
-- [ ] validate.ps1 green
+- [ ] validate.sh / make validate green
 - [ ] No manual edits to generated/
 
 ## Issue
@@ -54,11 +54,12 @@ Closes #NN
 
 ## Scripts
 
-- `.sdlc/scripts/gh-issue-intent.ps1`
-- `.sdlc/scripts/gh-pr-open.ps1`
-- `.sdlc/scripts/validate.ps1`
+- `.sdlc/scripts/gh-branch-start.sh`
+- `.sdlc/scripts/gh-issue-intent.sh`
+- `.sdlc/scripts/gh-pr-open.sh`
+- `.sdlc/scripts/validate.sh`
 
-## Docs
+## Workflows
 
+- [.sdlc/workflows/change-lifecycle.md](../../workflows/change-lifecycle.md)
 - [.sdlc/workflows/github-lifecycle.md](../../workflows/github-lifecycle.md)
-- [.sdlc/integrations/github.md](../../integrations/github.md)

@@ -7,21 +7,21 @@
 
 ## Autenticação
 
-```powershell
+```bash
 gh auth login
 gh auth status
 ```
 
 Defina repositório padrão (opcional):
 
-```powershell
-$env:GITHUB_REPOSITORY = "owner/rpg-op"
+```bash
+export GITHUB_REPOSITORY="owner/rpg-op"
 gh repo set-default owner/rpg-op
 ```
 
 ## Issues
 
-```powershell
+```bash
 # Listar
 gh issue list
 gh issue list --label "sdlc:intent"
@@ -38,7 +38,7 @@ gh issue develop 12 --checkout
 
 ## Pull requests
 
-```powershell
+```bash
 gh pr create --title "feat: …" --body-file .github/PULL_REQUEST_TEMPLATE.md
 gh pr list
 gh pr checks
@@ -48,7 +48,7 @@ gh pr merge --squash
 
 ## Actions
 
-```powershell
+```bash
 gh workflow list
 gh run list --workflow=sdlc.yml
 gh run view <run-id> --log-failed
@@ -56,9 +56,9 @@ gh run view <run-id> --log-failed
 
 ## Repo
 
-```powershell
+```bash
 gh repo clone owner/rpg-op
 gh repo view
 ```
 
-Scripts encapsulados em `.sdlc/scripts/gh-*.ps1`.
+Scripts encapsulados em `.sdlc/scripts/gh-*.sh`.

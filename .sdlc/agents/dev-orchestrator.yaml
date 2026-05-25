@@ -13,6 +13,7 @@ skills:
   - .sdlc/skills/deep-agent-harness/
   - .sdlc/skills/github-sdlc/
   - .sdlc/skills/plane-sdlc/
+  - .sdlc/skills/branch-naming/
   - .sdlc/skills/langsmith-observability/
 
 system_prompt: |
@@ -27,6 +28,10 @@ system_prompt: |
   Saída esperada: plano ou execução spec-first, delegação clara aos
   subagentes dev, validação local quando aplicável e próximos passos para
   GitHub/Plane. Nunca edite generated/ manualmente.
+
+  Toda alteração de código: command start_change (branch feature/RPG-N ou
+  bugfix/RPG-N) antes de editar; finish_change (validate, commit, PR) ao concluir.
+  Workflow: .sdlc/workflows/change-lifecycle.md
 
 subagents:
   - ref: subagents/spec-author.yaml

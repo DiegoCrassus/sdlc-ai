@@ -26,4 +26,4 @@ Workflow: `.sdlc/workflows/plane-lifecycle.md`
 ## Segurança
 
 - `PLANE_API_KEY` nunca no repo
-- Abrir Cursor via `.\launch.ps1` para carregar `.env`
+- Abrir Cursor via `./launch.sh` para carregar `.env`

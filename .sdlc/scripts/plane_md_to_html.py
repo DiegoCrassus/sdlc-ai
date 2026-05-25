@@ -24,7 +24,7 @@ def md_to_html(source: str, *, repo_path: str | None = None) -> str:
     if repo_path:
         footer = (
             f'<hr/><p><em>Fonte: <code>{html.escape(repo_path)}</code> '
-            f"(sincronizado via .sdlc/scripts/plane-sync-wiki-doc.ps1)</em></p>"
+            f"(sincronizado via .sdlc/scripts/plane-sync-wiki-doc.sh)</em></p>"
         )
     return f"{body}{footer}"
 

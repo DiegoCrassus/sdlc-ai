@@ -181,46 +181,6 @@
         }
       }
     },
-    "/v1/campaigns/{campaign_id}/template/source": {
-      "post": {
-        "tags": [
-          "campaigns"
-        ],
-        "operationId": "post_campaigns_campaign_id_template_source",
-        "responses": {
-          "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TemplateAnalysisDto"
-                }
-              }
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "campaign_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/TemplateSourceUploadDto"
-              }
-            }
-          }
-        }
-      }
-    },
     "/v1/campaigns/{campaign_id}/template/publish": {
       "post": {
         "tags": [
@@ -255,46 +215,6 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/PublishTemplateDto"
-              }
-            }
-          }
-        }
-      }
-    },
-    "/v1/campaigns/{campaign_id}/template/extend": {
-      "post": {
-        "tags": [
-          "campaigns"
-        ],
-        "operationId": "post_campaigns_campaign_id_template_extend",
-        "responses": {
-          "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SheetTemplateDto"
-                }
-              }
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "campaign_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ExtendTemplateDto"
               }
             }
           }
@@ -403,11 +323,6 @@
         "type": "object",
         "additionalProperties": true
       },
-      "ExtendTemplateDto": {
-        "title": "ExtendTemplateDto",
-        "type": "object",
-        "additionalProperties": true
-      },
       "PublishTemplateDto": {
         "title": "PublishTemplateDto",
         "type": "object",
@@ -420,16 +335,6 @@
       },
       "SheetTemplateDto": {
         "title": "SheetTemplateDto",
-        "type": "object",
-        "additionalProperties": true
-      },
-      "TemplateAnalysisDto": {
-        "title": "TemplateAnalysisDto",
-        "type": "object",
-        "additionalProperties": true
-      },
-      "TemplateSourceUploadDto": {
-        "title": "TemplateSourceUploadDto",
         "type": "object",
         "additionalProperties": true
       },

@@ -17,6 +17,7 @@ def main() -> None:
         "postToolUse",
         {"tool": tool_name, "input": sanitize(data.get("tool_input") or data.get("input") or {})},
         {"result_preview": sanitize(data.get("result") or data.get("output") or {}, 800)},
+        raw_hook_input=data,
     )
     respond({})
 

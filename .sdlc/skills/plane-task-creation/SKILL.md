@@ -31,6 +31,24 @@ Use these exact sections, in this order:
 ## comments
 ```
 
+## GitHub and branch linkage (required in comments)
+
+Every task that will touch code must record in `comments`:
+
+- **Plane ID:** `RPG-123` (used for branch naming)
+- **Branch (planned):** `feature/RPG-123` or `bugfix/RPG-123`
+- **GitHub issue:** `#N` or "a criar via gh-issue-intent"
+- **SDLC commands:** `start_change` → implement → `finish_change`
+
+When creating the task, also set the work item **title** prefix:
+
+| Type | Title prefix | Branch prefix |
+|------|--------------|---------------|
+| Feature | `[Feature]` | `feature/RPG-N` |
+| Bugfix | `[Bugfix]` | `bugfix/RPG-N` |
+| Spec-only | `[Spec]` | `feature/RPG-N` |
+| Docs | `[Docs]` | `feature/RPG-N` |
+
 ## Section requirements
 
 - `context`: Explain why the task exists, what problem it solves, relevant links or artifacts, current behavior, and any constraints.
@@ -45,6 +63,7 @@ Use these exact sections, in this order:
 3. Check whether the task scope is specific, actionable, and independently understandable.
 4. Create the Plane work item only after the description passes the documentation check.
 5. After creation, report the Plane task identifier and use it for branch naming when work begins.
+6. If GitHub issue is missing, propose creating one with `gh-issue-intent.sh` or GitHub MCP.
 
 ## Quality bar
 
@@ -74,5 +93,8 @@ Describe the concrete implementation or documentation changes expected.
 
 ## comments
 
-Record assumptions, risks, dependencies, links, or follow-up notes.
+- Plane: RPG-123 → branch `feature/RPG-123`
+- GitHub: issue #42 (ou criar)
+- SDLC: start_change → finish_change
+- Assumptions, risks, dependencies.
 ```

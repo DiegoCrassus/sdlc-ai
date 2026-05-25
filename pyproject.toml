@@ -4,7 +4,7 @@ line-length = 100
 
 # Diretórios a verificar
 include = [
-    "backend/**/*.py",
+    "apps/backend/**/*.py",
     "packages/rpg_dsl/**/*.py",
     "specs/**/*.py",
     ".cursor/hooks/**/*.py",
@@ -14,7 +14,7 @@ include = [
 exclude = [
     "generated/",
     ".venv/",
-    "backend/.venv/",
+    "apps/backend/.venv/",
     "**/__pycache__",
     "*.egg-info",
 ]
@@ -38,7 +38,7 @@ ignore = [
 
 [tool.ruff.lint.per-file-ignores]
 "specs/**" = ["N801", "N802"]  # CamelCase em nomes de classe/método nas specs é proposital
-"backend/app/fixtures/**" = ["N802"]
+"apps/backend/app/fixtures/**" = ["N802"]
 
 [tool.ruff.format]
 quote-style = "double"

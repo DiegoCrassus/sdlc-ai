@@ -13,7 +13,11 @@ from _lib.langsmith_emit import SECRET_PATTERNS, emit_pre, read_stdin, respond, 
 def main() -> None:
     data = read_stdin()
     prompt = str(data.get("prompt") or data.get("text") or "")
-    emit_pre("beforeSubmitPrompt", {"prompt_preview": sanitize(prompt, 300)})
+    emit_pre(
+        "beforeSubmitPrompt",
+        {"prompt_preview": sanitize(prompt, 300)},
+        raw_hook_input=data,
+    )
 
     for pattern in SECRET_PATTERNS:
         if pattern.search(prompt):

@@ -11,9 +11,10 @@ description: >-
 
 1. Read `.cursor/agents/dev-orchestrator.md`
 2. Read `.sdlc/agents/dev-orchestrator.yaml`
-3. Read `.sdlc/workflows/github-lifecycle.md`
-4. Read `.sdlc/AGENTS.md`
-5. Enable **GitHub MCP** (`.cursor/mcp.json` + token)
+3. Read `.sdlc/workflows/change-lifecycle.md`
+4. Read `.sdlc/workflows/github-lifecycle.md`
+5. Read `.sdlc/AGENTS.md`
+6. Enable **GitHub MCP** (`.cursor/mcp.json` + token)
 
 ## Agent Boundary
 
@@ -24,12 +25,12 @@ description: >-
 ## GitHub
 
 - MCP for issues, PRs, checks in chat
-- Scripts: `.sdlc/scripts/gh-*.ps1`
+- Scripts: `.sdlc/scripts/gh-*.sh`
 - Skill: `.sdlc/skills/github-sdlc/SKILL.md`
 
 ## Validate locally
 
-```powershell
-.sdlc/scripts/validate.ps1
-.sdlc/scripts/gh-sdlc-status.ps1
+```bash
+make validate
+.sdlc/scripts/gh-sdlc-status.sh
 ```

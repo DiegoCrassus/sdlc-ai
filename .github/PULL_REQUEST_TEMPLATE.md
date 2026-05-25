@@ -7,7 +7,7 @@
 - [ ] **Intent** — issue linkada ou descrita abaixo
 - [ ] **Spec** — alterações em `specs/` ou `.sdlc/agents/` (se contrato/agente/canvas)
 - [ ] **Compile** — `rpg compile` quando aplicável; sem edição manual em `generated/`
-- [ ] **Implement** — `.sdlc/scripts/validate.ps1` verde localmente
+- [ ] **Implement** — `make validate` verde localmente
 - [ ] **Eval** — smoke evals (quando F2+ agent)
 
 ## Test plan

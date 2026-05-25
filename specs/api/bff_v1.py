@@ -24,22 +24,8 @@ class BffV1:
     def update_sheet(self, sheet_id: str) -> None: ...
 
     @POST(
-        "/campaigns/{campaign_id}/template/source",
-        response="TemplateAnalysisDto",
-        body="TemplateSourceUploadDto",
-    )
-    def upload_template_source(self, campaign_id: str) -> None: ...
-
-    @POST(
         "/campaigns/{campaign_id}/template/publish",
         response="SheetTemplateDto",
         body="PublishTemplateDto",
     )
     def publish_template(self, campaign_id: str) -> None: ...
-
-    @POST(
-        "/campaigns/{campaign_id}/template/extend",
-        response="SheetTemplateDto",
-        body="ExtendTemplateDto",
-    )
-    def extend_template(self, campaign_id: str) -> None: ...

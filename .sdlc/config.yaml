@@ -10,8 +10,8 @@ paths:
   specs: specs/
   generated: generated/
   dsl_package: packages/rpg_dsl/
-  backend: backend/
-  frontend: apps/web/
+  backend: apps/backend/
+  frontend: apps/frontend/
   backend_target: apps/backend/
   frontend_target: apps/frontend/
   infra: infra/
@@ -28,10 +28,10 @@ deep_agent:
   default_model_env: AGENT_MODEL
 
 commands:
-  validate: ["rpg", "validate", "specs/"]
+  validate: ["bash", ".sdlc/scripts/validate.sh"]
   compile_all: ["rpg", "compile", "--target", "all"]
-  test_backend: ["pytest", "backend/", "-q"]
-  smoke_api: ["python", "backend/scripts/smoke_test.py"]
+  test_backend: ["pytest", "tests/", "-q"]
+  smoke_api: ["python", "apps/backend/scripts/smoke_test.py"]
 
 github:
   mcp_config: .cursor/mcp.json
@@ -39,10 +39,25 @@ github:
   cli: gh
   lifecycle: .sdlc/workflows/github-lifecycle.md
   scripts:
-    issue_intent: .sdlc/scripts/gh-issue-intent.ps1
-    pr_open: .sdlc/scripts/gh-pr-open.ps1
-    sdlc_status: .sdlc/scripts/gh-sdlc-status.ps1
-    labels_bootstrap: .sdlc/scripts/gh-labels-bootstrap.ps1
+    issue_intent: .sdlc/scripts/gh-issue-intent.sh
+    pr_open: .sdlc/scripts/gh-pr-open.sh
+    sdlc_status: .sdlc/scripts/gh-sdlc-status.sh
+    labels_bootstrap: .sdlc/scripts/gh-labels-bootstrap.sh
+
+plane:
+  mcp_config: .cursor/mcp.json
+  mcp_token_env: PLANE_API_KEY
+  workspace_env: PLANE_WORKSPACE_SLUG
+  lifecycle: .sdlc/workflows/plane-lifecycle.md
+  scripts:
+    mcp_check: .sdlc/scripts/plane-mcp-check.sh
+
+supabase:
+  mcp_config: .cursor/mcp.json
+  mcp_token_env: SUPABASE_ACCESS_TOKEN
+  project_ref_env: SUPABASE_PROJECT_REF
+  integration: .sdlc/integrations/supabase.md
+  read_only: true
 
 plane:
   mcp_config: .cursor/mcp.json

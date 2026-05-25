@@ -22,7 +22,7 @@ def _tool_path(data: dict) -> str:
 def main() -> None:
     data = read_stdin()
     tool_name = str(data.get("tool_name") or data.get("name") or "unknown")
-    emit_pre("preToolUse", {"tool": tool_name, "input": sanitize(data)})
+    emit_pre("preToolUse", {"tool": tool_name, "input": sanitize(data)}, raw_hook_input=data)
 
     if tool_name in {"Write", "Edit", "edit_file", "write_file"}:
         target = _tool_path(data)

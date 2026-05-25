@@ -1,12 +1,15 @@
-# Frontend
+# RPG-OP Frontend
 
-Target home for the TypeScript frontend application.
+React + Vite dashboard for workspaces and Sheet Canvas.
 
-The current React + Vite implementation still lives in `apps/web/` during transition. New frontend architecture work should plan the migration to this directory and update:
+## Run
 
-- `Makefile`
-- `.sdlc/config.yaml`
-- `.sdlc/commands/commands.yaml`
-- `.cursor/rules/frontend-react.mdc`
-- GitHub Actions
-- documentation in `docs/infrastructure/`
+```bash
+cd apps/frontend
+npm install
+npm run dev
+```
+
+Or from repo root: `make dev-frontend`
+
+Proxy: `/v1` → `http://127.0.0.1:8000`

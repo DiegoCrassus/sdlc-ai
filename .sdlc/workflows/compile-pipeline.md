@@ -20,8 +20,8 @@ rpg compile --target cursor_rules
 
 ## Local gate script
 
-```powershell
-.sdlc/scripts/validate.ps1
+```bash
+make validate
 ```
 
 Until `rpg` exists, script runs pytest smoke only.

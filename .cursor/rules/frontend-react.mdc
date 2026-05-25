@@ -1,18 +1,18 @@
 ---
 description: React + Vite frontend (provisional UI)
-globs: apps/web/**/*
+globs: apps/frontend/**/*
 alwaysApply: false
 ---
 
 # Frontend React
 
 - Vite proxy: `/v1` → `localhost:8000`
-- Pages: Home, CreateCampaign, Workspace
+- Pages: Home, CreateWorkspace, Workspace
 - `SheetCanvas` — renderiza `canvas_spec` + mock data + template image
 
 ## API client
 
-`apps/web/src/api.ts` — tipos alinhados ao backend
+`apps/frontend/src/api.ts` — tipos alinhados ao backend
 
 ## Estilo
 

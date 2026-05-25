@@ -7,10 +7,11 @@ Você opera neste repositório como **dev orchestrator** (Deep Agent). Siga o SD
 1. **Spec primeiro** — mudanças de contrato, schema, canvas ou agente começam em `specs/` ou `.sdlc/agents/`, nunca só em código imperativo.
 2. **Não editar `generated/`** — enforced por hook `preToolUse`; rode `rpg compile`.
 3. **Produto = agentes** — runtime em `services/agent/`; engenharia espelha skills, subagentes, HITL.
-4. **Lifecycle GitHub** — intent → issue; implement → PR; merge com checks SDLC verdes.
-5. **Observabilidade** — hooks Cursor pre/post → **LangSmith** (`rpg-op-cursor`) + fallback `.sdlc/logs/cursor-hooks.jsonl`.
-6. **Foco MVP** — Sheet Canvas ([docs/08-sheet-canvas.md](../docs/08-sheet-canvas.md)).
-7. **Agentes canônicos em `.sdlc`** — YAML operacional vive em `.sdlc/agents/`; `.cursor/agents/` apenas adapta uso na IDE.
+4. **Lifecycle GitHub** — intent → issue; **start_change** → branch → implement → **finish_change** → PR; merge com checks SDLC verdes.
+5. **Branch obrigatória** — toda alteração de código em `feature/<RPG-N>` ou `bugfix/<RPG-N>`; nunca commit em `main`/`develop`.
+6. **Observabilidade** — hooks Cursor pre/post → **LangSmith** (`rpg-op-cursor`) + fallback `.sdlc/logs/cursor-hooks.jsonl`.
+7. **Foco produto** — Sheet Canvas ([docs/product/sheet-canvas.md](../docs/product/sheet-canvas.md)).
+8. **Agentes canônicos em `.sdlc`** — YAML operacional vive em `.sdlc/agents/`; `.cursor/agents/` apenas adapta uso na IDE.
 
 ## Integrações
 
@@ -39,7 +40,7 @@ Registry: `.sdlc/hooks.yaml` · Docs: `.cursor/hooks/README.md`
 
 ## Gates antes de PR
 
-1. `.sdlc/scripts/validate.ps1`
+1. `.sdlc/scripts/validate.sh`
 2. `rpg validate specs/` (quando disponível)
 3. PR checklist `.github/PULL_REQUEST_TEMPLATE.md`
 
@@ -49,6 +50,8 @@ Commands em `.sdlc/commands/` agrupam skills, agentes e procedimentos. Use:
 
 | Command | Usar quando |
 |---------|-------------|
+| `start_change` | Antes de qualquer edição de código — branch + Plane In Progress |
+| `finish_change` | Ao concluir unidade de trabalho — validate, commit, push, PR |
 | `plane_backlog_plan` | Analisar intent e criar/atualizar tarefas no backlog Plane |
 | `architecture_documentation` | Documentar arquitetura, infra, migrations, testes, Makefile e Plane Infrastructure |
 | `plane_card_execution` | Mover card Plane, executar tarefa e registrar evidência |
@@ -73,8 +76,17 @@ Commands em `.sdlc/commands/` agrupam skills, agentes e procedimentos. Use:
 | `pr-approver` | Aprovação/watch de PR e Actions |
 | `issue-resolver` | Correção autônoma de issues geradas |
 
+## Workflows canônicos
+
+| Workflow | Arquivo |
+|----------|---------|
+| Toda alteração | `.sdlc/workflows/change-lifecycle.md` |
+| GitHub PR/merge | `.sdlc/workflows/github-lifecycle.md` |
+| Plane backlog | `.sdlc/workflows/plane-lifecycle.md` |
+| Lint e bugs | `.sdlc/workflows/lint-bug-resolution.md` |
+
 ## Preferências
 
 - Idioma com usuário: **português**
 - Código: **inglês**
-- Commits: só quando o usuário pedir
+- Commits: **obrigatório** ao concluir unidade de trabalho via `finish_change` (hooks bloqueiam commit em branch protegida)

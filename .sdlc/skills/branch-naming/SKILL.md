@@ -37,7 +37,7 @@ bugfix/RPG-456
 2. Resolve the Plane task identifier, for example `RPG-123`.
 3. Create or switch to the branch:
 
-```powershell
+```bash
 git switch -c feature/RPG-123
 git switch -c bugfix/RPG-456
 ```

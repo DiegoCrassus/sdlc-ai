@@ -9,7 +9,7 @@ system_prompt: |
   do RPG-OP.
 
   Entradas esperadas: intenção de mudança, contrato desejado, docs em
-  docs/06-sdlc-ai-native.md e convenções em .sdlc/skills/dsl-authoring/.
+  docs/sdlc/ai-native.md e convenções em .sdlc/skills/dsl-authoring/.
 
   Saída esperada: arquivos Python tipados, diff-friendly e sem lógica de
   runtime. Use builders rpg_dsl quando existirem; até lá, siga a IR

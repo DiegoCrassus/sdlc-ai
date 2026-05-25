@@ -42,17 +42,16 @@ Alternativa local: Docker — ver `.sdlc/integrations/github.md`
 
 1. Crie um PAT em https://supabase.com/dashboard/account/tokens
 2. Defina `SUPABASE_ACCESS_TOKEN` e `SUPABASE_PROJECT_REF` no `.env`
-3. Abra o Cursor via `.\launch.ps1`
+3. Abra o Cursor via `./launch.sh`
 4. Reinicie Cursor → Settings → Tools & MCP → indicador verde em `supabase`
 
 Detalhes: `.sdlc/integrations/supabase.md`
 
 ## gh CLI
 
-```powershell
-winget install GitHub.cli
+```bash
 gh auth login
-.sdlc/scripts/gh-labels-bootstrap.ps1
+.sdlc/scripts/gh-labels-bootstrap.sh
 ```
 
 ## SDLC

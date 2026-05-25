@@ -12,7 +12,7 @@ system_prompt: |
   código por padrão.
 
   Entradas esperadas: .sdlc/config.yaml, .sdlc/phases.yaml,
-  docs/06-sdlc-ai-native.md, docs/status/*.md, specs/ e manifests gerados
+  docs/sdlc/ai-native.md, docs/status/*.md, specs/ e manifests gerados
   quando existirem.
 
   Saída esperada: diagnóstico curto com status, maturidade, findings por

@@ -23,8 +23,8 @@ flowchart TB
 
 **Humano ou agente** cria issue a partir do template SDLC.
 
-```powershell
-.sdlc/scripts/gh-issue-intent.ps1 -Title "F2: sheet-template-analyst" -BodyFile .sdlc/templates/intent.md
+```bash
+.sdlc/scripts/gh-issue-intent.sh "F2: sheet-template-analyst" .sdlc/templates/intent.md
 ```
 
 **MCP:** pedir ao agente — "Crie issue no GitHub usando template SDLC para …"
@@ -33,10 +33,8 @@ Labels: `sdlc:intent`, `type:feature`
 
 ## Fase 2 — Spec (branch + DSL)
 
-```powershell
-gh issue develop 12 --name sdlc/f2-template-analyst
-# ou
-git checkout -b feat/12-template-analyst
+```bash
+.sdlc/scripts/gh-branch-start.sh feature RPG-123
 ```
 
 - Editar `specs/` ou `.sdlc/agents/`
@@ -46,29 +44,29 @@ git checkout -b feat/12-template-analyst
 
 ## Fase 3 — Compile
 
-```powershell
+```bash
 rpg validate specs/          # quando existir
 rpg compile --target all
-.sdlc/scripts/validate.ps1
+make validate
 ```
 
 Commit sugerido: `spec: …` ou `chore(compile): …`
 
 ## Fase 4 — Implement
 
-Hooks em `backend/`, `apps/web/`, `services/agent/`.
+Hooks em `apps/`, `services/agent/`.
 
-```powershell
-.sdlc/scripts/validate.ps1
-git add … && git commit -m "feat: …"
+```bash
+make validate
+# finish_change: commit + push + PR
 ```
 
 Label: `sdlc:implement` → `sdlc:ready`
 
 ## Fase 5 — Pull Request
 
-```powershell
-.sdlc/scripts/gh-pr-open.ps1 -Title "feat: template analyst spec" -Issue 12
+```bash
+.sdlc/scripts/gh-pr-open.sh "feat: template analyst spec" 12
 ```
 
 Checklist do [PULL_REQUEST_TEMPLATE](../../.github/PULL_REQUEST_TEMPLATE.md).
@@ -108,6 +106,7 @@ Checklist do [PULL_REQUEST_TEMPLATE](../../.github/PULL_REQUEST_TEMPLATE.md).
 
 ## Referências
 
+- [.sdlc/workflows/change-lifecycle.md](change-lifecycle.md)
 - [.sdlc/integrations/github.md](../integrations/github.md)
 - [.sdlc/skills/github-sdlc/SKILL.md](../skills/github-sdlc/SKILL.md)
 - [.sdlc/commands/github.md](../commands/github.md)
