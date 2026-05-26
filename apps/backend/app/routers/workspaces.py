@@ -1,5 +1,4 @@
 import uuid
-from pathlib import Path
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from fastapi.responses import FileResponse
@@ -11,7 +10,13 @@ from app.config import settings
 from app.database import dumps_json, get_db, loads_json
 from app.fixtures.draft_placeholder import DRAFT_PLACEHOLDER_CANVAS, DRAFT_PLACEHOLDER_SCHEMA
 from app.models import ExampleSheet, Workspace, WorkspaceInvite
-from app.schemas import ExampleSheetResponse, InviteCreate, InviteResponse, WorkspaceDetail, WorkspaceSummary
+from app.schemas import (
+    ExampleSheetResponse,
+    InviteCreate,
+    InviteResponse,
+    WorkspaceDetail,
+    WorkspaceSummary,
+)
 from app.services.dpa_analyzer import analyze_template
 from app.services.provisioning import provision_from_json
 from app.services.template_storage import save_template_source

@@ -7,11 +7,15 @@ from sqlalchemy.orm import selectinload
 
 from app.database import dumps_json, get_db, loads_json
 from app.deps.session import require_session
-from app.models import Character, Sheet, SheetRevision, Workspace
+from app.models import Sheet, SheetRevision, Workspace
 from app.routers.workspaces import template_image_url
 from app.schemas import ExampleSheetResponse, SheetPatch, SheetRevisionResponse
 from app.services.sheet_permissions import field_permissions
-from app.services.sheet_validation import SheetValidationError, missing_required_fields, validate_sheet_data
+from app.services.sheet_validation import (
+    SheetValidationError,
+    missing_required_fields,
+    validate_sheet_data,
+)
 
 router = APIRouter(prefix="/sheets", tags=["sheets"])
 

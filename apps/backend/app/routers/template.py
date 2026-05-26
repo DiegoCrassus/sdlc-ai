@@ -8,7 +8,11 @@ from app.database import dumps_json, get_db, loads_json
 from app.deps.session import require_session
 from app.models import TemplateExtension, Workspace
 from app.routers.workspaces import _get_workspace_or_404, template_image_url
-from app.services.dpa_analyzer import TemplateAnalysisResult, analyze_template, extend_template_analysis
+from app.services.dpa_analyzer import (
+    TemplateAnalysisResult,
+    analyze_template,
+    extend_template_analysis,
+)
 from app.services.template_extend import (
     TemplateExtendError,
     extend_from_description,
@@ -16,7 +20,11 @@ from app.services.template_extend import (
     merge_new_fields_into_sheet,
     remove_field,
 )
-from app.services.template_publish import collect_sheet_data, migrate_sheets_to_template, schema_field_keys
+from app.services.template_publish import (
+    collect_sheet_data,
+    migrate_sheets_to_template,
+    schema_field_keys,
+)
 from app.services.template_storage import save_template_source
 
 router = APIRouter(prefix="/workspaces", tags=["template"])

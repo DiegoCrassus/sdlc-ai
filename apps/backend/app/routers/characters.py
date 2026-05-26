@@ -8,8 +8,8 @@ from sqlalchemy.orm import selectinload
 
 from app.database import dumps_json, get_db, loads_json
 from app.deps.session import require_session
-from app.models import Character, Sheet, Workspace
-from app.routers.workspaces import _get_workspace_or_404, template_image_url
+from app.models import Character, Sheet
+from app.routers.workspaces import _get_workspace_or_404
 from app.schemas import CharacterCreate, CharacterSummary, WorkspaceDashboard
 from app.services.provisioning import empty_defaults
 from app.services.sheet_validation import missing_required_fields

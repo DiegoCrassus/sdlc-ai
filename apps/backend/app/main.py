@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
 from app.database import init_db
+from app.routers.agent import router as agent_router
 from app.routers.characters import router as characters_router
 from app.routers.sheets import router as sheets_router
 from app.routers.template import router as template_router
@@ -31,6 +32,7 @@ app.include_router(workspaces_router, prefix=settings.api_prefix)
 app.include_router(characters_router, prefix=settings.api_prefix)
 app.include_router(sheets_router, prefix=settings.api_prefix)
 app.include_router(template_router, prefix=settings.api_prefix)
+app.include_router(agent_router, prefix=settings.api_prefix)
 
 
 @app.get("/health")
