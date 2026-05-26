@@ -7,3 +7,7 @@ pydantic[email]>=2.10.0
 python-multipart>=0.0.17
 aiosqlite>=0.20.0
 greenlet>=3.1.0
+# Deep Agent — LangChain base (RPG-81)
+langchain-core>=0.3.0
+langchain-openai>=0.2.0
+langgraph>=0.2.0
