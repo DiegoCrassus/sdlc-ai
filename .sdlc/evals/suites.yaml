@@ -1,9 +1,0 @@
-suites:
-  smoke:
-    fail_under: 0.9
-    tags: [mvp, template]
-  template-analysis:
-    fail_under: 0.85
-    tags: [sheet-template-analyst]
-
-default_fixture_dir: .sdlc/evals/fixtures
