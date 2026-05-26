@@ -1,1 +1,0 @@
-# SheetSchema + CanvasSpec — specs (stub)

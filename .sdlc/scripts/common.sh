@@ -24,14 +24,11 @@ _sdlc_unix_shell() {
 
 resolve_python() {
   local backend_venv="$SDLC_REPO_ROOT/apps/backend/.venv"
-  local legacy_venv="$SDLC_REPO_ROOT/backend/.venv"
   local unix_candidates=(
     "$backend_venv/bin/python"
-    "$legacy_venv/bin/python"
   )
   local win_candidates=(
     "$backend_venv/Scripts/python.exe"
-    "$legacy_venv/Scripts/python.exe"
   )
   local candidates=()
 

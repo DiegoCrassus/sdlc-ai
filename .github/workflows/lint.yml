@@ -32,7 +32,7 @@ jobs:
         id: ruff
         run: |
           set +e
-          OUTPUT=$(ruff check apps/backend/ packages/rpg_dsl/ specs/ .cursor/hooks/ 2>&1)
+          OUTPUT=$(ruff check apps/backend/ .cursor/hooks/ 2>&1)
           EXIT=$?
           echo "failed=$( [ $EXIT -ne 0 ] && echo true || echo false )" >> $GITHUB_OUTPUT
           # escape newlines for output
@@ -52,7 +52,7 @@ jobs:
         id: ruff-fmt
         run: |
           set +e
-          OUTPUT=$(ruff format --check apps/backend/ packages/rpg_dsl/ specs/ .cursor/hooks/ 2>&1)
+          OUTPUT=$(ruff format --check apps/backend/ .cursor/hooks/ 2>&1)
           EXIT=$?
           echo "$OUTPUT"
           exit $EXIT

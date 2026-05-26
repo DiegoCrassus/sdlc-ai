@@ -1,0 +1,18 @@
+---
+description: Core SDLC AI Native workflow for this project
+alwaysApply: true
+---
+
+# SDLC AI Native
+
+Before substantial implementation, identify the lifecycle phase from `.sdlc/phases.yaml`.
+
+Use `.sdlc/` for operational SDLC assets. Keep product code in `apps/backend/` and `apps/frontend/`.
+
+For GitHub work, follow `.sdlc/workflows/github-lifecycle.md` and `.sdlc/commands/github.md`. Do not merge PRs, close issues, delete branches, change branch protection, or force push without explicit user approval.
+
+When SDLC config changes, validate with:
+
+```bash
+make validate
+```

@@ -8,7 +8,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import dumps_json, loads_json
-from app.models import ExampleSheet, Sheet, Workspace
+from app.models import Character, ExampleSheet, Sheet, Workspace
 from app.services.provisioning import empty_defaults
 from app.services.template_extend import merge_new_fields_into_sheet
 
