@@ -19,6 +19,6 @@ alwaysApply: false
 - CSS simples em `index.css` + colocated component CSS
 - UI provisória — priorizar fluxo GM/jogador sobre polish
 
-## Futuro
+## Validação
 
-Importar tipos de `generated/typescript/` após `rpg compile`
+Use `make lint` para build/typecheck do frontend antes de PR.

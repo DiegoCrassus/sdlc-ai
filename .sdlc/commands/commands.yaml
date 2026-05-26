@@ -49,8 +49,8 @@ agent_commands:
       - Plane In Review
       - handoff pr_code_review
     guardrails:
-      - make validate verde antes de push.
-      - Não mergear autonomamente.
+      - make test, make lint e make validate verdes antes de push.
+      - Não mergear sem aprovação humana explícita.
       - Não marcar Plane Done antes do merge.
 
   plane_backlog_plan:
@@ -73,7 +73,7 @@ agent_commands:
     guardrails:
       - Não deletar work items sem confirmação humana.
       - Não expor PLANE_API_KEY.
-      - Specs técnicas continuam em specs/; Plane guarda resumo, links e documentação de produto.
+      - Plane guarda contexto, decisões, links e documentação de produto.
 
   technical_documentation:
     title: Criar ou atualizar documentação técnica
@@ -189,11 +189,12 @@ agent_commands:
       - issue corretiva quando aplicável
     guardrails:
       - Não aprovar PR com checks falhos.
-      - Não aceitar generated/ editado manualmente.
+      - Não aprovar branch fora de feature/RPG-N ou bugfix/RPG-N.
+      - Não aprovar PR sem task Plane e Actions verdes.
 
   pr_approval_watch:
     title: Acompanhar aprovação e Actions do PR
-    description: Após PR aprovada ou pronta para develop, acompanha Actions até verde e registra evidências.
+    description: Após aprovação humana ou PR pronta para develop, acompanha Actions até verde e registra evidências.
     owner: pr-approver
     adapter: .cursor/agents/subagents/pr-approver.md
     playbook: .sdlc/commands/pr-approval-watch.md
@@ -212,6 +213,7 @@ agent_commands:
     guardrails:
       - Não burlar branch protection.
       - Não encerrar com Actions pendentes.
+      - Não mergear sem aprovação humana explícita.
 
   issue_resolution:
     title: Resolver issue gerada por CI/hook/review
@@ -236,7 +238,7 @@ agent_commands:
 
   issue_resolution_validation:
     title: Validar resolução de issue até develop
-    description: Valida fix de issue após resolução, reaciona code-reviewer, confere Actions e mergeia em develop quando permitido.
+    description: Valida fix de issue após resolução, reaciona code-reviewer, confere Actions e prepara merge em develop com aprovação humana.
     owner: pr-approver
     adapter: .cursor/agents/subagents/pr-approver.md
     playbook: .sdlc/commands/issue-resolution-validation.md
@@ -252,12 +254,13 @@ agent_commands:
       - Plane card relacionado
     outputs:
       - validação pós-correção
-      - aprovação/merge em develop ou comentário de bloqueio
+      - aprovação humana confirmada, merge em develop ou comentário de bloqueio
       - issue fechada ou justificativa para permanecer aberta
     guardrails:
       - Validar somente contra o head SHA atual.
       - Não mergear em main/staging diretamente.
-      - Comentar motivo quando não houver merge autônomo.
+      - Não mergear sem aprovação humana explícita.
+      - Comentar motivo quando não houver merge.
 
 local:
   branch_start:
@@ -284,14 +287,9 @@ local:
     requires: [gh]
     description: List open SDLC-tagged issues
 
-dsl:
-  validate: ["rpg", "validate", "specs/"]
-  compile: ["rpg", "compile", "--target", "all"]
-  eval_smoke: ["rpg", "eval", "run", "--suite", "smoke"]
-
 github_cli:
   auth: gh auth login
-  issue_list: gh issue list --label sdlc:ready
+  issue_list: gh issue list --label sdlc:ci-fail
   pr_checks: gh pr checks
   run_list: gh run list --workflow=sdlc.yml
   repo_view: gh repo view
@@ -310,20 +308,20 @@ ci:
 
 lint:
   check_python:
-    command: ["ruff", "check", "backend/", "packages/rpg_dsl/", "specs/", ".cursor/hooks/"]
+    command: ["ruff", "check", "apps/backend/", ".cursor/hooks/"]
     description: Verifica erros Python com ruff
   fix_python:
-    command: ["ruff", "check", "--fix", "--unsafe-fixes", "backend/", "packages/rpg_dsl/", "specs/", ".cursor/hooks/"]
+    command: ["ruff", "check", "--fix", "--unsafe-fixes", "apps/backend/", ".cursor/hooks/"]
     description: Auto-corrige erros Python com ruff
   format_python:
-    command: ["ruff", "format", "backend/", "packages/rpg_dsl/", "specs/", ".cursor/hooks/"]
+    command: ["ruff", "format", "apps/backend/", ".cursor/hooks/"]
     description: Formata codigo Python
   check_typescript:
-    command: ["npx", "tsc", "--noEmit"]
-    cwd: apps/web
+    command: ["npm", "run", "build"]
+    cwd: apps/frontend
     description: Verifica erros TypeScript
   trigger_fix_agent:
-    description: Dispara o agente lint-fix no GitHub Actions
+    description: Dispara o agente de correção no GitHub Actions
     github_workflow: lint-fix.yml
     inputs: [branch, issue_number, commit_sha]
     command: >

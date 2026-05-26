@@ -32,17 +32,20 @@ gh issue create --title "Intent: …" --body-file .sdlc/templates/intent.md --la
 # Ver
 gh issue view 12 --web
 
-# Branch a partir de issue
-gh issue develop 12 --checkout
+# Não use `gh issue develop` neste projeto.
+# Branches devem vir de tarefa Plane:
+.sdlc/scripts/gh-branch-start.sh feature RPG-123
+.sdlc/scripts/gh-branch-start.sh bugfix RPG-456
 ```
 
 ## Pull requests
 
 ```bash
-gh pr create --title "feat: …" --body-file .github/PULL_REQUEST_TEMPLATE.md
+gh pr create --base develop --title "feat: …" --body-file .github/PULL_REQUEST_TEMPLATE.md
 gh pr list
 gh pr checks
 gh pr view --web
+# Merge apenas após aprovação humana explícita e checks verdes
 gh pr merge --squash
 ```
 

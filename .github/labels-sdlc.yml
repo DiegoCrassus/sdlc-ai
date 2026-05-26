@@ -21,6 +21,9 @@ labels:
   - name: sdlc:blocked
     color: "B60205"
     description: Bloqueado — aguardando humano
+  - name: sdlc:ci-fail
+    color: "B60205"
+    description: GitHub Actions falharam — aguardando issue resolver
   - name: type:feature
     color: "A2EEEF"
     description: Nova funcionalidade
@@ -36,3 +39,6 @@ labels:
   - name: sdlc:lint-fail
     color: "E4E669"
     description: Lint falhou — aguardando auto-fix do agente
+  - name: sdlc:test-fail
+    color: "D93F0B"
+    description: Testes unitários falharam — aguardando correção

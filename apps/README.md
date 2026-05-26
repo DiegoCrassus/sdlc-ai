@@ -16,5 +16,3 @@ make setup
 
 - Backend: http://127.0.0.1:8000  
 - Frontend: http://127.0.0.1:5173  
-
-Legacy `backend/` and `apps/web/` — redirect READMEs only.

@@ -29,17 +29,18 @@ bugfix/RPG-456
 - Use `bugfix/` for defect fixes, regressions, failing tests, or production issues.
 - The segment after `/` must be the Plane task identifier, not a free-form title.
 - Do not use GitHub issue numbers, local slugs, author names, dates, or mixed prefixes in the branch name.
-- If the Plane task identifier is unknown, ask for it or retrieve it from Plane before creating the branch.
+- The Plane work item must exist before GitHub workflow starts. If the Plane task identifier is unknown, create or retrieve the Plane task before creating the branch.
+- Branches must start from `develop`. Do not branch from `main`, `master`, `staging`, or another feature branch unless the user explicitly approves an exception.
 
 ## Workflow
 
 1. Identify whether the work is a feature or bugfix.
 2. Resolve the Plane task identifier, for example `RPG-123`.
-3. Create or switch to the branch:
+3. Sync `develop`, then create or switch to the branch:
 
 ```bash
-git switch -c feature/RPG-123
-git switch -c bugfix/RPG-456
+.sdlc/scripts/gh-branch-start.sh feature RPG-123
+.sdlc/scripts/gh-branch-start.sh bugfix RPG-456
 ```
 
 ## Validation

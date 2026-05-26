@@ -4,9 +4,9 @@ description: >-
   finish_change, validate, commit, PR. Load before editing application code.
 globs:
   - apps/**
-  - services/**
-  - specs/**
-  - packages/**
+  - .sdlc/**
+  - .cursor/**
+  - .github/**
   - tests/**
 alwaysApply: false
 ---
@@ -15,19 +15,19 @@ alwaysApply: false
 
 Antes de editar código de aplicação:
 
-1. Ler `.sdlc/workflows/change-lifecycle.md`
-2. Executar command **`start_change`** — branch `feature/RPG-N` ou `bugfix/RPG-N`
-3. Skill **branch-naming**: `.sdlc/skills/branch-naming/SKILL.md`
+1. Confirmar task Plane existente (`RPG-N`)
+2. Ler `.sdlc/workflows/change-lifecycle.md`
+3. Executar command **`start_change`** — branch `feature/RPG-N` ou `bugfix/RPG-N`
+4. Skill **branch-naming**: `.sdlc/skills/branch-naming/SKILL.md`
 
 Durante o trabalho:
 
-- Spec primeiro quando contrato/schema/agente mudam
-- `make validate` antes de commit
+- `make test`, `make lint` e `make validate` antes de commit
 - Nunca commitar em `main` / `develop`
 
 Ao concluir:
 
-- Command **`finish_change`** — validate → commit → push → PR
+- Command **`finish_change`** — test/lint/validate → commit → push → PR
 - Plane card → In Review; delegar `pr_code_review`
 
 Lint/CI falhou → `.sdlc/workflows/lint-bug-resolution.md` + `issue_resolution`

@@ -29,14 +29,16 @@ Encerrar uma unidade de trabalho com validate, commit, push e PR — fechando o 
 
 ## Procedimento
 
-1. **Verificar branch** — deve seguir branch-naming; nunca commitar em branch protegida.
+1. **Verificar branch** — deve seguir `feature/RPG-N` ou `bugfix/RPG-N`; nunca commitar em branch protegida.
 2. **Validar**:
 
 ```bash
+make test
+make lint
 make validate
 ```
 
-3. **Revisar diff** — sem edição manual em `generated/`; specs atualizadas se contrato mudou.
+3. **Revisar diff** — remover mudanças locais fora do escopo e garantir que a task Plane esteja linkada.
 4. **Commit** — mensagem convencional:
 
 ```bash
@@ -57,7 +59,8 @@ git push -u origin HEAD
 ```
 
 7. **Plane** — comentar link do PR; mover para **In Review** se PR aberto.
-8. **Delegar** — `pr_code_review` → `pr_approval_watch`.
+8. **Actions** — aguardar lint e testes unitários. Falha gera issue e aciona `issue_resolution`.
+9. **Delegar** — `pr_code_review` → `pr_approval_watch` após checks verdes.
 
 ## Saída esperada
 
@@ -75,7 +78,7 @@ Próximo: pr_code_review / pr_approval_watch
 ## Guardrails
 
 - Não push sem validate verde (salvo WIP explícito autorizado)
-- Não mergear — delegar `pr_approval_watch`
+- Não mergear sem aprovação humana explícita
 - Não fechar Plane como Done até merge em develop
 - Commits atômicos por unidade lógica; evitar "misc fixes"
 

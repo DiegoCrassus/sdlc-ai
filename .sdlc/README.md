@@ -1,6 +1,6 @@
 # SDLC AI-native — RPG-OP
 
-Este diretório é o **harness de engenharia** do projeto. O [Deep Agent](https://docs.langchain.com/oss/python/deepagents/index) orquestra intent → spec → compile → implement → eval → deploy.
+Este diretório é o **harness de engenharia** do projeto. O Deep Agent orquestra Plane task → branch → implementação → PR → Actions → aprovação → merge em `develop`.
 
 ## Layout
 
@@ -21,33 +21,34 @@ Este diretório é o **harness de engenharia** do projeto. O [Deep Agent](https:
 
 ## GitHub lifecycle
 
-1. **Intent** — issue (template `.github/ISSUE_TEMPLATE/`)
-2. **Spec** — branch + `specs/`
-3. **PR** — checklist + workflow `SDLC`
-4. **MCP** — agente opera GitHub no Cursor
+1. **Plane task** — `RPG-N` criada e documentada.
+2. **Branch** — `feature/RPG-N` ou `bugfix/RPG-N`, sempre a partir de `develop`.
+3. **PR** — base `develop`, checklist e Plane linkados.
+4. **Actions** — lint e testes obrigatórios.
+5. **Issue resolution** — falha cria issue e aciona `issue-resolver`.
+6. **Merge** — somente com checks verdes e aprovação humana explícita.
 
 Ver [integrations/github.md](integrations/github.md) e [workflows/github-lifecycle.md](workflows/github-lifecycle.md).
 
-## Specs vs hooks
+## Camadas
 
 | Camada | Onde | Papel |
 |--------|------|-------|
-| **Declarativo** | `specs/` (repo root) | DSL Python — fonte da verdade |
 | **Harness SDLC** | `.sdlc/` | Como o agente desenvolve o repo |
 | **Agentes canônicos** | `.sdlc/agents/` | YAMLs operacionais: prompts, skills, tools, permissões e delegação |
 | **IDE + MCP** | `.cursor/` | Regras, adapters, skills de atalho, hooks e MCP |
 | **Adapters Cursor** | `.cursor/agents/` | Quando chamar cada agente no Cursor; não duplica configuração operacional |
 | **Remote** | `.github/` | Issues, PRs, Actions |
 
-## Comandos (quando `rpg_dsl` estiver instalado)
+## Comandos
 
 Commands combinam skills, agentes e procedimentos. Alguns são scripts locais;
 outros são playbooks para delegação agentic.
 
 ```bash
-rpg validate specs/
-rpg compile --target all
-pytest backend/ packages/
+make test
+make lint
+make validate
 ```
 
 Playbooks iniciais:
@@ -56,7 +57,8 @@ Playbooks iniciais:
 - `.sdlc/commands/technical-documentation.md`
 - `.sdlc/commands/business-documentation.md`
 
-## Documentação
+## Workflows principais
 
-- [docs/sdlc/ai-native.md](../docs/sdlc/ai-native.md)
-- [workflows/intent-to-deploy.md](workflows/intent-to-deploy.md)
+- [workflows/change-lifecycle.md](workflows/change-lifecycle.md)
+- [workflows/github-lifecycle.md](workflows/github-lifecycle.md)
+- [workflows/lint-bug-resolution.md](workflows/lint-bug-resolution.md)

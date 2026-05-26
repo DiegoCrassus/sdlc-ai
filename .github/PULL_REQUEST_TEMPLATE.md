@@ -4,20 +4,25 @@
 
 ## SDLC checklist
 
-- [ ] **Intent** — issue linkada ou descrita abaixo
-- [ ] **Spec** — alterações em `specs/` ou `.sdlc/agents/` (se contrato/agente/canvas)
-- [ ] **Compile** — `rpg compile` quando aplicável; sem edição manual em `generated/`
-- [ ] **Implement** — `make validate` verde localmente
-- [ ] **Eval** — smoke evals (quando F2+ agent)
+- [ ] **Plane** — task `RPG-N` linkada
+- [ ] **Branch** — `feature/RPG-N` ou `bugfix/RPG-N`, criada a partir de `develop`
+- [ ] **Base** — PR aponta para `develop`
+- [ ] **Local gates** — `make test`, `make lint` e `make validate` verdes
+- [ ] **Actions** — lint e testes unitários verdes no head SHA mais recente
+- [ ] **Owner approval** — aprovação humana antes do merge
 
 ## Test plan
 
-- [ ] `backend/scripts/smoke_test.py` (API rodando)
-- [ ] UI manual (se frontend)
+- [ ] `make test`
+- [ ] `make lint`
+- [ ] `make validate`
+- [ ] Smoke/API manual, se aplicável
+- [ ] UI manual, se frontend
 
-## Issue
+## Plane / Issue
 
-Closes #
+Plane: `RPG-`
+Issue: closes #
 
 ## Notas
 

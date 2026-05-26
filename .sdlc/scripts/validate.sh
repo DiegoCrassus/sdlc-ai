@@ -8,20 +8,23 @@ source "$SCRIPT_DIR/common.sh"
 cd "$SDLC_REPO_ROOT"
 echo "== RPG-OP SDLC validate =="
 
-if command -v rpg >/dev/null 2>&1; then
-  rpg validate specs/
-elif PYTHON="$(resolve_python)" && "$PYTHON" -c "import rpg_dsl" 2>/dev/null; then
-  "$PYTHON" -m rpg_dsl._cli validate specs/
-else
-  echo "skip: rpg_dsl not installed — run: pip install -e packages/rpg_dsl"
-fi
-
 PYTHON="$(resolve_python)"
-SMOKE_PY="$SDLC_REPO_ROOT/apps/backend/scripts/smoke_test.py"
-if [[ -x "$PYTHON" || -f "$PYTHON" ]]; then
-  "$PYTHON" "$SMOKE_PY" || true
+export PYTHONPATH="$SDLC_REPO_ROOT/apps/backend"
+
+"$PYTHON" -c "from app.main import app; print('backend import ok', app.title)"
+
+if "$PYTHON" - <<'PY'
+from urllib import request
+
+try:
+    request.urlopen("http://127.0.0.1:8000/health", timeout=1).read()
+except Exception:
+    raise SystemExit(1)
+PY
+then
+  "$PYTHON" "$SDLC_REPO_ROOT/apps/backend/scripts/smoke_test.py"
 else
-  echo "skip: backend venv not found (run: make setup)"
+  echo "skip: backend smoke (server is not running at 127.0.0.1:8000)"
 fi
 
 echo "== done =="

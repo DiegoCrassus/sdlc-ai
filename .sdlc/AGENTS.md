@@ -4,14 +4,13 @@ Você opera neste repositório como **dev orchestrator** (Deep Agent). Siga o SD
 
 ## Princípios
 
-1. **Spec primeiro** — mudanças de contrato, schema, canvas ou agente começam em `specs/` ou `.sdlc/agents/`, nunca só em código imperativo.
-2. **Não editar `generated/`** — enforced por hook `preToolUse`; rode `rpg compile`.
-3. **Produto = agentes** — runtime em `services/agent/`; engenharia espelha skills, subagentes, HITL.
-4. **Lifecycle GitHub** — intent → issue; **start_change** → branch → implement → **finish_change** → PR; merge com checks SDLC verdes.
-5. **Branch obrigatória** — toda alteração de código em `feature/<RPG-N>` ou `bugfix/<RPG-N>`; nunca commit em `main`/`develop`.
+1. **Plane primeiro** — toda alteração começa com task Plane `RPG-N` bem descrita.
+2. **Lifecycle GitHub** — Plane task → `start_change` → branch → implement → `finish_change` → PR → Actions → aprovação humana → merge em `develop`.
+3. **Branch obrigatória** — toda alteração de código em `feature/<RPG-N>` ou `bugfix/<RPG-N>`, sempre a partir de `develop`; nunca commit em `main`/`develop`.
+4. **Qualidade obrigatória** — PR roda lint e testes; falha cria issue e aciona `issue_resolution`.
+5. **Produto em `apps/`** — runtime vive em `apps/backend/` e `apps/frontend/`.
 6. **Observabilidade** — hooks Cursor pre/post → **LangSmith** (`rpg-op-cursor`) + fallback `.sdlc/logs/cursor-hooks.jsonl`.
-7. **Foco produto** — Sheet Canvas ([docs/product/sheet-canvas.md](../docs/product/sheet-canvas.md)).
-8. **Agentes canônicos em `.sdlc`** — YAML operacional vive em `.sdlc/agents/`; `.cursor/agents/` apenas adapta uso na IDE.
+7. **Agentes canônicos em `.sdlc`** — YAML operacional vive em `.sdlc/agents/`; `.cursor/agents/` apenas adapta uso na IDE.
 
 ## Integrações
 
@@ -40,9 +39,10 @@ Registry: `.sdlc/hooks.yaml` · Docs: `.cursor/hooks/README.md`
 
 ## Gates antes de PR
 
-1. `.sdlc/scripts/validate.sh`
-2. `rpg validate specs/` (quando disponível)
-3. PR checklist `.github/PULL_REQUEST_TEMPLATE.md`
+1. `make test`
+2. `make lint`
+3. `make validate`
+4. PR checklist `.github/PULL_REQUEST_TEMPLATE.md`
 
 ## Commands
 
@@ -51,7 +51,7 @@ Commands em `.sdlc/commands/` agrupam skills, agentes e procedimentos. Use:
 | Command | Usar quando |
 |---------|-------------|
 | `start_change` | Antes de qualquer edição de código — branch + Plane In Progress |
-| `finish_change` | Ao concluir unidade de trabalho — validate, commit, push, PR |
+| `finish_change` | Ao concluir unidade de trabalho — test/lint/validate, commit, push, PR |
 | `plane_backlog_plan` | Analisar intent e criar/atualizar tarefas no backlog Plane |
 | `architecture_documentation` | Documentar arquitetura, infra, migrations, testes, Makefile e Plane Infrastructure |
 | `plane_card_execution` | Mover card Plane, executar tarefa e registrar evidência |

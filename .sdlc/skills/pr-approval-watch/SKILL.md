@@ -7,12 +7,12 @@ description: Tracks approved PRs into develop, monitors GitHub Actions after app
 
 ## Workflow
 
-1. Confirm the PR is approved or explicitly ready for develop.
+1. Confirm the PR has explicit human owner approval.
 2. Ensure base branch is `develop` for active development work.
 3. Watch required Actions until success or failure.
 4. If checks fail, create or link a GitHub issue and hand off to `issue-resolver`.
 5. If checks pass, run `issue_resolution_validation` for any linked issue that was fixed in the PR.
-6. If validation passes and the PR targets `develop`, approve/merge autonomously.
+6. If validation passes, human approval exists, and the PR targets `develop`, merge.
 7. If merge is not performed, comment the exact reason on the PR and linked issue.
 
 ## Evidence
@@ -27,5 +27,6 @@ Record:
 ## Guardrails
 
 - Do not bypass branch protection.
+- Do not merge without explicit human owner approval.
 - Do not merge into protected `main` or `staging` directly.
-- Stop only after green checks plus merge into `develop`, or explicit blocker evidence explaining why merge was not performed.
+- Stop only after green checks plus approved merge into `develop`, or explicit blocker evidence explaining why merge was not performed.

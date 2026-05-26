@@ -8,7 +8,8 @@ body:
   - type: markdown
     attributes:
       value: |
-        Use o template em `.sdlc/templates/intent.md`. Fases em `.sdlc/phases.yaml`.
+        Use GitHub issues para espelhar contexto quando necessário.
+        O workflow de branch/PR começa por uma task Plane `RPG-N`.
   - type: textarea
     id: problem
     attributes:
@@ -32,7 +33,7 @@ body:
     attributes:
       label: Fases SDLC previstas
       options:
-        - label: spec (specs/ ou .sdlc/)
-        - label: compile (rpg compile)
-        - label: implement (backend/apps/services)
-        - label: eval (agent evals)
+        - label: Plane task criada e linkada
+        - label: branch feature/RPG-N ou bugfix/RPG-N
+        - label: implement
+        - label: lint/test Actions obrigatórios

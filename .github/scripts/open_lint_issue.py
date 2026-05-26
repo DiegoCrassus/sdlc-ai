@@ -48,7 +48,7 @@ def ensure_label(name: str, color: str, description: str) -> None:
 
 
 def find_open_issue(title_prefix: str) -> int | None:
-    s, data = api("GET", f'/issues?state=open&labels=sdlc:lint-fail&per_page=10')
+    s, data = api("GET", "/issues?state=open&labels=sdlc:lint-fail&per_page=10")
     if s != 200:
         return None
     for issue in data:

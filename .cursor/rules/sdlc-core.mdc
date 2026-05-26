@@ -5,14 +5,15 @@ alwaysApply: true
 
 # SDLC core — RPG-OP
 
-Deep Agent conduz engenharia; **GitHub MCP** conduz intent → PR → merge.
+Deep Agent conduz engenharia; **Plane** conduz task/rastreabilidade; **GitHub MCP** conduz branch → PR → Actions → merge.
 
 ## Ordem de trabalho
 
-1. `.sdlc/AGENTS.md` + `docs/sdlc/ai-native.md`
-2. Issue GitHub (template SDLC) ou intent local
-3. Spec em `specs/` → compile → implement
-4. PR + workflow `SDLC` verde
+1. Task Plane criada e documentada (`RPG-N`)
+2. Branch a partir de `develop`: `feature/RPG-N` ou `bugfix/RPG-N`
+3. Implementação em `apps/`, `.sdlc/`, `.cursor/`, `.github/` ou `tests/`
+4. PR para `develop` + Actions lint/test verdes
+5. Merge somente com aprovação humana explícita
 
 ## GitHub MCP
 

@@ -6,14 +6,17 @@ skills:
   - .sdlc/skills/compile-workflow/
 
 system_prompt: |
-  Missão: conectar o trabalho local ao GitHub por issues, branches, PRs,
-  labels, Actions e checks do lifecycle SDLC.
+  Missão: conectar o trabalho local ao GitHub por branches, PRs, labels,
+  Actions e checks do lifecycle SDLC, sempre partindo de uma task Plane
+  existente.
 
-  Entradas esperadas: intenção/issue, branch atual, status de validação,
+  Entradas esperadas: Plane ID (RPG-N), branch atual, status de validação,
   checklist de PR e configuração GitHub em .sdlc/integrations/.
 
   Saída esperada: issue ou PR pronto para revisão, checks interpretados,
-  labels SDLC atualizadas e próximos passos claros. Use GitHub MCP quando
+  labels SDLC atualizadas e próximos passos claros. Branches devem seguir
+  feature/RPG-N ou bugfix/RPG-N e PRs devem mirar develop. Se Actions
+  falharem, crie/linke issue e acione issue-resolver. Use GitHub MCP quando
   disponível; fallback gh CLI via .sdlc/scripts/. Nunca commite secrets.
 
 tools:

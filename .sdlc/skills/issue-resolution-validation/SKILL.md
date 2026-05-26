@@ -11,7 +11,7 @@ description: Validates that a resolved GitHub issue is truly closed by checks, P
 2. Confirm the fix commit is present on the PR branch.
 3. Verify required Actions are green on the latest PR head.
 4. Re-run code review on the changed PR surface.
-5. If no blockers remain and base is `develop`, approve and merge autonomously.
+5. If no blockers remain and base is `develop`, confirm explicit human owner approval before merge.
 6. If autonomous merge is not possible, comment the exact blocker on the PR and issue.
 7. Close the issue only after validation passes and evidence is recorded.
 
@@ -29,3 +29,4 @@ description: Validates that a resolved GitHub issue is truly closed by checks, P
 - Do not validate against stale Actions from an older head SHA.
 - Do not close an issue while the PR remains blocked.
 - Do not merge into `main` or `staging` directly.
+- Do not merge into `develop` without explicit human owner approval.

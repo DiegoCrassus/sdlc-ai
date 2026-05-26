@@ -1,10 +1,10 @@
-name: Lint Fix Agent
+name: Quality Fix Agent
 
 on:
   workflow_dispatch:
     inputs:
       branch:
-        description: "Branch com erros de lint"
+        description: "Branch da PR com falha de lint/teste"
         required: true
         default: develop
       issue_number:
@@ -23,7 +23,7 @@ permissions:
 
 jobs:
   auto-fix:
-    name: Auto-fix lint errors
+    name: Resolve quality failure
     runs-on: ubuntu-latest
 
     env:
@@ -44,95 +44,83 @@ jobs:
       - name: Install ruff
         run: pip install ruff
 
-      # --- Python auto-fix ---
       - name: ruff fix
         id: ruff-fix
         run: |
-          ruff check --fix --unsafe-fixes apps/backend/ packages/rpg_dsl/ specs/ .cursor/hooks/ || true
-          ruff format apps/backend/ packages/rpg_dsl/ specs/ .cursor/hooks/ || true
+          ruff check --fix --unsafe-fixes apps/backend/ .cursor/hooks/ .github/scripts/ || true
+          ruff format apps/backend/ .cursor/hooks/ .github/scripts/ || true
 
-          # Verifica se ainda há erros após o fix
           set +e
-          REMAINING=$(ruff check apps/backend/ packages/rpg_dsl/ specs/ .cursor/hooks/ 2>&1)
-          STILL_FAILING=$( [ $? -ne 0 ] && echo true || echo false )
+          CHECK_OUTPUT=$(ruff check apps/backend/ .cursor/hooks/ .github/scripts/ 2>&1)
+          CHECK_EXIT=$?
+          FORMAT_OUTPUT=$(ruff format --check apps/backend/ .cursor/hooks/ .github/scripts/ 2>&1)
+          FORMAT_EXIT=$?
+          REMAINING="${CHECK_OUTPUT}"$'\n'"${FORMAT_OUTPUT}"
+          STILL_FAILING=$( [ $CHECK_EXIT -ne 0 ] || [ $FORMAT_EXIT -ne 0 ] && echo true || echo false )
           ESCAPED="${REMAINING//$'\n'/'%0A'}"
           echo "still_failing=${STILL_FAILING}" >> $GITHUB_OUTPUT
           echo "remaining=${ESCAPED}" >> $GITHUB_OUTPUT
 
-      # --- TypeScript fix (tsc não tem auto-fix; apenas reporta) ---
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
           cache: npm
           cache-dependency-path: apps/frontend/package.json
 
-      - name: npm install (TypeScript check)
+      - name: npm install
         working-directory: apps/frontend
         run: npm install
 
-      - name: tsc --noEmit (check remaining)
+      - name: frontend build/typecheck
         id: tsc-check
         working-directory: apps/frontend
         run: |
           set +e
-          OUTPUT=$(npx tsc --noEmit 2>&1)
+          OUTPUT=$(npm run build 2>&1)
           EXIT=$?
           ESCAPED="${OUTPUT//$'\n'/'%0A'}"
           echo "failed=$( [ $EXIT -ne 0 ] && echo true || echo false )" >> $GITHUB_OUTPUT
           echo "errors=${ESCAPED}" >> $GITHUB_OUTPUT
 
-      # --- Commit e PR se houve mudanças ---
+      - name: Install backend test dependencies
+        run: pip install -r apps/backend/requirements.txt pytest pytest-asyncio httpx
+
+      - name: pytest check
+        id: pytest-check
+        env:
+          PYTHONPATH: apps/backend
+        run: |
+          set +e
+          OUTPUT=$(pytest tests/ -q 2>&1)
+          EXIT=$?
+          ESCAPED="${OUTPUT//$'\n'/'%0A'}"
+          echo "failed=$( [ $EXIT -ne 0 ] && echo true || echo false )" >> $GITHUB_OUTPUT
+          echo "errors=${ESCAPED}" >> $GITHUB_OUTPUT
+
       - name: Check for changes
         id: changes
         run: |
           git diff --quiet && echo "changed=false" >> $GITHUB_OUTPUT || echo "changed=true" >> $GITHUB_OUTPUT
 
-      - name: Commit auto-fix
+      - name: Commit auto-fix to PR branch
         if: steps.changes.outputs.changed == 'true'
         run: |
           git config user.name  "sdlc-lint-bot"
           git config user.email "sdlc-lint-bot@users.noreply.github.com"
-          git checkout -b "fix/lint-${{ inputs.commit_sha || github.run_id }}"
           git add -A
-          git commit -m "fix(lint): auto-fix ruff errors [bot]
+          git commit -m "fix: apply automated quality correction
 
-          Triggered by lint-fix agent on branch ${{ inputs.branch }}.
+          Triggered by issue-resolver workflow on branch ${{ inputs.branch }}.
           Issue: #${{ inputs.issue_number }}"
-          git push origin "fix/lint-${{ inputs.commit_sha || github.run_id }}"
+          git push origin "HEAD:${{ inputs.branch }}"
 
-      - name: Create PR with fix
-        if: steps.changes.outputs.changed == 'true'
-        uses: actions/github-script@v7
-        with:
-          github-token: ${{ secrets.SDLC_PAT_CLASSIC }}
-          script: |
-            const issueRef = '${{ inputs.issue_number }}' ? `\nCloses #${{ inputs.issue_number }}` : ''
-            const pr = await github.rest.pulls.create({
-              owner: context.repo.owner,
-              repo:  context.repo.repo,
-              title: 'fix(lint): auto-fix ruff errors [bot]',
-              body: `## Auto-fix de lint
-
-            Erros corrigidos automaticamente pelo agente \`lint-fix\`.
-
-            **Branch original:** \`${{ inputs.branch }}\`
-            **Commit:** \`${{ inputs.commit_sha }}\`
-
-            ## SDLC
-            - [x] Auto-fix ruff aplicado
-            - [ ] Revisar se há erros restantes (TypeScript / ruff não-auto-fixáveis)
-            ${issueRef}`,
-              head: 'fix/lint-${{ inputs.commit_sha || github.run_id }}',
-              base: '${{ inputs.branch }}'
-            })
-            core.setOutput('pr_number', pr.data.number)
-
-      # --- Comentar na issue ---
-      - name: Comment on issue — fixed
+      - name: Comment on issue — fix pushed
         if: |
           inputs.issue_number != '' &&
           steps.changes.outputs.changed == 'true' &&
-          steps.ruff-fix.outputs.still_failing == 'false'
+          steps.ruff-fix.outputs.still_failing == 'false' &&
+          steps.tsc-check.outputs.failed == 'false' &&
+          steps.pytest-check.outputs.failed == 'false'
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.SDLC_PAT_CLASSIC }}
@@ -141,22 +129,16 @@ jobs:
               owner: context.repo.owner,
               repo:  context.repo.repo,
               issue_number: Number('${{ inputs.issue_number }}'),
-              body: `### Lint fix concluido
+              body: `### Correção automática enviada
 
-            Erros corrigidos automaticamente. PR aberto para revisao.
-            Verifique o PR e aprove o merge se estiver correto.`
-            })
-            await github.rest.issues.update({
-              owner: context.repo.owner,
-              repo:  context.repo.repo,
-              issue_number: Number('${{ inputs.issue_number }}'),
-              state: 'closed'
+            Foi feito push de uma correção mínima para \`${{ inputs.branch }}\`.
+            As Actions devem rodar novamente no PR. Esta issue só deve ser fechada após checks verdes no head SHA mais recente.`
             })
 
       - name: Comment on issue — partial / blocked
         if: |
           inputs.issue_number != '' &&
-          (steps.ruff-fix.outputs.still_failing == 'true' || steps.tsc-check.outputs.failed == 'true')
+          (steps.ruff-fix.outputs.still_failing == 'true' || steps.tsc-check.outputs.failed == 'true' || steps.pytest-check.outputs.failed == 'true')
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.SDLC_PAT_CLASSIC }}
@@ -169,6 +151,8 @@ jobs:
             if (changed) body += `Algumas correcoes foram aplicadas mas erros persistem.\n\n`
             if (pyErr.trim())  body += `**Python (ruff):**\n\`\`\`\n${pyErr.trim()}\n\`\`\`\n\n`
             if (tsErr.trim())  body += `**TypeScript (tsc):**\n\`\`\`\n${tsErr.trim()}\n\`\`\`\n\n`
+            const testErr = '${{ steps.pytest-check.outputs.errors }}'.replace(/%0A/g, '\n')
+            if (testErr.trim()) body += `**Unit tests (pytest):**\n\`\`\`\n${testErr.trim()}\n\`\`\`\n\n`
             body += `> Corrija manualmente e remova a label \`sdlc:blocked\` apos resolver.`
 
             await github.rest.issues.createComment({

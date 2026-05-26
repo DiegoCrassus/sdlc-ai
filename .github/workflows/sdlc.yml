@@ -6,32 +6,27 @@ on:
   pull_request:
     branches: [main, master, staging, develop]
 
+permissions:
+  contents: read
+  issues: write
+  actions: write
+
 jobs:
   sdlc-gates:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: apps/backend
+    outputs:
+      failed: ${{ steps.pytest.outputs.failed }}
+      errors: ${{ steps.pytest.outputs.errors }}
 
     env:
-      LANGSMITH_API_KEY:   ${{ secrets.LANGSMITH_API_KEY }}
-      LANGSMITH_TRACING:   ${{ vars.LANGSMITH_TRACING }}
-      LANGSMITH_ENDPOINT:  ${{ vars.LANGSMITH_ENDPOINT }}
-      LANGSMITH_PROJECT:   ${{ vars.LANGSMITH_PROJECT }}
-      OPENAI_API_KEY:      ${{ secrets.OPENAI_API_KEY }}
-      AGENT_MODEL:         ${{ secrets.AGENT_MODEL }}
-      # PATs — use SDLC_PAT_CLASSIC para operacoes que precisam de token com scopes completos
-      SDLC_PAT_CLASSIC:    ${{ secrets.SDLC_PAT_CLASSIC }}
-
-    env:
-      LANGSMITH_API_KEY:   ${{ secrets.LANGSMITH_API_KEY }}
-      LANGSMITH_TRACING:   ${{ vars.LANGSMITH_TRACING }}
-      LANGSMITH_ENDPOINT:  ${{ vars.LANGSMITH_ENDPOINT }}
-      LANGSMITH_PROJECT:   ${{ vars.LANGSMITH_PROJECT }}
-      OPENAI_API_KEY:      ${{ secrets.OPENAI_API_KEY }}
-      AGENT_MODEL:         ${{ secrets.AGENT_MODEL }}
-      # PATs — use SDLC_PAT_CLASSIC para operacoes que precisam de token com scopes completos
-      SDLC_PAT_CLASSIC:    ${{ secrets.SDLC_PAT_CLASSIC }}
+      LANGSMITH_API_KEY: ${{ secrets.LANGSMITH_API_KEY }}
+      LANGSMITH_TRACING: ${{ vars.LANGSMITH_TRACING }}
+      LANGSMITH_ENDPOINT: ${{ vars.LANGSMITH_ENDPOINT }}
+      LANGSMITH_PROJECT: ${{ vars.LANGSMITH_PROJECT }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      AGENT_MODEL: ${{ secrets.AGENT_MODEL }}
+      SDLC_PAT_CLASSIC: ${{ secrets.SDLC_PAT_CLASSIC }}
+      PYTHONPATH: apps/backend
 
     steps:
       - uses: actions/checkout@v4
@@ -44,21 +39,90 @@ jobs:
           cache-dependency-path: apps/backend/requirements.txt
 
       - name: Install dependencies
-        run: pip install -r requirements.txt
-
-      - name: Install rpg_dsl
-        working-directory: .
-        run: pip install -e packages/rpg_dsl
-
-      - name: SDLC validate
-        working-directory: .
-        run: python -m rpg_dsl._cli validate specs/
+        run: pip install -r apps/backend/requirements.txt pytest pytest-asyncio httpx
 
       - name: Backend smoke import check
         run: python -c "from app.main import app; print('app ok', app.title)"
 
-      - name: Pytest (when tests exist)
+      - name: Pytest
+        id: pytest
         run: |
-          pip install pytest pytest-asyncio httpx 2>/dev/null || true
-          if [ -d tests ]; then pytest tests/ -q; else echo "skip: no tests/ yet"; fi
-        continue-on-error: true
+          set +e
+          OUTPUT=$(pytest tests/ -q 2>&1)
+          EXIT=$?
+          echo "$OUTPUT"
+          echo "failed=$( [ $EXIT -ne 0 ] && echo true || echo false )" >> $GITHUB_OUTPUT
+          ESCAPED="${OUTPUT//$'\n'/'%0A'}"
+          echo "errors=${ESCAPED}" >> $GITHUB_OUTPUT
+          if [ $EXIT -ne 0 ]; then
+            echo "### pytest errors" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            echo "$OUTPUT" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+          fi
+          exit 0
+
+  open-test-issue-and-fix:
+    name: Open test issue + trigger resolver
+    runs-on: ubuntu-latest
+    needs: [sdlc-gates]
+    if: needs.sdlc-gates.outputs.failed == 'true'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Create test-fail issue
+        id: create-issue
+        env:
+          SDLC_PAT_CLASSIC: ${{ secrets.SDLC_PAT_CLASSIC }}
+          REPO: ${{ github.repository }}
+          CHECK_KIND: test
+          COMMIT_SHA: ${{ github.sha }}
+          COMMIT_MSG: ${{ github.event.head_commit.message || github.event.pull_request.title }}
+          BRANCH: ${{ github.ref_name }}
+          TEST_ERRORS: ${{ needs.sdlc-gates.outputs.errors }}
+          TEST_FAILED: ${{ needs.sdlc-gates.outputs.failed }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: python .github/scripts/open_quality_issue.py
+
+      - name: Trigger issue resolver
+        if: steps.create-issue.outputs.issue_number != ''
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.SDLC_PAT_CLASSIC }}
+          script: |
+            const branch = context.payload.pull_request?.head?.ref ?? context.ref.replace('refs/heads/', '')
+            try {
+              await github.rest.actions.createWorkflowDispatch({
+                owner: context.repo.owner,
+                repo:  context.repo.repo,
+                workflow_id: 'lint-fix.yml',
+                ref: branch,
+                inputs: {
+                  branch,
+                  issue_number: '${{ steps.create-issue.outputs.issue_number }}',
+                  commit_sha:   '${{ github.sha }}'
+                }
+              })
+            } catch (error) {
+              core.warning(`issue resolver dispatch skipped: ${error.message}`)
+            }
+
+  test-gate:
+    name: Unit test gate
+    runs-on: ubuntu-latest
+    needs: [sdlc-gates, open-test-issue-and-fix]
+    if: always()
+
+    steps:
+      - name: Fail when unit tests failed
+        run: |
+          if [[ "${{ needs.sdlc-gates.outputs.failed }}" == "true" ]]; then
+            echo "Unit tests failed. Issue was created or updated before this gate failed."
+            exit 1
+          fi
+          echo "Unit tests passed."

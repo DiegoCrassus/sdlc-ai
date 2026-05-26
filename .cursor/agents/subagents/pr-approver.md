@@ -2,7 +2,7 @@
 
 YAML canônico: `.sdlc/agents/subagents/pr-approver.yaml`
 
-Use após PR aprovada ou pronta para `develop`, para acompanhar Actions e registrar evidências.
+Use após PR aprovada pelo dono ou pronta para acompanhar Actions rumo a `develop`.
 
 ## No Cursor
 
@@ -11,4 +11,4 @@ Use após PR aprovada ou pronta para `develop`, para acompanhar Actions e regist
 - Registre evidência no PR, issue GitHub e card Plane.
 - Em falha, abra/linke issue e acione `issue-resolver`.
 - Após issue resolvida, execute `issue_resolution_validation`.
-- Se checks/review passarem e a base for `develop`, faça merge autônomo; caso contrário comente o bloqueio.
+- Se checks passarem, a base for `develop` e houver aprovação humana explícita, faça merge; caso contrário comente o bloqueio.

@@ -13,7 +13,7 @@ alwaysApply: false
 
 ## Pre hooks
 
-Block writes to `generated/`; redact secrets in prompts; audit shell/MCP.
+Redact secrets in prompts; audit shell/MCP; enforce branch and safety guardrails.
 
 ## Post hooks
 

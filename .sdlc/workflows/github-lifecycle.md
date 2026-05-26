@@ -4,66 +4,61 @@ Ciclo de vida do RPG-OP conectado ao GitHub via **MCP** (agente no Cursor) + **g
 
 ```mermaid
 flowchart TB
-    I[Intent — Issue GitHub] --> S[Spec — branch + specs/]
-    S --> C[Compile — rpg compile]
-    C --> M[Implement — commits]
-    M --> P[PR — checks SDLC]
-    P --> R[Review — human + agent]
-    R --> MG[Merge]
-    MG --> D[Deploy — futuro]
-
-    MCP[GitHub MCP] -.-> I
-    MCP -.-> P
-    MCP -.-> R
-    GH[gh CLI] -.-> I
-    CI[GitHub Actions] -.-> P
+    Plane[Plane task RPG-N] --> Branch[Branch from develop]
+    Branch --> Work[Implementation]
+    Work --> PR[Pull Request to develop]
+    PR --> Actions[GitHub Actions: lint + unit tests]
+    Actions --> Gate{Checks green?}
+    Gate -->|no| Issue[GitHub issue: sdlc:ci-fail]
+    Issue --> Resolver[issue-resolver subagent]
+    Resolver --> Fix[Fix pushed to same branch]
+    Fix --> Actions
+    Gate -->|yes| Review[Human owner approval]
+    Review --> Merge[Merge into develop]
 ```
 
-## Fase 1 — Intent (Issue)
+## Fase 1 — Plane task
 
-**Humano ou agente** cria issue a partir do template SDLC.
+Antes de qualquer comando GitHub existir, crie ou recupere uma tarefa Plane.
 
-```bash
-.sdlc/scripts/gh-issue-intent.sh "F2: sheet-template-analyst" .sdlc/templates/intent.md
-```
+Requisitos mínimos da tarefa:
 
-**MCP:** pedir ao agente — "Crie issue no GitHub usando template SDLC para …"
+- Identificador legível: `RPG-N`.
+- Descrição com `context`, `changes`, `acceptance criteria`, `comments`.
+- Comentário planejado: branch `feature/RPG-N` ou `bugfix/RPG-N`.
 
-Labels: `sdlc:intent`, `type:feature`
+Sem tarefa Plane, o workflow GitHub deve parar.
 
-## Fase 2 — Spec (branch + DSL)
+## Fase 2 — Branch
+
+Toda branch nasce de `develop` e segue um dos formatos:
 
 ```bash
 .sdlc/scripts/gh-branch-start.sh feature RPG-123
+.sdlc/scripts/gh-branch-start.sh bugfix RPG-456
 ```
 
-- Editar `specs/` ou `.sdlc/agents/`
-- Label issue: `sdlc:spec`
+Use `feature/` para trabalho planejado. Use `bugfix/` para defeitos, regressões, lint falho ou teste falho.
 
-**MCP:** listar issue, criar branch, comentar progresso na issue.
+## Fase 3 — Implementação
 
-## Fase 3 — Compile
+Escopo atual do repositório:
+
+- Produto: `apps/backend/` e `apps/frontend/`
+- Operação SDLC: `.sdlc/`
+- Cursor: `.cursor/`
+- CI/GitHub: `.github/`
+- Testes: `tests/`
+
+Antes de commitar:
 
 ```bash
-rpg validate specs/          # quando existir
-rpg compile --target all
+make test
+make lint
 make validate
 ```
 
-Commit sugerido: `spec: …` ou `chore(compile): …`
-
-## Fase 4 — Implement
-
-Hooks em `apps/`, `services/agent/`.
-
-```bash
-make validate
-# finish_change: commit + push + PR
-```
-
-Label: `sdlc:implement` → `sdlc:ready`
-
-## Fase 5 — Pull Request
+## Fase 4 — Pull Request
 
 ```bash
 .sdlc/scripts/gh-pr-open.sh "feat: template analyst spec" 12
@@ -71,27 +66,39 @@ Label: `sdlc:implement` → `sdlc:ready`
 
 Checklist do [PULL_REQUEST_TEMPLATE](../../.github/PULL_REQUEST_TEMPLATE.md).
 
-**CI:** workflow `SDLC` — pytest + validate script.
+O PR deve mirar `develop`.
 
-**MCP:** criar PR, linkar issue (`Closes #12`), pedir review, ler check runs.
+**CI obrigatório:**
 
-## Fase 6 — Review
+- `lint.yml`: ruff + frontend build/typecheck.
+- `sdlc.yml`: unit tests (`pytest tests/ -q`) e import check do backend.
 
-- Agente usa MCP para ler comentários de review e checks falhos
-- Humano aprova merge
-- Squash merge → `main`
+## Fase 5 — Falha de CI
 
-## Fase 7 — Deploy (backlog)
+Se lint ou testes falharem:
 
-- `workflow_dispatch` ou push tag
-- Smoke pós-deploy
+1. GitHub Action cria ou atualiza issue com label `sdlc:ci-fail` ou `sdlc:lint-fail`.
+2. Workflow dispara o agente de correção (`lint-fix.yml` enquanto não houver runner AI dedicado).
+3. `issue-resolver` lê issue, logs, branch, PR e Plane task.
+4. Correção mínima é aplicada na mesma branch da PR.
+5. Actions rodam novamente.
+6. Issue só é fechada depois de checks verdes e evidência registrada.
+
+Nunca enfraqueça lint, testes ou required checks para resolver a issue.
+
+## Fase 6 — Review e merge
+
+- Review humano é obrigatório.
+- Merge permitido somente para `develop`.
+- Merge só ocorre com checks verdes no head SHA mais recente.
+- Plane card vai para `Done` apenas após merge em `develop`.
 
 ## Comandos úteis (gh)
 
 | Ação | Comando |
 |------|---------|
 | Status repo | `gh repo view` |
-| Listar issues SDLC | `gh issue list --label sdlc:ready` |
+| Listar issues SDLC | `gh issue list --label sdlc:ci-fail` |
 | Ver PR checks | `gh pr checks` |
 | Ver Actions | `gh run list --workflow=sdlc.yml` |
 | Comentar issue | `gh issue comment 12 --body "Spec merged"` |

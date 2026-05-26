@@ -14,7 +14,9 @@ alwaysApply: false
 
 ## Lifecycle
 
-Intent (issue) → **start_change** (branch) → spec → **finish_change** (PR) → Actions → merge
+Plane task → **start_change** (branch from `develop`) → implement → **finish_change** (PR to `develop`) → Actions lint/test → human approval → merge
+
+GitHub workflow cannot start without a Plane task identifier (`RPG-N`).
 
 Workflows:
 - `.sdlc/workflows/change-lifecycle.md` (toda alteração)
@@ -25,6 +27,7 @@ Workflows:
 
 ```bash
 .sdlc/scripts/gh-branch-start.sh feature RPG-123
+.sdlc/scripts/gh-branch-start.sh bugfix RPG-456
 .sdlc/scripts/gh-issue-intent.sh "[Intent] …"
 .sdlc/scripts/gh-pr-open.sh "feat: …" 12
 .sdlc/scripts/gh-sdlc-status.sh
@@ -33,9 +36,11 @@ Workflows:
 
 ## Labels SDLC
 
-`sdlc:intent`, `sdlc:spec`, `sdlc:implement`, `sdlc:ready`, `sdlc:blocked`
+`sdlc:intent`, `sdlc:implement`, `sdlc:ready`, `sdlc:ci-fail`, `sdlc:lint-fail`, `sdlc:blocked`
 
 ## Segurança
 
 - PAT nunca no repo
 - Não force-push `main`
+- Não criar branch fora de `feature/RPG-N` ou `bugfix/RPG-N`
+- Não mergear sem aprovação humana explícita

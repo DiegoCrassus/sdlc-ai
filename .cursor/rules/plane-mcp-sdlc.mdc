@@ -19,7 +19,7 @@ alwaysApply: false
 
 ## Lifecycle
 
-Intent (work item) → spec (specs/ + page opcional) → implement (PR) → done
+Plane task (`RPG-N`) → branch `feature/RPG-N` ou `bugfix/RPG-N` → implement → PR → Actions → human approval → done
 
 Workflow: `.sdlc/workflows/plane-lifecycle.md`
 

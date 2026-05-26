@@ -6,15 +6,17 @@ Acompanhar PR aprovada até integração em `develop`, monitorando Actions e reg
 
 ## Procedimento
 
-1. Confirmar aprovação ou prontidão para `develop`.
+1. Confirmar aprovação humana explícita ou registrar que ela ainda falta.
 2. Conferir branch base, branch head e checks obrigatórios.
 3. Monitorar Actions até conclusão.
 4. Se falhar, criar/linkar issue e acionar `issue-resolver`.
 5. Se passar, comentar evidência no PR, issue GitHub e Plane.
-6. Atualizar cards Plane conforme critérios de aceite.
+6. Com aprovação humana e base `develop`, realizar merge.
+7. Atualizar cards Plane conforme critérios de aceite após merge.
 
 ## Guardrails
 
 - Não ignorar checks falhos.
 - Não burlar branch protection.
 - Não considerar concluído sem evidência remota.
+- Não mergear sem aprovação humana explícita.

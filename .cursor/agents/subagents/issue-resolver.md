@@ -7,6 +7,7 @@ Use para issues geradas por CI, lint, hooks, review ou bloqueios SDLC.
 ## No Cursor
 
 - Leia o YAML canônico e a skill `.sdlc/skills/issue-resolution/`.
-- Identifique causa raiz, corrija no menor escopo seguro e valide.
+- Identifique causa raiz, corrija no menor escopo seguro na branch da PR e valide.
 - Mova o card Plane relacionado e registre evidência antes de fechar a issue.
 - Não finalize após push: entregue obrigatoriamente para `issue_resolution_validation`.
+- Nunca enfraqueça lint/testes e nunca faça merge sem aprovação humana explícita.
