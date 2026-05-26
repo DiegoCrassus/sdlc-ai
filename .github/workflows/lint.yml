@@ -9,6 +9,7 @@ on:
 permissions:
   contents: read
   issues: write
+  actions: write
 
 jobs:
   lint-python:
@@ -32,30 +33,23 @@ jobs:
         id: ruff
         run: |
           set +e
-          OUTPUT=$(ruff check apps/backend/ packages/rpg_dsl/ specs/ .cursor/hooks/ 2>&1)
-          EXIT=$?
-          echo "failed=$( [ $EXIT -ne 0 ] && echo true || echo false )" >> $GITHUB_OUTPUT
-          # escape newlines for output
-          ESCAPED="${OUTPUT//$'\n'/'%0A'}"
+          OUTPUT=$(ruff check apps/backend/ .github/scripts/ .cursor/hooks/ 2>&1)
+          EXIT_CHECK=$?
+          OUTPUT2=$(ruff format --check apps/backend/ .github/scripts/ .cursor/hooks/ 2>&1)
+          EXIT_FMT=$?
+          FINAL=$([ $EXIT_CHECK -ne 0 ] || [ $EXIT_FMT -ne 0 ] && echo 1 || echo 0)
+          COMBINED="${OUTPUT}"$'\n'"${OUTPUT2}"
+          echo "failed=$( [ $FINAL -ne 0 ] && echo true || echo false )" >> $GITHUB_OUTPUT
+          ESCAPED="${COMBINED//$'\n'/'%0A'}"
           echo "errors=${ESCAPED}" >> $GITHUB_OUTPUT
-          echo "$OUTPUT"
-          if [ $EXIT -ne 0 ]; then
+          echo "$COMBINED"
+          if [ $FINAL -ne 0 ]; then
             echo "### ruff errors" >> $GITHUB_STEP_SUMMARY
             echo '```' >> $GITHUB_STEP_SUMMARY
-            echo "$OUTPUT" >> $GITHUB_STEP_SUMMARY
+            echo "$COMBINED" >> $GITHUB_STEP_SUMMARY
             echo '```' >> $GITHUB_STEP_SUMMARY
           fi
-          exit $EXIT
-        continue-on-error: true
-
-      - name: ruff format check
-        id: ruff-fmt
-        run: |
-          set +e
-          OUTPUT=$(ruff format --check apps/backend/ packages/rpg_dsl/ specs/ .cursor/hooks/ 2>&1)
-          EXIT=$?
-          echo "$OUTPUT"
-          exit $EXIT
+          exit $FINAL
         continue-on-error: true
 
   lint-typescript:
@@ -116,17 +110,15 @@ jobs:
       - name: Create lint-fail issue
         id: create-issue
         env:
-          SDLC_PAT_CLASSIC:   ${{ secrets.SDLC_PAT_CLASSIC }}
-          REPO:                ${{ github.repository }}
-          COMMIT_SHA:          ${{ github.sha }}
-          COMMIT_MSG:          ${{ github.event.head_commit.message || github.event.pull_request.title }}
-          BRANCH:              ${{ github.ref_name }}
-          PYTHON_ERRORS:       ${{ needs.lint-python.outputs.errors }}
-          TS_ERRORS:           ${{ needs.lint-typescript.outputs.errors }}
-          PYTHON_FAILED:       ${{ needs.lint-python.outputs.failed }}
-          TS_FAILED:           ${{ needs.lint-typescript.outputs.failed }}
-          RUN_URL:             ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-        run: python .github/scripts/open_lint_issue.py
+          SDLC_PAT_CLASSIC: ${{ secrets.SDLC_PAT_CLASSIC }}
+          REPO:             ${{ github.repository }}
+          COMMIT_SHA:       ${{ github.sha }}
+          COMMIT_MSG:       ${{ github.event.head_commit.message || github.event.pull_request.title }}
+          BRANCH:           ${{ github.ref_name }}
+          CHECK_KIND:       lint
+          ERRORS:           "${{ needs.lint-python.outputs.errors }} ${{ needs.lint-typescript.outputs.errors }}"
+          RUN_URL:          ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: python .github/scripts/open_quality_issue.py
 
       - name: Trigger lint-fix agent
         if: steps.create-issue.outputs.issue_number != ''
@@ -150,3 +142,19 @@ jobs:
             } catch (error) {
               core.warning(`lint-fix dispatch skipped: ${error.message}`)
             }
+
+  lint-gate:
+    name: Lint gate
+    runs-on: ubuntu-latest
+    needs: [lint-python, lint-typescript]
+    if: always()
+    steps:
+      - name: Fail if lint failed
+        if: |
+          needs.lint-python.outputs.failed == 'true' ||
+          needs.lint-typescript.outputs.failed == 'true'
+        run: |
+          echo "Lint checks failed — blocking merge."
+          exit 1
+      - name: Lint passed
+        run: echo "All lint checks green."
