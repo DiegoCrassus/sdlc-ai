@@ -1,51 +1,54 @@
-# app/frontend
+# app/frontend — MarketPulse Dashboard
 
-## Purpose
+React 19 + TypeScript + Vite dashboard for MarketPulse.
 
-Web frontend for the sdlc-ai project.
+## Stack
 
-## Status
+- React 19, TypeScript, Vite
+- Tailwind CSS v3
+- TanStack Query (30s polling)
+- Recharts (price chart)
 
-**Not yet implemented.** This boundary is reserved for the future web UI.
+## Setup
 
-## What Belongs Here
-
-- UI components and pages
-- Frontend routing
-- Client-side state management
-- Styles and assets
-- Frontend-specific configuration (build, lint, format)
-- Frontend tests
-
-## What Does NOT Belong Here
-
-- Business logic — goes in `app/backend/`
-- Database access — goes in `app/backend/`
-- Shared types used by both frontend and backend — goes in `app/shared/`
-- Infrastructure definitions — goes in `app/infra/`
-- API definitions — goes in `app/backend/`
-
-## Expected Future Structure
-
-```
-app/frontend/
-├── src/
-│   ├── components/     ← Reusable UI components
-│   ├── pages/          ← Page-level components
-│   ├── hooks/          ← Custom React hooks (if React)
-│   ├── store/          ← Client state (if needed)
-│   └── api/            ← API client calls
-├── public/             ← Static assets
-├── tests/              ← Frontend unit and E2E tests
-├── package.json
-└── README.md           ← (this file, extended with setup instructions)
+```bash
+cd app/frontend
+npm install
 ```
 
-## Framework Decision
+Ensure the API is running on port 8000 (see `app/backend/README.md`). Vite proxies `/api` to `http://127.0.0.1:8000`.
 
-**TBD** — Framework will be decided when frontend development begins.
-An ADR will be written in `docs/architecture/decisions.md` at that time.
+## Development
 
-## Setup (When Implemented)
+```bash
+npm run dev
+```
 
-TBD.
+Open http://localhost:5173
+
+## Production build
+
+```bash
+npm run build
+```
+
+Static output: `app/frontend/dist/`
+
+## Environment
+
+Optional override for API base (default uses Vite proxy `/api/v1`):
+
+```bash
+VITE_API_BASE=http://127.0.0.1:8000/api/v1
+```
+
+## Layout
+
+```
+src/
+  pages/DashboardPage.tsx
+  components/
+  hooks/useMarketData.ts
+  api/client.ts
+  types/market.ts
+```
