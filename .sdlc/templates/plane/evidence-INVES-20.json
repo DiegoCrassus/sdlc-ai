@@ -1,0 +1,60 @@
+{
+  "card": "INVES-20",
+  "title": "[AI][BACKEND] Market data service with fallback",
+  "summary": "Delivered /api/v1 market data layer with live providers, fallback catalog, and canonical asset IDs for downstream watchlist, portfolio, and frontend.",
+  "problems_solved": [
+    "Legacy routes used /api/assets with symbol+asset_type query params — inconsistent across consumers",
+    "No unified asset identifier — watchlist and portfolio would have duplicated mapping logic",
+    "Live provider failures broke local demos — no graceful degradation or source metadata",
+    "Error responses were ad-hoc HTTPException strings — frontend could not parse failures uniformly"
+  ],
+  "technical": {
+    "endpoints": [
+      "GET /api/v1/health",
+      "GET /api/v1/assets/search",
+      "GET /api/v1/assets/{asset_id}",
+      "GET /api/v1/quotes/{asset_id}",
+      "GET /api/v1/quotes?ids=",
+      "GET /api/v1/history/{asset_id}"
+    ],
+    "modules": [
+      "app/backend/services/market_data.py",
+      "app/backend/services/fallback_catalog.py",
+      "app/backend/utils/asset_id.py",
+      "app/backend/errors.py"
+    ],
+    "stack": "FastAPI, httpx, CoinGecko + Finnhub/Alpha Vantage, Pydantic v2",
+    "decisions": [
+      "Asset ID format stock:AAPL / crypto:BTC per investment-radar-api.md",
+      "All quotes expose source: live | fallback",
+      "OHLCV history with interval/from/to query params"
+    ],
+    "files_changed": [
+      "app/backend/main.py",
+      "app/backend/routers/assets.py",
+      "app/backend/routers/quotes.py",
+      "app/backend/routers/history.py",
+      "app/backend/schemas.py",
+      "app/backend/tests/test_market.py"
+    ]
+  },
+  "validation": {
+    "pytest": "12 passed (app/backend/tests/)",
+    "ruff": "clean",
+    "make sdlc-doctor": "94 passed",
+    "CI": "SDLC CI success on PR #32"
+  },
+  "artifacts": {
+    "pr": "32",
+    "pr_url": "https://github.com/DiegoCrassus/sdlc-ai/pull/32",
+    "branch": "feature/INVES-20-market-data",
+    "commit": "237b3d2 (squash merge to develop)",
+    "docs": ["docs/architecture/investment-radar-api.md"]
+  },
+  "context_for_future": [
+    "Watchlist (INVES-21) and portfolio (INVES-22) must use asset_id resolver from market_data",
+    "Frontend (INVES-23) should read source badge from quote.source",
+    "Optional FINNHUB_API_KEY and ALPHA_VANTAGE_API_KEY in .env for live stock quotes",
+    "Fallback catalog symbols: AAPL, MSFT, NVDA, BTC, ETH, SOL — extend in fallback_catalog.py"
+  ]
+}

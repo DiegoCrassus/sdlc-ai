@@ -1,0 +1,37 @@
+{
+  "card": "INVES-24",
+  "title": "[AI][DOCS] Local runbook and developer onboarding",
+  "summary": "Developer runbook, README quick start, handoff current-state, and env reference for local Investment Radar.",
+  "problems_solved": [
+    "Product merged but no single doc for clone/install/run workflow",
+    "Handoff still described empty app/ placeholders — misleading for new developers",
+    ".env.example missing optional market data keys"
+  ],
+  "technical": {
+    "modules": [
+      "docs/product/investment-radar-runbook.md",
+      "docs/handoff/current-state.md",
+      "README.md Investment Radar section"
+    ],
+    "files_changed": [
+      "docs/product/investment-radar-runbook.md",
+      "docs/handoff/current-state.md",
+      "README.md",
+      ".env.example",
+      "app/frontend/README.md"
+    ]
+  },
+  "validation": {
+    "make sdlc-doctor": "94 passed",
+    "CI": "SDLC CI success on PR #36"
+  },
+  "artifacts": {
+    "pr": "36",
+    "pr_url": "https://github.com/DiegoCrassus/sdlc-ai/pull/36",
+    "branch": "feature/INVES-24-runbook"
+  },
+  "context_for_future": [
+    "Update runbook when start commands or env vars change",
+    "Production deployment section intentionally out of scope until auth ADR"
+  ]
+}

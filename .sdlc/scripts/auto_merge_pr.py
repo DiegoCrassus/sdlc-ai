@@ -6,7 +6,7 @@ No human approval required when all gates pass (see auto-merge-policy.md).
 Usage:
   python3 .sdlc/scripts/auto_merge_pr.py --pr 32
   python3 .sdlc/scripts/auto_merge_pr.py --branch feature/INVES-20-market-data
-  python3 .sdlc/scripts/auto_merge_pr.py --pr 32 --card INVES-20 --plane-comment
+  python3 .sdlc/scripts/auto_merge_pr.py --pr 32 --card INVES-20 --plane-comment --evidence-file .sdlc/templates/plane/evidence-INVES-20.json
 """
 
 from __future__ import annotations
@@ -136,13 +136,50 @@ def delete_branch(token: str, repo: str, branch: str) -> None:
             print(f"WARN: could not delete branch {branch}: {resp.status_code}", file=sys.stderr)
 
 
-def plane_done(card: str, pr_url: str) -> None:
-    script = ROOT / ".sdlc/scripts/plane_state.py"
+def plane_done(card: str, pr_url: str, pr_number: int, evidence_file: str | None = None) -> None:
+    import json
     import subprocess
 
-    comment = f"Autonomous merge complete — <a href=\"{pr_url}\">{pr_url}</a>"
+    script = ROOT / ".sdlc/scripts/plane_state.py"
+    ev_path = evidence_file
+    if not ev_path:
+        default = ROOT / ".sdlc/templates/plane" / f"evidence-{card.upper()}.json"
+        if default.is_file():
+            ev_path = str(default)
+
+    if ev_path and Path(ev_path).is_file():
+        data = json.loads(Path(ev_path).read_text(encoding="utf-8"))
+        art = data.setdefault("artifacts", {})
+        art.setdefault("pr", str(pr_number))
+        art.setdefault("pr_url", pr_url)
+        tmp = ROOT / ".sdlc/memory/.plane-evidence-tmp.json"
+        tmp.write_text(json.dumps(data, indent=2), encoding="utf-8")
+        subprocess.run(
+            [
+                sys.executable,
+                str(script),
+                "done",
+                "--card",
+                card,
+                "--evidence-file",
+                str(tmp),
+            ],
+            check=True,
+            cwd=ROOT,
+        )
+        tmp.unlink(missing_ok=True)
+        return
+
     subprocess.run(
-        [sys.executable, str(script), "done", "--card", card, "--comment", comment],
+        [
+            sys.executable,
+            str(script),
+            "done",
+            "--card",
+            card,
+            "--comment",
+            f"Autonomous merge — PR #{pr_number}: {pr_url}",
+        ],
         check=True,
         cwd=ROOT,
     )
@@ -154,6 +191,11 @@ def main() -> None:
     parser.add_argument("--branch", help="Head branch name")
     parser.add_argument("--card", help="Plane card INVES-N for Done transition")
     parser.add_argument("--plane-comment", action="store_true", help="Move Plane card to Done")
+    parser.add_argument(
+        "--evidence-file",
+        default="",
+        help="Structured JSON evidence for Plane Done comment",
+    )
     parser.add_argument("--timeout", type=int, default=600, help="CI wait seconds")
     parser.add_argument("--poll", type=int, default=15, help="CI poll interval")
     parser.add_argument("--skip-ci-wait", action="store_true", help="Merge immediately (dangerous)")
@@ -172,7 +214,12 @@ def main() -> None:
     if pr.get("merged"):
         print(f"Already merged: {pr_url}")
         if args.plane_comment and args.card:
-            plane_done(args.card, pr_url)
+            plane_done(
+                args.card,
+                pr_url,
+                pr_number,
+                args.evidence_file or None,
+            )
         sys.exit(0)
 
     if pr.get("mergeable") is False and pr.get("mergeable_state") == "dirty":
@@ -195,7 +242,12 @@ def main() -> None:
 
     if args.card and CARD_RE.match(args.card):
         if args.plane_comment:
-            plane_done(args.card, pr_url)
+            plane_done(
+                args.card,
+                pr_url,
+                pr_number,
+                args.evidence_file or None,
+            )
         else:
             print(f"Hint: run plane_state.py done --card {args.card}")
 
