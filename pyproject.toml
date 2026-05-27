@@ -12,6 +12,12 @@ license = { text = "MIT" }
 
 dependencies = [
     "PyYAML>=6.0",
+    "fastapi>=0.110",
+    "uvicorn[standard]>=0.27",
+    "sqlalchemy>=2.0",
+    "aiosqlite>=0.19",
+    "pydantic-settings>=2.0",
+    "httpx>=0.27",
 ]
 
 [project.optional-dependencies]
