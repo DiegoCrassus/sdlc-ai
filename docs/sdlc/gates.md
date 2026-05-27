@@ -35,6 +35,8 @@ Gates are enforced by:
 
 ### Implementation Gate
 
+- [ ] Plane card **In Progress** (`plane_state.py in-progress`) before any code
+- [ ] Feature branch `feature/INVES-N-*` checked out
 - [ ] Tests exist for all new logic
 - [ ] Diff is focused (no unrelated changes)
 - [ ] Docs updated if public interfaces or architecture changed
@@ -47,10 +49,13 @@ Gates are enforced by:
 
 ### PR & Review Gate
 
+- [ ] Task(QA) completed with real test output
+- [ ] Task(Reviewer) APPROVE per `auto-merge-policy.md`
+- [ ] CI green on PR branch
 - [ ] Security considerations checked
 - [ ] No unaddressed high-risk items
-- [ ] Test coverage verified
 - [ ] Doctor passed
+- [ ] **Merge autônomo** via `auto_merge_pr.py` (no human click)
 
 ### Deployment Gate
 
@@ -69,9 +74,10 @@ Gates are enforced by:
 **Hard gate** — Must pass before proceeding. Violation is a required FAIL in Doctor or review.
 
 Examples:
+- Plane card must be **In Progress** during implementation
 - Tests must pass before review
 - Doctor must pass before deployment
-- Human review required before auto-fix merge
+- Merge via `auto_merge_pr.py` when CI green — human merge is exception only
 
 **Soft gate** — Warning if not met. Must be explicitly accepted or addressed.
 
@@ -79,6 +85,14 @@ Examples:
 - Test coverage below threshold
 - No observability stack configured
 - Optional integrations not set up
+
+## GitHub Issues vs Plane
+
+- **Plane `INVES-N`** is the only task tracker for product work
+- Open GitHub Issues → delegate **Issue Analyst** before any Implementer
+- Superseded/duplicate issues → close with link to Plane card and PR
+
+Scripts: `.sdlc/scripts/github_issue_triage.py`, `.sdlc/scripts/plane_state.py`
 
 ## Gate Failure Handling
 

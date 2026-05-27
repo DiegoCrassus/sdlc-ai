@@ -1,4 +1,4 @@
-.PHONY: sdlc-doctor sdlc-validate sdlc-stages docs-check obs-init obs-server obs-seed sdlc-audit help
+.PHONY: sdlc-doctor sdlc-validate sdlc-stages docs-check obs-init obs-server obs-seed sdlc-audit plane-in-progress auto-merge-pr issue-triage help
 
 help:
 	@echo "SDLC AI — Available targets:"
@@ -13,6 +13,9 @@ help:
 	@echo "  obs-seed       Insert sample data for dashboard preview"
 	@echo ""
 	@echo "  sdlc-audit     Run autonomous SDLC audit — generates canvas report"
+	@echo "  plane-in-progress  Move Plane card to In Progress (CARD=INVES-N)"
+	@echo "  auto-merge-pr  Autonomous squash merge when CI green (PR=N CARD=INVES-N)"
+	@echo "  issue-triage   Close superseded GitHub issues (TRIAGE=1 to apply)"
 	@echo ""
 	@echo "Workflow: docs/sdlc/change-lifecycle.md"
 
@@ -58,6 +61,17 @@ print('[obs] sample data inserted')"
 sdlc-audit:
 	@echo "Running SDLC Audit..."
 	@$(PYTHON) app/infra/sdlc_obs/auditor.py
+
+plane-in-progress:
+	@test -n "$(CARD)" || (echo "Usage: make plane-in-progress CARD=INVES-N" && exit 1)
+	@$(PYTHON) .sdlc/scripts/plane_state.py in-progress --card $(CARD)
+
+auto-merge-pr:
+	@test -n "$(PR)" || (echo "Usage: make auto-merge-pr PR=32 CARD=INVES-N" && exit 1)
+	@$(PYTHON) .sdlc/scripts/auto_merge_pr.py --pr $(PR) $(if $(CARD),--card $(CARD) --plane-comment,)
+
+issue-triage:
+	@$(PYTHON) .sdlc/scripts/github_issue_triage.py $(if $(TRIAGE),--close-superseded,--dry-run)
 
 export-pdf:
 	@echo "Generating simulation PDF..."

@@ -100,9 +100,19 @@ Se score >= 0.95: APPROVE automático
 - [ ] Todos os gates obrigatórios estão verdes
 - [ ] Nenhum critério de bloqueio ativo
 - [ ] Confidence score ≥ 0.95
-- [ ] `delete_branch_on_merge: true` configurado no PR
+- [ ] Card Plane em **In Progress** durante implementação
 - [ ] Card Plane vinculado ao PR
-- [ ] Plano de rollback documentado no corpo do PR
+- [ ] **Merge executado pelo agente** via `.sdlc/scripts/auto_merge_pr.py` — não aguardar humano
+
+## Autonomous merge (default)
+
+When all gates pass, **DevOps/Orchestrator MUST run**:
+
+```bash
+python3 .sdlc/scripts/auto_merge_pr.py --pr <N> --card INVES-N --plane-comment
+```
+
+Human merge in GitHub UI is **exception only** (ESCALATE, auth changes, policy block).
 
 ## Outputs
 

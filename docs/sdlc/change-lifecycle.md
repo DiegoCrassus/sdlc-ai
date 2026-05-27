@@ -32,17 +32,40 @@ Cards Plane são criados **no project `investiments`** antes de qualquer ediçã
 ## Fluxo completo (gitflow)
 
 ```
-1. Plane     → criar/atualizar work item via MCP [AI][TYPE] (project investiments, In Progress)
-2. Branch    → feature/INVESTIMENTS-N-<slug> a partir de develop atualizado
-3. Plane     → descrição do card: story, AC, DoD, riscos (corpo do work item — não arquivo local)
-4. Implement → commits no feature branch apenas
-5. Validate  → testes reais + make sdlc-doctor
-6. PR        → base develop, CI verde, delete_branch_on_merge=true
-7. Review    → aprovação (humana ou Reviewer agent)
-8. Merge     → squash merge → develop
-9. Plane     → Done com link do PR como evidência
+1. Plane     → card INVES-N (Todo após plano; In Progress no start-change)
+2. start-change → plane_state.py in-progress ANTES de branch/código
+3. Branch    → feature/INVES-N-<slug> a partir de develop
+4. Implement → Task(Implementer) · commits no feature branch
+5. Validate  → Task(QA) · testes reais + make sdlc-doctor
+6. Review    → Task(Reviewer) · auto-merge-policy
+7. PR        → push + gh/API · CI verde
+8. Merge     → auto_merge_pr.py (autônomo — sem clique humano)
+9. Plane     → Done (--plane-comment) + link PR
 10. Observer → post_task.py
 ```
+
+### Plane — estados obrigatórios
+
+| Estado | Quando |
+|--------|--------|
+| **Todo** | Após Planner criar card |
+| **In Progress** | **Obrigatório** ao iniciar implementação (`start-change`) |
+| **Done** | Após merge autônomo + CI verde |
+
+Script: `python3 .sdlc/scripts/plane_state.py in-progress --card INVES-N`
+
+### GitHub Issues
+
+Plane é tracker primário. Issues abertas → **Issue Analyst** (Task) tria/fecha duplicatas.
+Script: `python3 .sdlc/scripts/github_issue_triage.py --close-superseded`
+
+### Merge autônomo
+
+```bash
+python3 .sdlc/scripts/auto_merge_pr.py --pr <N> --card INVES-N --plane-comment
+```
+
+Ver `.cursor/skills/finish-change/SKILL.md` e `auto-merge-policy.md`.
 
 ### Prefixos de branch
 
