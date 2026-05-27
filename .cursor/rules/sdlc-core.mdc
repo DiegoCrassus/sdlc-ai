@@ -5,7 +5,7 @@ alwaysApply: true
 
 # SDLC core — RPG-OP
 
-Deep Agent conduz engenharia; **GitHub MCP** conduz intent → PR → merge.
+Deep Agent conduz engenharia; **Plane MCP** conduz tarefas; **GitHub MCP** conduz PR → merge.
 
 ## Fonte da verdade
 
@@ -16,14 +16,21 @@ Plane: workspace `investments-sdlc`, project `investiments`, cards `INVESTIMENTS
 ## Ordem de trabalho
 
 1. `.sdlc/AGENTS.md` + `docs/sdlc/change-lifecycle.md`
-2. Card Plane (project `investiments`) ou Issue GitHub (template SDLC)
+2. **Plane MCP** — criar/atualizar work item (project `investiments`) — skill **plane-sdlc**
 3. Branch `feature/INVESTIMENTS-N-<slug>` via **start-change**
-4. Spec em `specs/` → implement
+4. Implement → commits apenas no feature branch
 5. PR + CI verde → merge **develop** via **finish-change**
+6. Evidência e Done **no card Plane** (nunca em arquivos locais)
 
-## GitHub MCP
+## Proibição absoluta
 
-Config: `.cursor/mcp.json` — skill `github-sdlc`
+- **Nunca** criar pasta `specs/` nem tickets/backlog/evidência de tarefa no repositório.
+- **Nunca** criar tarefa localmente — somente Plane via MCP.
+
+## MCP
+
+- Plane: `.cursor/mcp.json` — skill `plane-sdlc`
+- GitHub: `.cursor/mcp.json` — skill `github-sdlc`
 
 ## Idioma
 

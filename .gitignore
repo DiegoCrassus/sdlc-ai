@@ -107,6 +107,7 @@ logs/
 
 # Generated
 generated/
+specs/
 specs/__generated__/
 simulacao-end-to-end-sdlc.pdf
 

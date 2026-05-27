@@ -33,7 +33,7 @@ Este repositório é um **AI-Native SDLC**. Seu propósito é:
 4. Leia .sdlc/memory/operational-context.md → contexto de runtime
 5. Identifique o estágio SDLC da tarefa (ticket/req/arch/impl/qa/review/deploy/obs)
 6. Invoque o subagente correto para o estágio
-7. Siga .cursor/skills/ correspondente (start-change antes de codar)
+7. Siga `.cursor/skills/plane-sdlc/SKILL.md` (tarefas) e start-change antes de codar
 8. Emita métricas via pre_task.py e post_task.py
 ```
 
@@ -89,8 +89,12 @@ Todas em `.cursor/skills/`:
 
 ## MCPs Ativos
 
-- **GitHub MCP:** criar issues, PRs, gerenciar lifecycle de branches
-- **Plane MCP:** criar cards, mover sprints, registrar evidências
+- **Plane MCP:** **única** fonte de tarefas — criar cards, descrição, evidência, Done (`plane-sdlc`)
+- **GitHub MCP:** PRs, CI, merge em `develop`
+
+## Proibição
+
+- **Nunca** pasta `specs/` nem backlog/ticket/evidência local no repo.
 
 ## Makefile Targets Principais
 

@@ -32,9 +32,9 @@ Cards Plane são criados **no project `investiments`** antes de qualquer ediçã
 ## Fluxo completo (gitflow)
 
 ```
-1. Plane     → criar card [AI][TYPE] título (project investiments, estado In Progress)
+1. Plane     → criar/atualizar work item via MCP [AI][TYPE] (project investiments, In Progress)
 2. Branch    → feature/INVESTIMENTS-N-<slug> a partir de develop atualizado
-3. Spec      → specs/ ou plano em docs/ (se aplicável)
+3. Plane     → descrição do card: story, AC, DoD, riscos (corpo do work item — não arquivo local)
 4. Implement → commits no feature branch apenas
 5. Validate  → testes reais + make sdlc-doctor
 6. PR        → base develop, CI verde, delete_branch_on_merge=true
@@ -62,7 +62,9 @@ Formato: `feature/INVESTIMENTS-N-<slug>` — ver `.cursor/skills/branch-naming.m
 ## Proibições explícitas
 
 - Push direto em `develop` ou `main`
-- Implementar sem card Plane
+- Implementar sem card Plane criado via MCP/API
+- **Criar pasta `specs/` ou tickets/evidência/backlog em arquivos locais**
+- **Criar tarefas localmente** (somente Plane, project `investiments`)
 - Pular CI ou merge com gates vermelhos
 - Inventar resultado de testes ou Doctor
 - Substituir API oficial por scraping como estratégia default
@@ -100,12 +102,11 @@ python app/infra/sdlc_obs/hooks/post_task.py  # fim
 
 Fase atual: **SDLC operating system only** — `app/backend` e `app/frontend` são placeholders até nova rodada planejada via este workflow.
 
-Implementação de produto (market data, APIs, etc.) **só reinicia** após:
+Implementação de produto **só reinicia** após:
 
-1. Card Plane no project `investiments`
-2. Plano em `specs/` ou `EXAMPLE-SDLC-PLAN.md` derivado
-3. Branch `feature/INVESTIMENTS-N-...`
-4. PR com CI verde
+1. Work items no Plane (project `investiments`) via MCP — epic e sub-tarefas
+2. Branch `feature/INVESTIMENTS-N-...` por card
+3. PR com CI verde; evidência no card Plane (link PR, testes)
 
 ---
 

@@ -50,7 +50,7 @@ Auto Fix → back to Validation
 ### Requirements → Architecture
 
 **Preconditions:**
-- Requirements document exists in `specs/`
+- Requirements captured on Plane work item (via MCP)
 - Non-goals documented
 - At least 2 risks identified
 

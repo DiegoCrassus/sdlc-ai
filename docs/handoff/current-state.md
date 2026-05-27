@@ -24,6 +24,12 @@ Previous market-data implementation was **removed** to restart from zero followi
 - `make sdlc-audit`
 - `make obs-server` (observability dashboard)
 
+## Governance (2026-05-27)
+
+- **Tarefas:** somente Plane MCP (project `investiments`) — **nunca** `specs/` nem arquivos locais.
+- Pasta `specs/` removida; referências no SDLC corrigidas.
+- Skill: `.cursor/skills/plane-sdlc/SKILL.md`
+
 ## Next step
 
-Create a Plane card in project `investiments`, then `/sdlc-plan` for the next product increment.
+Criar epic + sub-tarefas no Plane via MCP; depois `start-change` por card.

@@ -13,11 +13,14 @@ Iniciar uma unidade de trabalho **antes de qualquer edição de código**, crian
 
 ## Procedure
 
-### 1. Criar card no Plane
+### 1. Criar card no Plane (MCP — obrigatório)
+
+Seguir `.cursor/skills/plane-sdlc/SKILL.md`.
 
 - **Workspace:** `investments-sdlc` (`PLANE_WORKSPACE_SLUG`)
 - **Project:** `investiments` (`PLANE_PROJECT_NAME`)
 - **Título:** `[AI][TYPE] Short imperative title` (ver `task-creation.md`)
+- **Descrição:** story, scope, non-goals, AC, DoD (no corpo do card — **nunca** em `specs/`)
 - **Estado:** `In Progress`
 
 ### 2. Registrar número do card
@@ -49,5 +52,5 @@ Nunca commitar em `develop` ou `main` durante implementação.
 | Situation | Action |
 |-----------|--------|
 | Usuário pede "push direto em develop" | Explicar que merge só via PR; branch + PR atende o objetivo |
-| Plane indisponível | Criar Issue GitHub `issue-gh-N` e branch `feature/issue-gh-N-slug`; card Plane retrospectivo |
-| Sem card ID | **Parar** — criar card primeiro |
+| Plane indisponível | **Parar** — corrigir MCP/token; não criar backlog local nem `specs/` |
+| Sem card ID | **Parar** — criar card no Plane via MCP primeiro |
