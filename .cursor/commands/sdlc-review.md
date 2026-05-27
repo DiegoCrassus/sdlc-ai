@@ -15,7 +15,7 @@ Review changes for correctness, security, maintainability, testability, and SDLC
 ### Step 1 — Collect Context
 
 1. Identify the PR or diff being reviewed.
-2. Read the original plan or spec (from `specs/` or conversation).
+2. Read the original Plane work item (MCP) and PR description.
 3. Read `.sdlc/stages.yaml` review stage gates.
 4. Note the acceptance criteria.
 

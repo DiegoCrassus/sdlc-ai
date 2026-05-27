@@ -148,6 +148,10 @@ Single paragraph addressed to the Architect (or the next agent in the lifecycle)
 
 ---
 
+## Delivery
+
+Persist the plan on the **Plane work item** via `.cursor/skills/plane-sdlc/SKILL.md`. Do not write `specs/` or local ticket files.
+
 ## Outputs
 
 1. **Task name** — `[AI][TYPE] Short imperative title`

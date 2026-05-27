@@ -77,7 +77,7 @@ What the Implementer or Architect should do first.
 ## Outputs
 
 - Structured plan (as above)
-- Optionally: a `specs/<ticket-id>.md` file if a persistent spec is needed
+- Plane work item updated via MCP with full plan in description (never a local `specs/` file)
 
 ## Failure Modes
 

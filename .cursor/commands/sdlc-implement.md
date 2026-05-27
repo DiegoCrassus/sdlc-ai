@@ -15,7 +15,7 @@ Implement a planned task with proper context loading, focused diff, validation, 
 ### Step 1 — Load Implementation Context
 
 1. Read `.sdlc/stages.yaml` for implementation stage gates.
-2. Read the plan or spec for this task (from `specs/` or the current conversation).
+2. Read the Plane work item (MCP) for this task — description, acceptance criteria, DoD.
 3. Read `.sdlc/memory/architecture.md` to confirm boundaries.
 4. Identify the exact files that will change.
 

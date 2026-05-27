@@ -2,22 +2,54 @@
 
 ## Current Status
 
-**Phase:** Initialization — no application code implemented yet.
+**Phase:** Investment Radar architecture defined — implementation pending (INVES-20..24).
 
-The project structure has been initialized with the SDLC operating system. Application code will be added in future stages.
+The SDLC operating system is production-ready. **Investment Radar** is the first product vertical: a local demo for market data, watchlists, and simulated portfolios (no real trading).
 
 ## System Boundaries
 
 ```
 sdlc-ai/
 ├── app/
-│   ├── frontend/    ← Future web frontend (framework TBD)
-│   ├── backend/     ← Future Python API / service layer
+│   ├── frontend/    ← React + Vite + TypeScript (INVES-23)
+│   ├── backend/     ← FastAPI + SQLAlchemy async (INVES-20..22)
 │   ├── infra/       ← Future infrastructure-as-code
-│   └── shared/      ← Shared utilities and types
+│   └── shared/      ← Shared constants (optional JSON schemas)
 ├── .sdlc/           ← Machine-readable SDLC configuration
 ├── .cursor/         ← Cursor agent configuration
 └── docs/            ← Human-readable documentation
+```
+
+## Investment Radar — Component Diagram
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                        Browser (localhost)                       │
+│              React SPA — Vite dev server :5173                   │
+└────────────────────────────┬────────────────────────────────────┘
+                             │ REST /api/v1/*
+                             ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                   FastAPI Backend (:8000)                        │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────────────┐ │
+│  │ Market data  │  │  Watchlist   │  │ Simulated portfolio  │ │
+│  │ INVES-20     │  │  INVES-21    │  │ INVES-22             │ │
+│  └──────┬───────┘  └──────┬───────┘  └──────────┬───────────┘ │
+│         │                 │                      │             │
+│         ▼                 └──────────┬───────────┘             │
+│  ┌──────────────┐                    ▼                          │
+│  │ Provider     │           ┌─────────────────┐                  │
+│  │ adapters +   │           │ SQLAlchemy async │                  │
+│  │ fallback     │           │ SQLite (local)   │                  │
+│  │ catalog      │           │ investment_radar │                  │
+│  └──────┬───────┘           │ .db              │                  │
+└─────────┼───────────────────┴─────────────────┴──────────────────┘
+          │
+          ▼
+┌─────────────────────────────────────────────────────────────────┐
+│              External market data (read-only)                    │
+│   Finnhub · Alpha Vantage · CoinGecko · Brapi (optional)        │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
 ## App Boundaries Convention
@@ -29,19 +61,23 @@ sdlc-ai/
 
 ## Data Layer
 
-- **Local development:** SQLite (`./data/rpg_op.db`)
-- **Production target:** TBD
-- ORM: TBD (likely SQLAlchemy with async support, given `aiosqlite` in `.env`)
+- **Investment Radar (local):** SQLite `./data/investment_radar.db` via SQLAlchemy 2.0 async + aiosqlite
+- **SDLC observability:** SQLite `.sdlc/obs/data/sdlc_obs.db` (separate concern)
+- **Production target:** TBD — auth and hosted DB require future ADR
 
 ## Key Technology Decisions
 
-| Area        | Decision        | Status   | Notes                              |
-|-------------|-----------------|----------|------------------------------------|
-| Backend     | Python          | decided  | Primary language                   |
-| Database    | SQLite (local)    | decided | Production target TBD              |
-| Frontend    | TBD             | pending  | Decide when frontend work starts   |
-| Deployment  | TBD             | pending  | Kubernetes or serverless TBD       |
-| Auth        | TBD             | pending  | Decide when user features start    |
+| Area        | Decision                          | Status   | ADR / Doc                                      |
+|-------------|-----------------------------------|----------|------------------------------------------------|
+| Backend     | Python + FastAPI + Pydantic v2    | decided  | ADR-002, ADR-004                               |
+| ASGI server | Uvicorn                           | decided  | ADR-004                                        |
+| Database    | SQLite async (local MVP)          | decided  | ADR-003, ADR-007                               |
+| ORM         | SQLAlchemy 2.0 async              | decided  | ADR-007                                        |
+| Frontend    | React + Vite + TypeScript         | decided  | ADR-005                                        |
+| Market data | Finnhub, Alpha Vantage, CoinGecko | decided  | ADR-006                                        |
+| API contract| REST `/api/v1`, OpenAPI           | decided  | ADR-008, `investment-radar-api.md`             |
+| Auth        | None (local single-user MVP)      | deferred | ADR-008                                        |
+| Deployment  | Local demo only (INVES-24)        | pending  | Runbook sub-task                               |
 
 ## Design Principles
 
@@ -49,3 +85,10 @@ sdlc-ai/
 2. **Observability first** — Every component emits logs and metrics from day one.
 3. **Small diffs** — Prefer reversible, scoped changes over large rewrites.
 4. **SDLC-driven** — No code without a plan and acceptance criteria.
+5. **Graceful degradation** — Live market data with explicit `source=fallback` when providers unavailable.
+
+## Related Documents
+
+- [System context](./system-context.md)
+- [Architecture decisions](./decisions.md)
+- [Investment Radar API contract](./investment-radar-api.md)

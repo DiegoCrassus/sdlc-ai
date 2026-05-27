@@ -31,7 +31,7 @@ stages:
       - Non-goals list
       - Risk registry (at least 2 risks)
     required_evidence:
-      - Written requirements document in specs/
+      - Plane work item with story, scope, and acceptance criteria in description
     gates:
       - Non-goals explicitly documented
       - Risks have mitigations or accepted status
@@ -49,7 +49,7 @@ stages:
       - ADR entry if a significant decision was made
       - List of impacted files and modules
     required_evidence:
-      - Architecture notes in specs/ or docs/architecture/decisions.md
+      - Architecture notes on Plane work item and/or docs/architecture/decisions.md (ADR)
     gates:
       - Trade-offs documented
       - Impacted areas listed

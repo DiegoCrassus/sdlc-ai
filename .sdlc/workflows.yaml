@@ -8,8 +8,8 @@ workflows:
     to_stage: architecture
     description: Transition from approved requirements to architecture definition.
     preconditions:
-      - Requirements document exists in specs/
-      - Non-goals documented
+      - Plane work item exists with requirements in description
+      - Non-goals documented on Plane work item
     agent: architect
     skill: architecture-analysis
     outputs:
