@@ -1,32 +1,29 @@
-"""Asset routes."""
+"""Asset discovery routes."""
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Query
 
-from app.backend.schemas import (
-    AssetDetail,
-    AssetSearchResult,
-    AssetType,
-    HistoryRange,
-    PriceHistory,
-)
+from app.backend.errors import AppError
+from app.backend.schemas import Asset, AssetClass, PaginatedAssets
 from app.backend.services import market_data
+from app.backend.utils.asset_id import parse_asset_id
 
 router = APIRouter(prefix="/assets", tags=["assets"])
 
 
-@router.get("/search", response_model=list[AssetSearchResult])
-async def search(q: str = "", limit: int = Query(20, ge=1, le=50)):
-    return await market_data.search_assets(q, limit)
+@router.get("/search", response_model=PaginatedAssets)
+async def search(
+    q: str = Query(..., min_length=1),
+    asset_class: AssetClass | None = Query(None, alias="class"),
+    limit: int = Query(20, ge=1, le=50),
+    offset: int = Query(0, ge=0),
+) -> PaginatedAssets:
+    return await market_data.search_assets(q, limit=limit, offset=offset, asset_class=asset_class)
 
 
-@router.get("/{symbol}", response_model=AssetDetail)
-async def detail(symbol: str, asset_type: AssetType = Query(...)):
-    return await market_data.get_asset_detail(symbol, asset_type)
-
-
-@router.get("/{symbol}/history", response_model=PriceHistory)
-async def history(symbol: str, asset_type: AssetType = Query(...), range: HistoryRange = Query("7d")):
-    h = await market_data.get_price_history(symbol, asset_type, range)
-    if not h.points:
-        raise HTTPException(404, "No history")
-    return h
+@router.get("/{asset_id:path}", response_model=Asset)
+async def get_asset(asset_id: str) -> Asset:
+    try:
+        parse_asset_id(asset_id)
+    except Exception as exc:
+        raise AppError("VALIDATION_ERROR", str(exc)) from exc
+    return await market_data.get_asset(asset_id)

@@ -7,7 +7,8 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.backend.config import settings
 from app.backend.database import init_db
-from app.backend.routers import assets, health
+from app.backend.errors import register_exception_handlers
+from app.backend.routers import assets, health, history, quotes
 
 
 @asynccontextmanager
@@ -16,7 +17,8 @@ async def lifespan(app: FastAPI):
     yield
 
 
-app = FastAPI(title=settings.app_name, lifespan=lifespan)
+app = FastAPI(title=settings.app_name, lifespan=lifespan, openapi_url="/api/v1/openapi.json")
+register_exception_handlers(app)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origin_list,
@@ -24,8 +26,11 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-app.include_router(health.router, prefix="/api")
-app.include_router(assets.router, prefix="/api")
+api_v1 = "/api/v1"
+app.include_router(health.router, prefix=api_v1)
+app.include_router(assets.router, prefix=api_v1)
+app.include_router(quotes.router, prefix=api_v1)
+app.include_router(history.router, prefix=api_v1)
 
 
 @app.get("/")

@@ -1,50 +1,62 @@
-"""API schemas."""
+"""API schemas aligned with investment-radar-api.md."""
+
+from __future__ import annotations
 
 from datetime import datetime
 from typing import Literal
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
-AssetType = Literal["stock", "crypto"]
-HistoryRange = Literal["1d", "7d", "30d", "90d"]
-DataSourceStatus = Literal["live", "fallback", "unavailable"]
+AssetClass = Literal["stock", "crypto"]
+DataSource = Literal["live", "fallback"]
+HistoryInterval = Literal["1d", "1h"]
+
+
+class Asset(BaseModel):
+    id: str
+    asset_class: str = Field(alias="class")
+    symbol: str
+    name: str
+    currency: str
+    exchange: str | None = None
+    source: DataSource | None = None
+
+    model_config = {"populate_by_name": True}
+
+
+class Quote(BaseModel):
+    asset_id: str
+    price: float
+    change: float | None = None
+    change_percent: float | None = None
+    currency: str
+    timestamp: datetime
+    source: DataSource
 
 
 class PricePoint(BaseModel):
     timestamp: datetime
-    price: float
+    open: float
+    high: float
+    low: float
+    close: float
+    volume: float | None = None
 
 
-class AssetQuote(BaseModel):
-    symbol: str
-    asset_type: AssetType
-    name: str
-    currency: str = "USD"
-    price: float
-    change_24h: float | None = None
-    change_pct_24h: float | None = None
-    market_cap: float | None = None
-    volume_24h: float | None = None
-    source: DataSourceStatus
-    as_of: datetime
+class PaginatedAssets(BaseModel):
+    items: list[Asset]
+    total: int
+    limit: int
+    offset: int
 
 
-class AssetSearchResult(BaseModel):
-    symbol: str
-    asset_type: AssetType
-    name: str
-    exchange_or_network: str | None = None
+class BatchQuotes(BaseModel):
+    items: list[Quote]
+    missing: list[str]
 
 
-class AssetDetail(AssetQuote):
-    description: str | None = None
-    high_52w: float | None = None
-    low_52w: float | None = None
-
-
-class PriceHistory(BaseModel):
-    symbol: str
-    asset_type: AssetType
-    range: HistoryRange
+class HistoryResponse(BaseModel):
+    asset_id: str
+    interval: HistoryInterval
+    source: DataSource
     points: list[PricePoint]
-    source: DataSourceStatus
