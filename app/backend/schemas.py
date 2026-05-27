@@ -60,3 +60,30 @@ class HistoryResponse(BaseModel):
     interval: HistoryInterval
     source: DataSource
     points: list[PricePoint]
+
+
+class WatchlistItem(BaseModel):
+    asset_id: str
+    asset: Asset | None = None
+    quote: Quote | None = None
+    notes: str | None = None
+    sort_order: int = 0
+    added_at: datetime
+
+
+class PaginatedWatchlist(BaseModel):
+    items: list[WatchlistItem]
+    total: int
+    limit: int
+    offset: int
+
+
+class WatchlistItemCreate(BaseModel):
+    asset_id: str
+    notes: str | None = Field(None, max_length=500)
+    sort_order: int = 0
+
+
+class WatchlistItemUpdate(BaseModel):
+    notes: str | None = Field(None, max_length=500)
+    sort_order: int | None = None
