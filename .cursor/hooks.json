@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "hooks": {
+    "sessionStart": [
+      {
+        "command": "python3 .cursor/hooks/sdlc_obs_session.py pre"
+      }
+    ],
+    "stop": [
+      {
+        "command": "python3 .cursor/hooks/sdlc_obs_session.py post"
+      }
+    ]
+  }
+}

@@ -1,0 +1,136 @@
+version: "1.0"
+description: Doctor validation rules for the SDLC repository.
+
+checks:
+  directories:
+    severity: required
+    items:
+      - .cursor
+      - .cursor/rules
+      - .cursor/commands
+      - .cursor/skills
+      - .cursor/subagents
+      - .cursor/hooks
+      - .sdlc
+      - .sdlc/dsl
+      - .sdlc/memory
+      - docs
+      - docs/architecture
+      - docs/infrastructure
+      - docs/handoff
+      - docs/roadmap
+      - docs/operations
+      - docs/sdlc
+      - app
+      - app/frontend
+      - app/backend
+      - app/infra
+      - app/shared
+
+  files:
+    severity: required
+    items:
+      - .sdlc/sdlc.yaml
+      - .sdlc/lifecycle.yaml
+      - .sdlc/stages.yaml
+      - .sdlc/workflows.yaml
+      - .sdlc/agents.yaml
+      - .sdlc/skills.yaml
+      - .sdlc/rules.yaml
+      - .sdlc/integrations.yaml
+      - .sdlc/doctor.yaml
+      - .sdlc/dsl/cli.py
+      - .sdlc/dsl/doctor.py
+      - Makefile
+      - README.md
+
+  cursor:
+    severity: required
+    commands:
+      - .cursor/commands/sdlc-doctor.md
+      - .cursor/commands/sdlc-plan.md
+      - .cursor/commands/sdlc-implement.md
+      - .cursor/commands/sdlc-review.md
+      - .cursor/commands/sdlc-handoff.md
+    rules:
+      - .cursor/rules/000-project-governance.mdc
+      - .cursor/rules/010-ai-native-sdlc.mdc
+      - .cursor/rules/020-code-quality.mdc
+      - .cursor/rules/030-docs-and-handoff.mdc
+      - .cursor/rules/040-doctor-gates.mdc
+    skills:
+      - .cursor/skills/requirements-refinement.md
+      - .cursor/skills/architecture-analysis.md
+      - .cursor/skills/implementation.md
+      - .cursor/skills/qa-validation.md
+      - .cursor/skills/code-review.md
+      - .cursor/skills/observability.md
+      - .cursor/skills/documentation.md
+    subagents:
+      - .cursor/subagents/planner.md
+      - .cursor/subagents/architect.md
+      - .cursor/subagents/implementer.md
+      - .cursor/subagents/reviewer.md
+      - .cursor/subagents/qa.md
+      - .cursor/subagents/devops.md
+      - .cursor/subagents/doctor.md
+    hooks:
+      - .cursor/hooks/pre-task.md
+      - .cursor/hooks/post-task.md
+      - .cursor/hooks/pre-review.md
+      - .cursor/hooks/post-review.md
+
+  docs:
+    severity: required
+    items:
+      - docs/architecture/overview.md
+      - docs/architecture/decisions.md
+      - docs/architecture/system-context.md
+      - docs/infrastructure/overview.md
+      - docs/infrastructure/local-development.md
+      - docs/infrastructure/deployment.md
+      - docs/handoff/template.md
+      - docs/handoff/current-state.md
+      - docs/roadmap/roadmap.md
+      - docs/operations/observability.md
+      - docs/operations/incident-response.md
+      - docs/operations/maintenance.md
+      - docs/sdlc/ai-native-sdlc.md
+      - docs/sdlc/workflows.md
+      - docs/sdlc/gates.md
+      - docs/sdlc/doctor.md
+
+  yaml_validity:
+    severity: required
+    files:
+      - .sdlc/sdlc.yaml
+      - .sdlc/lifecycle.yaml
+      - .sdlc/stages.yaml
+      - .sdlc/workflows.yaml
+      - .sdlc/agents.yaml
+      - .sdlc/skills.yaml
+      - .sdlc/rules.yaml
+      - .sdlc/integrations.yaml
+      - .sdlc/doctor.yaml
+
+  integrations:
+    severity: warning
+    items:
+      - id: github
+        env: GITHUB_PERSONAL_ACCESS_TOKEN_CLASSIC
+      - id: plane
+        env: PLANE_API_KEY
+      - id: openai
+        env: OPENAI_API_KEY
+
+  makefile:
+    severity: required
+    targets:
+      - sdlc-doctor
+      - sdlc-validate
+      - sdlc-stages
+      - docs-check
+
+  python_dsl:
+    severity: required
+    importable: .sdlc/dsl/cli.py

@@ -1,0 +1,65 @@
+---
+description: AI-Native SDLC model rules. Applied when working on any feature or fix.
+alwaysApply: true
+---
+
+# AI-Native SDLC Model
+
+## Lifecycle Stages
+
+1. **Ticket** — Capture intent, constraints, and acceptance criteria.
+2. **Requirements** — Refine scope, assumptions, risks, non-goals.
+3. **Architecture** — Define approach, boundaries, trade-offs, impacted areas.
+4. **Implementation** — Implement through scoped tasks.
+5. **Validation** — Run tests and collect real evidence.
+6. **PR & Review** — Review correctness, security, maintainability.
+7. **Deployment** — Safe release with rollback plan.
+8. **Observability** — Confirm signals: logs, metrics, traces.
+9. **Incident** — Document and resolve production issues.
+10. **Auto Fix** — Prepare corrective changes from evidence.
+
+## Stage Transitions
+
+- Do not skip stages without explicit reason.
+- Each stage requires its `required_evidence` (defined in `.sdlc/stages.yaml`) before proceeding.
+- Produce a handoff summary before major transitions.
+
+## SDLC Files
+
+- Machine-readable config: `.sdlc/`
+- Human-readable docs: `docs/`
+- Agent instructions: `.cursor/`
+- Application code: `app/`
+
+## Cursor Workflow
+
+1. Use `sdlc-plan` command for new tickets.
+2. Use `sdlc-implement` command for implementation tasks.
+3. Use `sdlc-review` command for PR reviews.
+4. Use `sdlc-handoff` command for stage transitions.
+5. Use `sdlc-doctor` command after structural changes.
+
+## Context Loading
+
+Always load context in this order:
+1. `.sdlc/AGENTS.md`                        ← handbook with all agents, skills, and commands
+2. `.sdlc/sdlc.yaml`
+3. `.sdlc/memory/operational-context.md`
+4. `.sdlc/memory/architecture.md`
+5. Relevant `docs/` section for the current stage
+
+## New Repository Initialization
+
+If this is a new blank repository and the SDLC structure does not exist yet:
+- Read `SDLC-basic.txt` (root of repository) for the complete initialization spec
+- Follow its EXECUTION RULES section step by step
+- Target: `make sdlc-audit` must pass with Autonomy Score ≥ 90%
+- Do not invent structure — follow SDLC-basic.txt exactly
+
+## Available Commands
+
+- `/sdlc-plan`    → `.cursor/commands/sdlc-plan.md`
+- `/sdlc-audit`   → `.cursor/commands/sdlc-audit.md` (runs full autonomy check)
+- `/sdlc-doctor`  → `.cursor/commands/sdlc-doctor.md`
+- `/sdlc-review`  → `.cursor/commands/sdlc-review.md`
+- `/sdlc-handoff` → `.cursor/commands/sdlc-handoff.md`

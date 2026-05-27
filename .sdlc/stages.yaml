@@ -1,0 +1,174 @@
+version: "1.0"
+description: Stage definitions with inputs, outputs, evidence, and gates.
+
+stages:
+  - id: ticket
+    name: Ticket / Idea
+    objective: Capture and validate a work item before refinement begins.
+    inputs:
+      - User request or business need
+      - Context from .sdlc/memory/business-rules.md
+    outputs:
+      - Ticket description with title and intent
+      - Acceptance criteria (at least 3)
+      - Initial constraints list
+    required_evidence:
+      - Written ticket with title, description, and acceptance criteria
+    gates:
+      - Acceptance criteria are explicit and measurable
+      - Scope is bounded (not "refactor everything")
+
+  - id: requirements
+    name: Requirements
+    objective: Produce a refined specification that guides architecture and implementation.
+    inputs:
+      - Ticket output
+      - .sdlc/memory/business-rules.md
+      - Relevant docs
+    outputs:
+      - Refined scope statement
+      - Assumptions list
+      - Non-goals list
+      - Risk registry (at least 2 risks)
+    required_evidence:
+      - Written requirements document in specs/
+    gates:
+      - Non-goals explicitly documented
+      - Risks have mitigations or accepted status
+
+  - id: architecture
+    name: Architecture
+    objective: Define the technical solution before any code is written.
+    inputs:
+      - Requirements output
+      - .sdlc/memory/architecture.md
+      - docs/architecture/overview.md
+    outputs:
+      - Technical approach description
+      - Component/boundary diagram or description
+      - ADR entry if a significant decision was made
+      - List of impacted files and modules
+    required_evidence:
+      - Architecture notes in specs/ or docs/architecture/decisions.md
+    gates:
+      - Trade-offs documented
+      - Impacted areas listed
+      - No code written before this gate passes
+
+  - id: implementation
+    name: Implementation
+    objective: Implement the planned change in small, reversible, well-scoped diffs.
+    inputs:
+      - Architecture output
+      - Relevant tests and existing code
+    outputs:
+      - Code changes
+      - Updated tests
+      - Docs updated if architecture/infra changed
+    required_evidence:
+      - Working code that passes linting and unit tests
+    gates:
+      - Tests exist for new logic
+      - Diff is focused and does not touch unrelated areas
+      - Docs updated if public interfaces changed
+
+  - id: validation
+    name: Validation
+    objective: Confirm the implementation meets acceptance criteria.
+    inputs:
+      - Implementation output
+      - Acceptance criteria from ticket
+    outputs:
+      - Test results
+      - QA notes
+      - Evidence of passing gates
+    required_evidence:
+      - Test output (pass/fail) recorded
+      - Each acceptance criterion verified
+    gates:
+      - All required tests pass
+      - No fake validation (results must be real)
+      - Acceptance criteria met
+
+  - id: review
+    name: PR & Review
+    objective: Human or agent review of correctness, security, and maintainability.
+    inputs:
+      - Validation output
+      - PR diff
+    outputs:
+      - Review decision (approve / request changes)
+      - Risk notes
+      - Required fixes list
+    required_evidence:
+      - Review comments recorded
+      - Decision documented
+    gates:
+      - Security considerations checked
+      - No unaddressed high-risk items
+      - Maintainability reviewed
+
+  - id: deployment
+    name: Deployment
+    objective: Release the change safely to the target environment.
+    inputs:
+      - Review approval
+      - docs/infrastructure/deployment.md
+    outputs:
+      - Deployment notes
+      - Rollback plan
+      - Environment assumptions
+    required_evidence:
+      - Deployment executed (or skipped with reason)
+      - Rollback procedure documented
+    gates:
+      - Rollback plan exists
+      - Environment variables verified
+
+  - id: observability
+    name: Observability
+    objective: Confirm signals are in place to detect problems after deployment.
+    inputs:
+      - Deployment output
+      - docs/operations/observability.md
+    outputs:
+      - Log coverage notes
+      - Metric definitions
+      - Expected trace paths
+    required_evidence:
+      - Observability checklist completed
+    gates:
+      - At least error logging confirmed
+      - Key metrics identified
+
+  - id: incident
+    name: Incident
+    objective: Record and resolve production incidents systematically.
+    inputs:
+      - Incident report or alert
+      - .sdlc/memory/incidents.md
+    outputs:
+      - Incident record
+      - Mitigation steps
+      - Post-mortem summary
+    required_evidence:
+      - Incident documented in .sdlc/memory/incidents.md
+      - Root cause identified
+    gates:
+      - Mitigation applied or scheduled
+      - Communication sent if user-facing
+
+  - id: autofix
+    name: Auto Fix
+    objective: Automatically prepare corrective changes based on incident or validation evidence.
+    inputs:
+      - Incident output or validation failure
+      - Relevant code context
+    outputs:
+      - Proposed fix (diff or description)
+      - Validation plan for the fix
+    required_evidence:
+      - Fix traceable to specific evidence (not guessed)
+    gates:
+      - Fix does not introduce new risks without documentation
+      - Human review required before merge

@@ -1,0 +1,28 @@
+version: "1.0"
+name: sdlc-ai
+description: AI-Native SDLC operating system for the sdlc-ai project.
+
+# Entry references
+lifecycle: lifecycle.yaml
+stages: stages.yaml
+workflows: workflows.yaml
+agents: agents.yaml
+skills: skills.yaml
+rules: rules.yaml
+integrations: integrations.yaml
+doctor: doctor.yaml
+
+memory:
+  architecture: memory/architecture.md
+  business_rules: memory/business-rules.md
+  operational_context: memory/operational-context.md
+  incidents: memory/incidents.md
+
+settings:
+  default_language: python
+  docs_root: docs
+  app_root: app
+  cursor_root: .cursor
+  doctor_exit_on_fail: true
+  require_handoff_on_major_transition: true
+  require_doctor_after_structural_change: true

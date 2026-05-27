@@ -1,0 +1,1374 @@
+You are acting as a senior software architect specialized in AI-native SDLC, Cursor-based agentic workflows, project governance, and developer experience.
+
+Your task is to initialize a solid AI Native SDLC structure for this repository.
+
+The goal is NOT to build the product yet.
+The goal is to create the project operating system: folders, conventions, Cursor configuration, SDLC YAML files, Python DSL, documentation, and a Doctor validation tool.
+
+You must work autonomously and inspect the current repository before creating files.
+
+====================================================================
+CORE OBJECTIVE
+====================================================================
+
+Create a minimal but solid AI Native SDLC foundation with these main folders:
+
+1. .cursor
+   Contains Cursor-oriented configuration:
+   - rules
+   - commands
+   - skills
+   - subagents
+   - hooks
+   - project instructions
+
+2. .sdlc
+   Contains SDLC configuration:
+   - lifecycle definition
+   - stages
+   - governance rules
+   - workflows
+   - skills mapping
+   - agent mapping
+   - integrations
+   - doctor rules
+   - Python DSL package
+
+3. docs
+   Contains human-readable project documentation:
+   - infrastructure
+   - handoff
+   - roadmap
+   - architecture
+   - operations
+   - onboarding
+   - AI-native SDLC guide
+
+4. app
+   Contains the actual project implementation area:
+   - frontend
+   - backend
+   - infra
+   - shared
+   - scripts if needed
+
+Root-level files may exist only when they make sense globally, for example:
+- Makefile
+- README.md
+- pyproject.toml
+- .gitignore
+- docker-compose.yml if needed later
+
+Do not create unnecessary application code.
+Do not invent product features.
+Do not over-engineer.
+Create enough structure to support future frontend, backend and infra development.
+
+====================================================================
+EXPECTED FINAL STRUCTURE
+====================================================================
+
+Create or update the repository toward this structure:
+
+.
+├── .cursor/
+│   ├── rules/
+│   │   ├── 000-project-governance.mdc
+│   │   ├── 010-ai-native-sdlc.mdc
+│   │   ├── 020-code-quality.mdc
+│   │   ├── 030-docs-and-handoff.mdc
+│   │   └── 040-doctor-gates.mdc
+│   ├── commands/
+│   │   ├── sdlc-doctor.md
+│   │   ├── sdlc-plan.md
+│   │   ├── sdlc-implement.md
+│   │   ├── sdlc-review.md
+│   │   ├── sdlc-handoff.md
+│   │   └── sdlc-audit.md              ← runs SDLC Auditor + generates canvas report
+│   ├── skills/
+│   │   ├── requirements-refinement.md
+│   │   ├── architecture-analysis.md
+│   │   ├── implementation.md
+│   │   ├── qa-validation.md
+│   │   ├── code-review.md
+│   │   ├── observability.md
+│   │   ├── documentation.md
+│   │   ├── task-creation.md           ← [AI][TYPE] planning format + DoD
+│   │   ├── branch-naming.md           ← SDLCINVEST-N / issue-gh-N conventions
+│   │   ├── container-validation.md    ← docker build + compose health check
+│   │   ├── e2e-testing.md             ← Playwright headless gate
+│   │   ├── secrets-management.md      ← gitleaks pre-commit + CI gate
+│   │   ├── performance-testing.md     ← k6 load testing + baseline comparison
+│   │   ├── auto-merge-policy.md       ← confidence score + merge criteria
+│   │   └── iac-generation.md          ← Terraform/IaC generation templates
+│   ├── subagents/
+│   │   ├── planner.md                 ← primary skill: task-creation.md
+│   │   ├── architect.md
+│   │   ├── implementer.md
+│   │   ├── reviewer.md
+│   │   ├── qa.md
+│   │   ├── devops.md                  ← PR lifecycle + branch deletion + CI generation
+│   │   ├── doctor.md
+│   │   ├── observer.md                ← records and surfaces SDLC metrics
+│   │   ├── issue-analyst.md           ← triages every GitHub Issue automatically
+│   │   ├── sdlc-auditor.md            ← runs full SDLC audit + generates canvas report
+│   │   ├── migration-runner.md        ← executes Alembic migrations in test DB
+│   │   ├── contract-validator.md      ← validates OpenAPI ↔ TypeScript types sync
+│   │   ├── auto-fixer.md              ← reads CI failures + opens fix PRs
+│   │   ├── rollback-agent.md          ← executes documented rollback plans
+│   │   └── security-scanner.md        ← SAST + dependency scan + secrets gate
+│   ├── hooks/
+│   │   ├── pre-task.md
+│   │   ├── post-task.md
+│   │   ├── pre-review.md
+│   │   └── post-review.md
+│   ├── mcp.json                       ← MCP server configuration (gitignored)
+│   └── README.md
+│
+├── .sdlc/
+│   ├── AGENTS.md                      ← agent handbook (FIRST file any new chat reads)
+│   ├── sdlc.yaml
+│   ├── lifecycle.yaml
+│   ├── stages.yaml
+│   ├── workflows.yaml
+│   ├── agents.yaml
+│   ├── skills.yaml
+│   ├── rules.yaml
+│   ├── integrations.yaml
+│   ├── doctor.yaml
+│   ├── memory/
+│   │   ├── architecture.md
+│   │   ├── business-rules.md
+│   │   ├── operational-context.md
+│   │   └── incidents.md
+│   ├── dsl/
+│   │   ├── __init__.py
+│   │   ├── models.py
+│   │   ├── loader.py
+│   │   ├── validator.py
+│   │   ├── doctor.py
+│   │   └── cli.py
+│   └── README.md
+│
+├── docs/
+│   ├── README.md
+│   ├── architecture/
+│   │   ├── overview.md
+│   │   ├── decisions.md
+│   │   └── system-context.md
+│   ├── infrastructure/
+│   │   ├── overview.md
+│   │   ├── local-development.md
+│   │   └── deployment.md
+│   ├── handoff/
+│   │   ├── template.md
+│   │   └── current-state.md
+│   ├── roadmap/
+│   │   └── roadmap.md
+│   ├── operations/
+│   │   ├── observability.md
+│   │   ├── incident-response.md
+│   │   └── maintenance.md
+│   └── sdlc/
+│       ├── ai-native-sdlc.md
+│       ├── workflows.md
+│       ├── gates.md
+│       └── doctor.md
+│
+├── app/
+│   ├── frontend/
+│   │   └── README.md
+│   ├── backend/
+│   │   └── README.md
+│   ├── infra/
+│   │   ├── README.md
+│   │   ├── sdlc_obs/                  ← SDLC observability + audit tool
+│   │   │   ├── README.md
+│   │   │   ├── schema.sql
+│   │   │   ├── collector.py
+│   │   │   ├── server.py
+│   │   │   ├── auditor.py             ← autonomous SDLC audit script
+│   │   │   └── hooks/
+│   │   │       ├── __init__.py
+│   │   │       ├── emit.py
+│   │   │       ├── pre_task.py
+│   │   │       └── post_task.py
+│   │   └── terraform/                 ← IaC modules (PostgreSQL, Redis, backend, frontend)
+│   │       ├── README.md
+│   │       ├── modules/
+│   │       │   ├── database/
+│   │       │   ├── cache/
+│   │       │   ├── backend/
+│   │       │   └── frontend/
+│   │       └── environments/
+│   │           ├── local.tfvars
+│   │           └── staging.tfvars
+│   └── shared/
+│       └── README.md
+│
+├── .github/
+│   └── workflows/
+│       └── ci.yml                     ← GitHub Actions: test, security, build, deploy
+├── Makefile
+├── pyproject.toml
+├── README.md
+└── .gitignore
+
+If some files already exist, preserve useful content and extend it.
+Do not overwrite existing meaningful project content without reason.
+If a conflict exists, make the smallest safe change.
+
+====================================================================
+AI NATIVE SDLC MODEL
+====================================================================
+
+The SDLC must follow this lifecycle:
+
+1. Ticket / Idea
+   - Capture request, business intent, constraints and acceptance criteria.
+
+2. Requirements
+   - Refine scope, rules, assumptions, risks and non-goals.
+
+3. Architecture
+   - Define technical approach, boundaries, trade-offs and impacted areas.
+
+4. Implementation
+   - Implement through scoped tasks using deterministic rules.
+
+5. Validation
+   - Run tests, checks, QA notes and evidence collection.
+
+6. PR & Review
+   - Review diffs, risks, security, maintainability and regression impact.
+
+7. Deployment
+   - Prepare safe release, rollback notes and environment assumptions.
+
+8. Observability
+   - Define logs, metrics, traces, dashboards and expected signals.
+   - Emit SDLC pipeline metrics via pre_task.py / post_task.py hooks.
+
+9. Incident
+   - Capture diagnosis, mitigation, communication and post-mortem.
+
+10. Auto Fix
+    - Suggest or prepare corrective changes using evidence from previous stages.
+
+This lifecycle must be represented in YAML and documentation.
+
+====================================================================
+MCP CONFIGURATION
+====================================================================
+
+Configure Model Context Protocol (MCP) servers in .cursor/mcp.json.
+
+Required MCP servers:
+
+1. GitHub
+   - command: npx
+   - args: ["-y", "@modelcontextprotocol/server-github"]
+   - env: GITHUB_PERSONAL_ACCESS_TOKEN (from .env)
+   - Purpose: create issues, PRs, read repository state
+
+2. Plane
+   - command: uvx
+   - args: ["plane-mcp-server", "stdio"]
+   - env: PLANE_API_KEY, PLANE_WORKSPACE_SLUG, PLANE_BASE_URL (from .env)
+   - Purpose: create/update work items, wiki pages, project management
+
+Rules:
+- .cursor/mcp.json must be listed in .gitignore (contains credentials).
+- Load credentials from environment variables, not hardcoded values.
+- Active integrations must be marked status: active in .sdlc/integrations.yaml.
+
+Do NOT include LangSmith, Supabase, or any observability SaaS in the integrations.
+Observability is handled internally by app/infra/sdlc_obs/.
+
+====================================================================
+CURSOR CONFIGURATION REQUIREMENTS
+====================================================================
+
+Inside .cursor, create rules and command files that instruct Cursor agents to operate using the SDLC structure.
+
+The Cursor setup must support:
+
+- Vertical-first execution
+- Context-aware development
+- Deterministic gates
+- Safe autonomy
+- Human-in-the-loop when needed
+- Continuous improvement
+- Operational memory
+- Documentation synchronization
+- Doctor validation before and after important work
+- Observability emission at every task boundary
+
+The rules must make clear that Cursor should:
+
+- Inspect repository state before acting.
+- Read .sdlc/sdlc.yaml before any major task.
+- Read relevant memory files from .sdlc/memory.
+- Use docs as source of human-facing truth.
+- Update docs when architecture, infrastructure, operations or handoff changes.
+- Run the SDLC Doctor after structural changes.
+- Avoid broad rewrites without explicit reason.
+- Prefer small, reversible, well-scoped changes.
+- Record assumptions when information is missing.
+- Never fake validation results.
+- Never claim a command passed unless it actually ran successfully.
+- Emit observability metrics at task start (pre_task.py) and task end (post_task.py).
+
+====================================================================
+CURSOR COMMANDS
+====================================================================
+
+Create these command instruction files:
+
+1. .cursor/commands/sdlc-doctor.md
+   Purpose:
+   - Run the SDLC Doctor.
+   - Validate folders, YAML files, docs, Cursor rules and app boundaries.
+   - Report missing, invalid or inconsistent items.
+
+2. .cursor/commands/sdlc-plan.md
+   Purpose:
+   - Convert an idea/ticket into SDLC-aligned plan using task-creation.md skill.
+   - Produce scope, story, assumptions, risks, affected areas, DoD, tasks and validation gates.
+   - Every plan must follow the [AI][TYPE] task naming convention.
+
+3. .cursor/commands/sdlc-implement.md
+   Purpose:
+   - Implement a planned task.
+   - Require context loading, focused diff, validation and docs update if needed.
+
+4. .cursor/commands/sdlc-review.md
+   Purpose:
+   - Review changes.
+   - Check correctness, security, maintainability, testability and SDLC alignment.
+
+5. .cursor/commands/sdlc-handoff.md
+   Purpose:
+   - Generate a handoff summary.
+   - Include what changed, why, risks, validation evidence, next steps and rollback notes.
+
+6. .cursor/commands/sdlc-audit.md
+   Purpose:
+   - Run the SDLC Auditor autonomously: python3 app/infra/sdlc_obs/auditor.py
+   - Interpret Autonomy Score and Health Score (target ≥ 90% each)
+   - Open GitHub Issues for every FAIL result found
+   - Open the generated canvas report for the user
+   - Update .sdlc/memory/operational-context.md with audit results
+
+Each command file must be written as reusable Cursor instructions, not as prose documentation only.
+
+====================================================================
+SKILLS
+====================================================================
+
+Create skill files in .cursor/skills.
+
+Each skill must contain:
+
+- Purpose
+- When to use
+- Required inputs
+- Procedure
+- Outputs
+- Validation checklist
+- Failure modes
+
+Minimum skills:
+
+1.  requirements-refinement
+2.  architecture-analysis
+3.  implementation
+4.  qa-validation
+5.  code-review
+6.  observability
+7.  documentation
+8.  task-creation           ← defines the structured planning format (see below)
+9.  branch-naming           ← SDLCINVEST-N / issue-gh-N naming conventions
+10. container-validation    ← docker build + compose stack health check gate
+11. e2e-testing             ← Playwright headless E2E gate for every frontend PR
+12. secrets-management      ← gitleaks pre-commit + CI gate; .env rules
+13. performance-testing     ← k6 load test + baseline comparison before deploy
+14. auto-merge-policy       ← confidence score criteria for autonomous merge
+15. iac-generation          ← Terraform module generation from architecture spec
+
+Keep them practical and concise.
+
+====================================================================
+NEW SKILLS — DETAILED REQUIREMENTS
+====================================================================
+
+9. branch-naming.md
+   Convention: <prefix>/SDLCINVEST-N-issue-gh-N-imperative-slug
+   Prefixes: feature/ | bugfix/ | hotfix/ | docs/ | infra/ | refactor/ | sdlc/ | test/
+   Rules: English slug, kebab-case, max 5 words, imperative verb.
+   Lifecycle: created by IssueAnalyst → used in PR → deleted by DevOps on merge/close.
+
+10. container-validation.md
+    Gate: runs after every Dockerfile or docker-compose change.
+    Procedure:
+    - docker build --check (syntax only)
+    - docker compose build --no-cache
+    - docker compose up -d && wait 10s
+    - docker compose ps: all services must be "healthy"
+    - docker compose down -v
+    Exit 0 only if all services healthy.
+
+11. e2e-testing.md
+    Gate: mandatory for every PR touching app/frontend/.
+    Procedure: Playwright headless chromium against stack running in CI.
+    Coverage required: login/logout, main CRUD flow, form validation, error handling.
+    Threshold: 0 failures; flakiness < 5%.
+
+12. secrets-management.md
+    Gate: runs BEFORE any other CI check.
+    Tools: gitleaks detect --source . --exit-code 1
+    Local hook: .git/hooks/pre-commit calls gitleaks protect --staged
+    Rules: .env in .gitignore; .env.example values must be placeholders only.
+
+13. performance-testing.md
+    Gate: optional but required before first production deploy.
+    Tool: k6 with 10 VUs, 30s duration.
+    Thresholds: p95 < 200ms, error rate < 0.1%, throughput > baseline × 0.8.
+    Baseline stored in .sdlc/memory/perf-baseline.json.
+
+14. auto-merge-policy.md
+    Confidence score: score starts at 1.0 and decreases per penalty.
+    Auto-APPROVE threshold: score ≥ 0.95.
+    Hard blocks (score = 0): auth/ changes, production DB changes, explicit ESCALATE.
+    Auto-merge gate: Doctor=0 + all CI green + Reviewer APPROVE → merge automatically.
+
+15. iac-generation.md
+    Trigger: when Architect finalizes docs/architecture/overview.md.
+    Procedure:
+    - Generate app/infra/terraform/ modules from architecture spec
+    - Modules: database/ (PostgreSQL), cache/ (Redis), backend/ (container), frontend/ (CDN)
+    - Run: terraform init -backend=false && terraform validate && terraform fmt -check
+    - No hardcoded values — all in variables.tf with sensitive = true for secrets.
+
+====================================================================
+TASK CREATION SKILL (task-creation.md)
+====================================================================
+
+The task-creation.md skill defines how every agent-created plan must be structured.
+The Planner subagent must reference this skill as its primary skill.
+
+Task Naming Convention:
+  Every task name must follow this format:
+  [AI][TYPE] Short imperative title (max 8 words)
+
+  TYPE values: PLAN | BACKEND | FRONTEND | INFRA | QA | REVIEW | ARCH | FIX | DOCS
+
+  Examples:
+  - [AI][BACKEND] Add internal work-item API endpoint
+  - [AI][INFRA] Setup SDLC observability tool
+  - [AI][QA] Validate Plane MCP integration
+
+Required plan sections (in order):
+
+1. Story
+   Narrative context explaining why this task matters.
+   Written in plain English. 3-5 sentences minimum.
+   Must connect to a business or product need.
+
+2. Scope
+   Bullet list of what is included.
+
+3. Non-Goals
+   Bullet list of what is explicitly excluded.
+
+4. Assumptions
+   Table with: Assumption | Confidence | Impact if wrong
+
+5. Risks
+   Table with: Risk | Likelihood | Impact | Mitigation
+
+6. Impacted Areas
+   Table with: Area | Files / Systems | Change Type
+
+7. Acceptance Criteria
+   Numbered list of measurable, testable criteria.
+   Each criterion must be verifiable without ambiguity.
+
+8. Definition of Done (DoD)
+   Checkbox list. Must include:
+   - [ ] Required ADRs written and accepted (if architectural decision made)
+   - [ ] Unit tests pass locally
+   - [ ] Integration tests pass (if applicable)
+   - [ ] make sdlc-doctor exits 0
+   - [ ] Relevant docs updated
+   - [ ] No secrets in code or diff
+   - [ ] PR reviewed and approved (human or Reviewer agent)
+   - [ ] Handoff summary written in docs/handoff/current-state.md
+
+9. Task Breakdown
+   Subtasks using the same [AI][TYPE] naming convention.
+   Each subtask: title | owner agent | estimated complexity
+
+10. Next Step
+    Single clear instruction for the next agent or human action.
+
+Plan quality gates (self-check before delivery):
+- All 10 sections present
+- Task names follow [AI][TYPE] convention
+- DoD has at least 6 checkboxes
+- Assumptions table has confidence levels
+- Next Step is a single, actionable sentence
+
+====================================================================
+SUBAGENTS
+====================================================================
+
+Create subagent descriptions in .cursor/subagents.
+
+Each subagent must contain:
+
+- Role
+- Responsibilities
+- Inputs
+- Outputs
+- Boundaries
+- Escalation triggers
+
+Minimum subagents:
+
+1.  Planner           — Primary skill: task-creation.md. [AI][TYPE] plans + Story + DoD.
+2.  Architect         — ADR authoring, impacted areas, trade-offs.
+3.  Implementer       — Scoped code changes, follows implementation.md skill.
+4.  Reviewer          — Confidence-scored PR review; APPROVE if score ≥ 0.95.
+5.  QA                — Runs tests, collects evidence per acceptance criteria.
+6.  DevOps            — PR lifecycle, branch deletion, CI generation, IaC deployment.
+7.  Doctor            — Runs make sdlc-doctor + make sdlc-audit; blocks on FAILs.
+8.  Observer          — Records metrics via pre_task.py / post_task.py hooks.
+9.  IssueAnalyst      — Triages every GitHub Issue: classify, comment, suggest branch.
+10. SDLCAuditor       — Runs python3 app/infra/sdlc_obs/auditor.py; generates canvas report.
+11. MigrationRunner   — Executes Alembic migrations in test DB; validates reversibility.
+12. ContractValidator — Validates OpenAPI ↔ TypeScript types are in sync.
+13. AutoFixer         — Reads CI failures; opens fix PRs for known error patterns.
+14. RollbackAgent     — Executes documented rollback plan when health metrics degrade.
+15. SecurityScanner   — Runs Bandit + npm audit + Trivy + gitleaks as PR gate.
+
+Subagents should be specialized, not generic.
+They must work together through the SDLC YAML and docs.
+
+Observer subagent responsibilities:
+- Call pre_task.py at task start to open a metrics run.
+- Call post_task.py at task end to close the run with outcomes.
+- Set hallucination_flag when agent claims success but evidence says otherwise.
+- Set regression_flag when Doctor or tests fail after claimed success.
+- Alert when quality thresholds are crossed (completion rate < 80%, hallucination rate > 5%).
+
+IssueAnalyst subagent responsibilities:
+- Triggered on every new GitHub Issue.
+- Classify issue as bug/feature/infra/docs/security.
+- Post a structured comment with analysis and suggested branch name.
+- Create Plane card linked to the issue.
+- Apply labels (priority, type, stage).
+
+SDLCAuditor subagent responsibilities:
+- Execute python3 app/infra/sdlc_obs/auditor.py autonomously.
+- Interpret Autonomy Score and Health Score.
+- Open GitHub Issues for every FAIL result.
+- Update .sdlc/memory/operational-context.md with audit results.
+
+MigrationRunner subagent responsibilities:
+- Triggered after any change to app/backend/migrations/ or app/backend/models/.
+- Provision isolated test PostgreSQL (Docker or DATABASE_URL_TEST env var).
+- Run: alembic upgrade head — capture output and exit code.
+- Run: alembic downgrade -1 — verify reversibility.
+- Validate schema with SQLAlchemy inspect() against models.
+- Post result as PR comment. Block merge if migration fails or is irreversible.
+
+ContractValidator subagent responsibilities:
+- Triggered after any change to app/backend/ endpoints or app/frontend/ API calls.
+- Start FastAPI and export OpenAPI spec to openapi.json.
+- Run openapi-typescript openapi.json → api.generated.ts.
+- Diff against app/frontend/src/types/api.ts.
+- Block merge if fields removed or types changed without explicit Implementer approval.
+
+AutoFixer subagent responsibilities:
+- Triggered on second consecutive CI failure on same PR.
+- Parse CI output and match against known error catalogue.
+- Create branch fix/SDLCINVEST-N-auto-fix-<category>.
+- Open PR with: original error, patch applied, regression test added.
+- Maximum 3 attempts — escalate to Implementer with diagnosis after 3rd failure.
+- Never removes tests or silences linter to make CI pass.
+
+RollbackAgent subagent responsibilities:
+- Triggered when Observer detects regression_flag=1 after a merge, or health check fails 60s+.
+- Identify merge commit causing degradation (by timestamp + git log).
+- Read rollback plan from PR body (## Rollback section).
+- Create branch hotfix/rollback-pr-N, apply git revert -m 1 <merge_commit>.
+- If migrations exist: invoke MigrationRunner for downgrade.
+- Open rollback PR and record incident in .sdlc/memory/incidents.md.
+- Never executes rollback without documented plan in the original PR.
+
+SecurityScanner subagent responsibilities:
+- Triggered on every PR before Reviewer is notified.
+- Run: bandit -r app/backend/ (Python SAST).
+- Run: npm audit --audit-level=high (Node dependencies).
+- Run: trivy image (if Dockerfile changed).
+- Run: gitleaks detect (secrets in diff).
+- Block merge on CRITICAL or HIGH findings.
+- For CRITICAL: create private GitHub Issue in addition to PR comment.
+
+====================================================================
+HOOKS
+====================================================================
+
+Create hook instruction files in .cursor/hooks.
+
+Hooks are deterministic operational procedures that Cursor should follow.
+Pre-task and post-task hooks must emit observability metrics.
+
+Minimum hooks:
+
+1. pre-task
+   - Load SDLC context.
+   - Identify lifecycle stage.
+   - Check relevant docs and memory.
+   - Define expected output.
+   - Emit metrics run start:
+     python3 app/infra/sdlc_obs/hooks/pre_task.py \
+       --task  "<task_name with [AI][TYPE] prefix>" \
+       --stage <stage_id> \
+       --agent <agent_id> \
+       --tags  "[AI]" "[TYPE]"
+
+2. post-task
+   - Summarize changes.
+   - Update docs if needed.
+   - Run Doctor if structure changed.
+   - Record unresolved risks.
+   - Emit metrics run end:
+     python3 app/infra/sdlc_obs/hooks/post_task.py \
+       --status    <completed|failed|escalated|abandoned> \
+       --tokens-in <N> --tokens-out <N> \
+       --cost      <USD> \
+       --tools-total <N> --tools-ok <N> \
+       --tests-pass  <N> --tests-fail <N> \
+       --doctor    <0|1>
+     Add --hallucination if agent claimed success but evidence says otherwise.
+     Add --regression if Doctor/tests failed after claimed success.
+
+3. pre-review
+   - Collect changed files.
+   - Identify risk areas.
+   - Verify validation evidence.
+
+4. post-review
+   - Record review decision.
+   - Capture required fixes.
+   - Update handoff if needed.
+
+====================================================================
+SDLC YAML REQUIREMENTS
+====================================================================
+
+Create YAML files under .sdlc.
+
+1. .sdlc/sdlc.yaml
+   Main entrypoint.
+   Must reference:
+   - lifecycle.yaml
+   - stages.yaml
+   - workflows.yaml
+   - agents.yaml
+   - skills.yaml
+   - rules.yaml
+   - integrations.yaml
+   - doctor.yaml
+   - memory files
+
+2. .sdlc/lifecycle.yaml
+   Defines the 10 SDLC stages.
+
+3. .sdlc/stages.yaml
+   Defines each stage with:
+   - id
+   - name
+   - objective
+   - inputs
+   - outputs
+   - required_evidence
+   - gates
+
+4. .sdlc/workflows.yaml
+   Defines executable workflows:
+   - requirements_to_architecture
+   - architecture_to_implementation
+   - implementation_to_validation
+   - validation_to_review
+   - review_to_deployment
+   - deployment_to_observability
+   - incident_to_autofix
+
+5. .sdlc/agents.yaml
+   Maps agents to lifecycle stages and responsibilities.
+   Must include the observer agent.
+
+6. .sdlc/skills.yaml
+   Maps skills to stages and expected outputs.
+   Must include task-creation skill mapped to the ticket/requirements stages.
+
+7. .sdlc/rules.yaml
+   Defines governance rules:
+   - no fake validation
+   - docs sync required
+   - doctor required after structural changes
+   - small diffs preferred
+   - explicit assumptions required
+   - handoff required before major transition
+   - observability emission required at every task boundary
+- security scan required before every review stage
+- branch naming must follow SDLCINVEST-N/issue-gh-N convention
+- IaC must be validated (terraform validate) before deploy stage
+
+8. .sdlc/integrations.yaml
+   Define integrations with explicit status fields.
+   Active integrations (mark as status: active):
+   - github   (MCP via @modelcontextprotocol/server-github)
+   - plane    (MCP via plane-mcp-server)
+   - openai   (LLM inference via OPENAI_API_KEY)
+
+   Placeholder integrations (mark as status: placeholder):
+   - cicd           (GitHub Actions is now active — update to active when ci.yml is created)
+   - docker
+   - kubernetes
+   - sentry
+   - slack
+
+   CI/CD integration notes:
+   - github_actions: status becomes active once .github/workflows/ci.yml is created
+   - Jobs in ci.yml: sdlc-doctor, secrets-scan, backend, frontend, container, terraform, auto-merge-gate
+
+   Do NOT include supabase or langsmith.
+
+9. .sdlc/doctor.yaml
+   Defines Doctor checks:
+   - required directories
+   - required files
+   - YAML validity
+   - Cursor structure validity
+   - docs structure validity
+   - app boundaries
+   - Makefile targets
+   - Python DSL importability
+
+====================================================================
+PYTHON DSL REQUIREMENTS
+====================================================================
+
+Create a minimal Python DSL under .sdlc/dsl.
+
+The DSL must be able to:
+
+- Load SDLC YAML files.
+- Validate required structure.
+- Validate required directories and files.
+- Validate lifecycle stage consistency.
+- Validate workflow references.
+- Validate agent and skill references.
+- Run Doctor checks.
+- Print a clear report.
+
+Files:
+
+1. .sdlc/dsl/models.py
+   Define simple dataclasses or Pydantic models if already available.
+   Prefer standard library unless the project already uses Pydantic.
+
+2. .sdlc/dsl/loader.py
+   Load YAML files safely.
+   Use yaml.safe_load.
+   Provide clear errors.
+
+3. .sdlc/dsl/validator.py
+   Validate schema-level consistency.
+
+4. .sdlc/dsl/doctor.py
+   Run repository-level checks.
+
+5. .sdlc/dsl/cli.py
+   Provide CLI entrypoint:
+   - python -m .sdlc.dsl.cli doctor is not valid because .sdlc starts with a dot.
+   Therefore expose a Makefile target that runs the script path directly.
+   Use a practical command such as:
+   python .sdlc/dsl/cli.py doctor
+
+The CLI should support:
+
+- doctor
+- validate
+- list-stages
+
+The Doctor output must be readable and deterministic:
+
+Example:
+[PASS] Required directory exists: .cursor
+[PASS] Required directory exists: .sdlc
+[FAIL] Missing file: docs/handoff/current-state.md
+[WARN] Integration not configured: github
+
+The CLI must exit with:
+- 0 when all required checks pass
+- 1 when required checks fail
+
+Warnings should not fail the command unless configured as required.
+
+====================================================================
+AGENTS.MD REQUIREMENTS
+====================================================================
+
+Create .sdlc/AGENTS.md as the FIRST file of the SDLC structure.
+This is the handbook read by every agent at the start of every new chat.
+
+The Cursor rule 000-project-governance.mdc instructs agents to read this file
+before any action. Without it, agents lack the context needed to work autonomously.
+
+Required sections in .sdlc/AGENTS.md:
+
+1. Project identity
+   - Repository name, GitHub slug, Plane project slug, SDLC version
+
+2. How to start (any task)
+   Step-by-step boot sequence:
+   1. Read this file
+   2. Read docs/sdlc/ai-native.md
+   3. Read .sdlc/memory/operational-context.md
+   4. Identify SDLC stage
+   5. Invoke the right subagent
+   6. Follow the skill
+   7. Emit metrics via pre_task.py / post_task.py
+
+3. Subagents table
+   | Agent | File | SDLC Stage |
+   All 15 subagents mapped to their .md files and stages.
+
+4. Skills list
+   All skills in .cursor/skills/, one-line description each.
+
+5. Commands table
+   /sdlc-plan, /sdlc-audit, /sdlc-doctor, /sdlc-review, /sdlc-handoff
+   mapped to their .cursor/commands/ files.
+
+6. Mandatory conventions
+   - Task naming: [AI][TYPE] imperative title
+   - Branch naming: prefix/SDLCINVEST-N-issue-gh-N-slug
+   - Always emit pre_task.py before and post_task.py after every task
+   - Run make sdlc-doctor after structural changes
+   - Run make sdlc-audit periodically (target ≥ 90%)
+
+7. Active MCPs
+   - GitHub MCP: create issues, PRs, manage branches
+   - Plane MCP: create cards, update sprints, record evidence
+
+8. Current SDLC state
+   - Autonomy Score and Health Score
+   - Agent and skill counts
+
+9. When to escalate to human
+   Explicit list of the ONLY cases that require human intervention.
+
+====================================================================
+GITHUB MANAGEMENT REQUIREMENTS
+====================================================================
+
+Branch naming convention (MANDATORY — all branches must follow this):
+  <prefix>/SDLCINVEST-N-issue-gh-N-short-slug
+
+Prefixes: feature/ | bugfix/ | hotfix/ | docs/ | infra/ | refactor/ | sdlc/ | test/
+
+Rules:
+- Slug: English, kebab-case, max 5 words, imperative verb
+- Always link to Plane task (SDLCINVEST-N) AND GitHub Issue (issue-gh-N) when both exist
+- Branch created by the Issue Analyst when a new issue is triaged
+- See full spec in .cursor/skills/branch-naming.md
+
+PR Lifecycle:
+- Every PR must have delete_branch_on_merge: true enabled
+- Merged PRs: source branch deleted automatically on merge
+- Rejected/closed PRs: DevOps agent deletes source branch manually
+- DevOps runs periodic orphan branch check (no PR open, no recent commits)
+
+Issue Analyst:
+- Triggered on EVERY new GitHub Issue automatically
+- Classifies as: bug | feature | infra | docs | security | sdlc
+- Posts structured comment: classification, affected areas, branch name suggestion
+- Creates Plane card linked to issue
+- Applies labels: priority (P0/P1/P2/P3), type, stage
+
+SDLC Audit:
+- Run make sdlc-audit to get Autonomy Score and Health Score
+- Target: Autonomy Score ≥ 90%, Health Score ≥ 90%
+- canvas report generated at: ~/.cursor/projects/.../canvases/sdlc-audit-report.canvas.tsx
+- Auditor creates GitHub Issues for every FAIL result found
+- Run auditor after any structural change to the SDLC
+
+====================================================================
+GITHUB ACTIONS CI REQUIREMENTS
+====================================================================
+
+Create .github/workflows/ci.yml with these jobs (in dependency order):
+
+1. sdlc-doctor
+   - runs: python3 .sdlc/dsl/cli.py doctor (must exit 0)
+   - runs: python3 app/infra/sdlc_obs/auditor.py (generates report; continue-on-error)
+
+2. secrets-scan
+   - uses: gitleaks/gitleaks-action@v2
+   - Must pass before any other code-touching job starts
+
+3. backend (Python)
+   - pip install -e ".[dev]" or -r requirements.txt
+   - ruff check . (lint)
+   - mypy . (type check)
+   - pytest tests/ (unit tests)
+   - bandit -r . (SAST)
+   - pip-audit (dependency scan)
+
+4. frontend (Node.js)
+   - npm ci
+   - npm run lint (ESLint)
+   - npm run type-check (tsc)
+   - npm test (Jest/Vitest)
+   - npm audit --audit-level=high
+
+5. container
+   - docker compose -f app/infra/docker-compose.yml config --quiet (validate syntax)
+   - docker compose build --no-cache (if docker-compose.yml exists)
+   - trivy config scan on app/infra/ (configuration SAST)
+
+6. terraform
+   - terraform init -backend=false (if main.tf exists)
+   - terraform validate
+   - terraform fmt -check -recursive
+
+7. auto-merge-gate (needs: all above)
+   - Collects results from all jobs
+   - Exits 0 if ALL passed → PR eligible for autonomous merge
+   - Exits 1 if ANY failed → merge blocked with reason
+   - Follows .cursor/skills/auto-merge-policy.md logic
+
+Important CI notes:
+- Jobs that don't apply yet (e.g. no frontend yet) must echo a skip message and exit 0 gracefully
+- Secrets: GITHUB_TOKEN injected automatically; OPENAI_API_KEY via repo secrets if needed
+- Cache pip and npm for performance
+- Trigger: pull_request targeting develop/main; push to develop
+
+====================================================================
+IAC GENERATION REQUIREMENTS
+====================================================================
+
+Create app/infra/terraform/ structure when architecture is finalized.
+Follow .cursor/skills/iac-generation.md for the full procedure.
+
+Minimum structure:
+- app/infra/terraform/README.md       ← purpose, quick start, module descriptions
+- app/infra/terraform/main.tf          ← provider config + local Docker setup
+- app/infra/terraform/variables.tf     ← all configurable values
+- app/infra/terraform/outputs.tf       ← outputs consumed by app
+- app/infra/terraform/modules/database/main.tf (PostgreSQL)
+- app/infra/terraform/modules/cache/main.tf    (Redis)
+- app/infra/terraform/modules/backend/main.tf  (container service)
+- app/infra/terraform/modules/frontend/main.tf (CDN/static)
+- app/infra/terraform/environments/local.tfvars
+- app/infra/terraform/environments/staging.tfvars
+
+Validation (MUST pass before any deploy):
+  terraform init -backend=false
+  terraform validate
+  terraform fmt -check -recursive
+
+Rules:
+- No hardcoded values — use variables.tf with sensitive = true for secrets
+- Local environment uses Docker provider; staging/prod uses cloud provider
+- Modules must be self-contained with their own variables.tf and outputs.tf
+- Production database and cloud provider decision deferred to product owner
+
+====================================================================
+SDLC OBSERVABILITY REQUIREMENTS
+====================================================================
+
+Create app/infra/sdlc_obs/ — the SDLC pipeline observability tool.
+Uses only Python standard library and SQLite. Zero external dependencies.
+
+Purpose: measure the AI-Native SDLC process itself.
+
+Metrics to track per run:
+
+| Metric            | Field               | How measured                              |
+|-------------------|---------------------|-------------------------------------------|
+| Precision         | completion_rate_pct | completed runs / total runs per stage     |
+| Cost              | cost_usd            | OpenAI token cost reported by agent       |
+| Time              | duration_ms         | wall-clock from start_run to end_run      |
+| Tool success rate | tool_success_rate   | tool_calls_success / tool_calls_total     |
+| Hallucination rate| hallucination_flag  | set when agent claims pass but evidence fails |
+| Completion rate   | completion_status   | completed | failed | escalated | abandoned |
+| Regressions       | regression_flag     | Doctor/tests failed after claimed success |
+
+Required files:
+
+1. app/infra/sdlc_obs/schema.sql
+   SQLite schema with sdlc_runs table and sdlc_metrics view.
+
+2. app/infra/sdlc_obs/collector.py
+   Python API: Collector class with start_run(), end_run(), get_kpis(), get_runs(), get_summary().
+   Uses sqlite3.Row so column names are always aliases, never raw SQL expressions.
+
+3. app/infra/sdlc_obs/server.py
+   Stdlib HTTP server. Endpoints:
+   - GET /           → HTML dashboard (auto-refresh 30s)
+   - GET /api/kpis   → JSON top-level KPIs
+   - GET /api/summary → JSON per stage/agent aggregates
+   - GET /api/runs   → JSON recent runs (query: ?limit=N&stage=S)
+   Default port: 7700.
+
+4. app/infra/sdlc_obs/hooks/pre_task.py
+   CLI: opens a run, writes run_id to .sdlc_obs_state.json.
+
+5. app/infra/sdlc_obs/hooks/post_task.py
+   CLI: reads run_id from .sdlc_obs_state.json, closes run with outcome metrics.
+
+6. app/infra/sdlc_obs/hooks/emit.py
+   Shared state file management (write_state, read_state, clear_state).
+
+Important implementation notes:
+- Directory must be named sdlc_obs (underscore), not sdlc-obs (hyphen).
+  Python cannot import modules with hyphens in directory names.
+- All imports use: sys.path.insert(0, repo_root); from app.infra.sdlc_obs.collector import Collector
+- Add app/infra/sdlc_obs/data/ and .sdlc_obs_state.json to .gitignore.
+
+====================================================================
+MAKEFILE REQUIREMENTS
+====================================================================
+
+Create a root Makefile with at least:
+
+make sdlc-doctor     # run Doctor validation
+make sdlc-validate   # validate YAML schema consistency
+make sdlc-stages     # list lifecycle stages
+make docs-check      # check docs structure
+
+make obs-init        # initialize SQLite observability database
+make obs-server      # start dashboard at http://localhost:7700
+make obs-seed        # insert sample data for dashboard preview
+
+make sdlc-audit      # run autonomous SDLC audit — generates canvas report
+                     # calls: python3 app/infra/sdlc_obs/auditor.py
+                     # outputs: Autonomy Score, Health Score, canvas report
+
+The targets should call the Python DSL or the sdlc_obs module directly.
+Do not add heavy dependencies.
+
+Avoid hardcoding paths with hyphens in Python module imports.
+Use PYTHON ?= $(shell command -v python3 ...) for interpreter detection.
+
+====================================================================
+PYPROJECT REQUIREMENTS
+====================================================================
+
+Create a minimal pyproject.toml only if one does not exist.
+
+It should include:
+- project metadata
+- Python version
+- PyYAML dependency if needed
+
+If dependency management already exists, adapt to the existing project style.
+
+====================================================================
+ROOT README REQUIREMENTS
+====================================================================
+
+Create or update README.md with:
+
+- Project purpose placeholder
+- Folder structure
+- How to run the SDLC Doctor
+- How Cursor should be used with this SDLC
+- Basic workflow:
+  1. Plan (Planner → task-creation.md skill → [AI][TYPE] tasks)
+  2. Architect
+  3. Implement
+  4. Validate
+  5. Review
+  6. Handoff
+- How to run the observability dashboard (make obs-server)
+
+Keep it direct.
+
+====================================================================
+DOCS REQUIREMENTS
+====================================================================
+
+Create docs with useful starter content.
+
+Do not write empty files.
+Each file must contain enough structure to be useful.
+
+Minimum docs:
+
+1. docs/architecture/overview.md
+   - Current architecture status
+   - Boundaries
+   - App folder convention
+
+2. docs/architecture/decisions.md
+   - ADR-like decision log template
+
+3. docs/architecture/system-context.md
+   - Placeholder for business/system context
+
+4. docs/infrastructure/overview.md
+   - Infra status
+   - Local/dev/prod placeholders
+
+5. docs/infrastructure/local-development.md
+   - Local setup placeholders
+   - Required env vars: GITHUB_PERSONAL_ACCESS_TOKEN, PLANE_API_KEY,
+     PLANE_WORKSPACE_SLUG, OPENAI_API_KEY, AGENT_MODEL
+
+6. docs/infrastructure/deployment.md
+   - Deployment placeholders
+
+7. docs/handoff/template.md
+   - Handoff template
+
+8. docs/handoff/current-state.md
+   - Current repository state after initialization
+
+9. docs/roadmap/roadmap.md
+   - Initial roadmap structure
+
+10. docs/operations/observability.md
+    - SDLC observability tool documentation (sdlc_obs)
+    - Metrics tracked, dashboard usage, instrumentation pattern
+    - Application-level observability (TBD section)
+
+11. docs/operations/incident-response.md
+    - Incident workflow
+
+12. docs/operations/maintenance.md
+    - Autonomous maintenance placeholders
+
+13. docs/sdlc/ai-native-sdlc.md
+    - Explanation of the SDLC model used in this repo
+
+14. docs/sdlc/workflows.md
+    - Workflow explanation
+
+15. docs/sdlc/gates.md
+    - Validation gates
+
+16. docs/sdlc/doctor.md
+    - How the Doctor works
+
+====================================================================
+APP FOLDER REQUIREMENTS
+====================================================================
+
+Create app folder boundaries only.
+
+Do not implement frontend/backend yet.
+
+Create:
+- app/frontend/README.md
+- app/backend/README.md
+- app/infra/README.md       ← mention sdlc_obs and terraform as infra components
+- app/shared/README.md
+- app/infra/sdlc_obs/       ← implement the observability tool (see above)
+- app/infra/terraform/      ← IaC structure (README + modules structure)
+  - app/infra/terraform/README.md
+  - app/infra/terraform/modules/database/
+  - app/infra/terraform/modules/cache/
+  - app/infra/terraform/modules/backend/
+  - app/infra/terraform/modules/frontend/
+  - app/infra/terraform/environments/local.tfvars
+  - app/infra/terraform/environments/staging.tfvars
+
+Also create:
+- .github/workflows/ci.yml  ← GitHub Actions CI with all gates
+
+Each README should define:
+- Purpose
+- What belongs here
+- What does not belong here
+- Expected future structure
+
+====================================================================
+DOCTOR REQUIREMENTS
+====================================================================
+
+The Doctor is mandatory.
+
+It must validate at least:
+
+Required directories:
+- .cursor
+- .cursor/rules
+- .cursor/commands
+- .cursor/skills
+- .cursor/subagents
+- .cursor/hooks
+- .sdlc
+- .sdlc/dsl
+- .sdlc/memory
+- docs
+- docs/architecture
+- docs/infrastructure
+- docs/handoff
+- docs/roadmap
+- docs/operations
+- docs/sdlc
+- app
+- app/frontend
+- app/backend
+- app/infra
+- app/infra/sdlc_obs
+- app/infra/terraform
+- app/shared
+- .github/workflows
+
+Required files:
+- .sdlc/AGENTS.md
+- .sdlc/sdlc.yaml
+- .sdlc/lifecycle.yaml
+- .sdlc/stages.yaml
+- .sdlc/workflows.yaml
+- .sdlc/agents.yaml
+- .sdlc/skills.yaml
+- .sdlc/rules.yaml
+- .sdlc/integrations.yaml
+- .sdlc/doctor.yaml
+- .sdlc/dsl/cli.py
+- .sdlc/dsl/doctor.py
+- app/infra/sdlc_obs/auditor.py
+- app/infra/sdlc_obs/collector.py
+- app/infra/sdlc_obs/server.py
+- app/infra/sdlc_obs/schema.sql
+- app/infra/sdlc_obs/hooks/pre_task.py
+- app/infra/sdlc_obs/hooks/post_task.py
+- app/infra/terraform/README.md
+- .github/workflows/ci.yml
+- Makefile
+- README.md
+
+YAML validation:
+- All YAML files must parse.
+- Stage IDs referenced by workflows must exist.
+- Agent IDs referenced by stages/workflows must exist if references are declared.
+- Skill IDs referenced by stages/workflows must exist if references are declared.
+
+Cursor validation:
+- Required command files exist.
+- Required rules exist.
+- Required skills exist.
+- Required subagents exist.
+- Required hooks exist.
+
+Docs validation:
+- Required docs exist.
+- Docs are not empty.
+
+App validation:
+- app folder exists.
+- frontend/backend/infra/shared boundaries exist.
+
+====================================================================
+EXECUTION RULES
+====================================================================
+
+Follow this execution sequence:
+
+1. Inspect the repository.
+2. Identify existing files that must be preserved.
+3. Create missing folder structure.
+4. Create .sdlc/AGENTS.md — this is the agent handbook and must be created FIRST.
+5. Create SDLC YAML files.
+6. Create Python DSL.
+7. Create Cursor rules, commands, skills, subagents and hooks.
+7. Create docs.
+8. Create app boundary READMEs.
+9.  Create app/infra/sdlc_obs/ observability tool + auditor.py.
+10. Create app/infra/terraform/ IaC structure with README.
+11. Create .github/workflows/ci.yml with all CI gates.
+12. Create or update Makefile (include obs-init, obs-server, obs-seed, sdlc-audit).
+13. Create or update pyproject.toml only if appropriate.
+14. Configure .cursor/mcp.json with GitHub and Plane MCP servers.
+15. Run the Doctor.
+16. Fix any Doctor failures caused by your own initialization.
+17. Run the Doctor again.
+18. Run make obs-init && make obs-seed to verify observability tool works.
+19. Run make sdlc-audit to verify Autonomy Score ≥ 90%.
+20. Produce a final summary.
+
+====================================================================
+VALIDATION REQUIREMENTS
+====================================================================
+
+You must actually run:
+
+make sdlc-doctor
+
+If Makefile execution is not possible, run:
+
+python .sdlc/dsl/cli.py doctor
+
+You must also run and verify:
+
+make obs-init
+make obs-seed
+make obs-server   (start, hit /api/kpis, verify JSON has proper field names, stop)
+make sdlc-audit   (must achieve Autonomy Score ≥ 90%)
+
+You must include in the final response:
+
+- Files created
+- Files updated
+- Doctor result (must show 0 failed)
+- Observability tool test result (/api/kpis must return named fields, not raw SQL)
+- SDLC Audit result (Autonomy Score %, Health Score %, FAIL count)
+- Remaining warnings
+- Explicit next steps
+
+Do not claim success if the Doctor fails.
+Do not claim success if /api/kpis returns raw SQL expression keys instead of aliases.
+Do not claim success if make sdlc-audit returns Autonomy Score < 90%.
+If any check fails, explain exactly what failed and why.
+
+====================================================================
+QUALITY BAR
+====================================================================
+
+The final result must be:
+
+- Minimal
+- Consistent
+- Easy to extend
+- Cursor-native
+- SDLC-driven
+- Human-readable
+- Machine-validatable
+- Safe for future automation
+- Observable — every agent action emits metrics
+- Auditable — make sdlc-audit must pass with Autonomy Score ≥ 90%
+- Self-improving — auditor identifies gaps; agents close them without human intervention
+
+Avoid vague documentation.
+Avoid empty placeholder files.
+Avoid excessive abstraction.
+Avoid building fake application code.
+Avoid adding unnecessary dependencies.
+Avoid LangSmith, Supabase, or any external observability SaaS.
+Avoid naming Python packages with hyphens (use underscores).
+Avoid hardcoded credentials — always load from environment variables.
+Avoid merging PRs without all CI gates green (Doctor + tests + security + audit).
+
+The repository after this task should be ready for future AI-native development
+using Cursor with a clear SDLC operating model, active GitHub and Plane MCPs,
+and a working observability pipeline that measures every agent action.

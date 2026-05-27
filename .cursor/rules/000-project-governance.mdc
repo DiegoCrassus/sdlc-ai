@@ -1,0 +1,48 @@
+---
+description: Core project governance rules. Applied to every agent interaction.
+alwaysApply: true
+---
+
+# Project Governance
+
+## Repository
+
+- Name: `sdlc-ai`
+- GitHub: `DiegoCrassus/sdlc-ai`
+- Language: Python (backend), TBD (frontend)
+- SDLC model: 10-stage AI-Native lifecycle (see `.sdlc/lifecycle.yaml`)
+
+## Before Any Major Task
+
+1. Read `.sdlc/AGENTS.md` — this is the agent handbook with full context.
+2. Inspect the repository structure.
+3. Read `.sdlc/sdlc.yaml` to understand the current SDLC configuration.
+4. Read `.sdlc/memory/operational-context.md` for runtime context.
+5. Identify the current SDLC stage.
+6. Check if a Doctor run is needed (`make sdlc-doctor`).
+
+## If SDLC Structure Is Missing (New Repo)
+
+Read `SDLC-basic.txt` at the root and follow it step by step.
+Do not improvise structure — the file is the single source of truth for initialization.
+
+## Mandatory Rules
+
+- Never fake validation results. If a command fails, report the failure.
+- Never claim a command passed unless it actually ran and produced real output.
+- Never perform broad rewrites without an explicit documented reason.
+- Prefer small, reversible, well-scoped changes.
+- Record explicit assumptions when information is missing.
+- Update docs when architecture, infrastructure, operations, or public interfaces change.
+- Run `make sdlc-doctor` after any structural change to the repository.
+
+## Change Scope
+
+- Do not touch files outside the scope of the current task unless explicitly required.
+- Do not invent product features.
+- Do not add unnecessary dependencies.
+
+## Communication
+
+- Responses in Portuguese. Code in English.
+- Always report what changed, why, and what the next step is.
