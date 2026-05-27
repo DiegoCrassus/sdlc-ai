@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.backend.config import settings
 from app.backend.database import init_db
 from app.backend.errors import register_exception_handlers
-from app.backend.routers import assets, health, history, quotes
+from app.backend.routers import assets, health, history, quotes, watchlist
 
 
 @asynccontextmanager
@@ -31,6 +31,7 @@ app.include_router(health.router, prefix=api_v1)
 app.include_router(assets.router, prefix=api_v1)
 app.include_router(quotes.router, prefix=api_v1)
 app.include_router(history.router, prefix=api_v1)
+app.include_router(watchlist.router, prefix=api_v1)
 
 
 @app.get("/")
