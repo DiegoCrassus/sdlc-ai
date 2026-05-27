@@ -113,4 +113,5 @@ simulacao-end-to-end-sdlc.pdf
 
 # SDLC Observability (transient state)
 .sdlc_obs_state.json
+.sdlc/memory/session-gate.json
 app/infra/sdlc_obs/data/
