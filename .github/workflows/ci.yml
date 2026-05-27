@@ -8,7 +8,6 @@ on:
 
 env:
   PYTHON_VERSION: "3.12"
-  NODE_VERSION: "20"
 
 jobs:
 
@@ -39,129 +38,18 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  backend:
-    name: Backend (Python)
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-          cache: pip
-      - name: Install dependencies
-        run: |
-          pip install pydantic httpx "SQLAlchemy[asyncio]" aiosqlite redis beautifulsoup4 \
-            fastapi "uvicorn[standard]" python-dotenv pytest pytest-asyncio ruff
-      - name: Lint (ruff)
-        run: ruff check app/backend app/shared
-      - name: Unit tests (pytest)
-        env:
-          MARKET_DATA_MODE: mock
-          PYTHONPATH: .
-        run: pytest app/backend/tests/ -v --tb=short
-
-  frontend:
-    name: Frontend (Node.js)
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Detect frontend package
-        id: frontend
-        run: |
-          if [ -f app/frontend/package.json ] && [ -f app/frontend/package-lock.json ]; then
-            echo "ready=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "ready=false" >> "$GITHUB_OUTPUT"
-            echo "Frontend not initialized — skipping Node jobs"
-          fi
-      - uses: actions/setup-node@v4
-        if: steps.frontend.outputs.ready == 'true'
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: npm
-          cache-dependency-path: app/frontend/package-lock.json
-      - name: Install dependencies
-        if: steps.frontend.outputs.ready == 'true'
-        run: npm ci
-        working-directory: app/frontend
-      - name: Lint (ESLint)
-        if: steps.frontend.outputs.ready == 'true'
-        run: npm run lint
-        working-directory: app/frontend
-      - name: Unit tests
-        if: steps.frontend.outputs.ready == 'true'
-        run: npm test -- --passWithNoTests
-        working-directory: app/frontend
-
-  container:
-    name: Container Build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Validate docker-compose syntax
-        run: |
-          if [ -f docker-compose.yml ]; then
-            docker compose -f docker-compose.yml config --quiet
-          else
-            echo "No docker-compose.yml — skipping"
-          fi
-      - name: Build backend image
-        run: |
-          if [ -f app/backend/Dockerfile ]; then
-            docker build -f app/backend/Dockerfile -t sdlc-backend:ci .
-          else
-            echo "No Dockerfile — skipping"
-          fi
-
-  terraform:
-    name: Terraform Validate
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: hashicorp/setup-terraform@v3
-      - name: Terraform Init
-        run: |
-          if [ -f app/infra/terraform/main.tf ]; then
-            cd app/infra/terraform && terraform init -backend=false
-          else
-            echo "No Terraform files yet — skipping"
-          fi
-      - name: Terraform Validate
-        run: |
-          if [ -f app/infra/terraform/main.tf ]; then
-            cd app/infra/terraform && terraform validate
-          else
-            echo "No Terraform files yet — skipping"
-          fi
-
   auto-merge-gate:
     name: Auto-Merge Gate
-    needs: [sdlc-doctor, secrets-scan, backend, frontend, container, terraform]
+    needs: [sdlc-doctor, secrets-scan]
     runs-on: ubuntu-latest
     if: always()
     steps:
-      - name: Evaluate all gates
+      - name: Evaluate gates
         run: |
-          echo "sdlc-doctor:  ${{ needs.sdlc-doctor.result }}"
-          echo "secrets-scan: ${{ needs.secrets-scan.result }}"
-          echo "backend:      ${{ needs.backend.result }}"
-          echo "frontend:     ${{ needs.frontend.result }}"
-          echo "container:    ${{ needs.container.result }}"
-          echo "terraform:    ${{ needs.terraform.result }}"
-
-          for job in sdlc-doctor secrets-scan backend frontend container terraform; do
-            result="${{ needs.sdlc-doctor.result }}"
-            case "$job" in
-              sdlc-doctor) result="${{ needs.sdlc-doctor.result }}" ;;
-              secrets-scan) result="${{ needs.secrets-scan.result }}" ;;
-              backend) result="${{ needs.backend.result }}" ;;
-              frontend) result="${{ needs.frontend.result }}" ;;
-              container) result="${{ needs.container.result }}" ;;
-              terraform) result="${{ needs.terraform.result }}" ;;
-            esac
+          for result in "${{ needs.sdlc-doctor.result }}" "${{ needs.secrets-scan.result }}"; do
             if [ "$result" = "failure" ]; then
-              echo "❌ Gate failed: $job"
+              echo "❌ Gate failed"
               exit 1
             fi
           done
-          echo "✅ ALL GATES GREEN (skipped jobs are OK)"
+          echo "✅ ALL GATES GREEN"

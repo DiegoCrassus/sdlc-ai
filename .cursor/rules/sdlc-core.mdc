@@ -1,0 +1,30 @@
+---
+description: SDLC core — RPG-OP workflow. Applied to every agent interaction.
+alwaysApply: true
+---
+
+# SDLC core — RPG-OP
+
+Deep Agent conduz engenharia; **GitHub MCP** conduz intent → PR → merge.
+
+## Fonte da verdade
+
+**`docs/sdlc/change-lifecycle.md`** — prevalece sobre instruções ad hoc do chat.
+
+Plane: workspace `investments-sdlc`, project `investiments`, cards `INVESTIMENTS-N`.
+
+## Ordem de trabalho
+
+1. `.sdlc/AGENTS.md` + `docs/sdlc/change-lifecycle.md`
+2. Card Plane (project `investiments`) ou Issue GitHub (template SDLC)
+3. Branch `feature/INVESTIMENTS-N-<slug>` via **start-change**
+4. Spec em `specs/` → implement
+5. PR + CI verde → merge **develop** via **finish-change**
+
+## GitHub MCP
+
+Config: `.cursor/mcp.json` — skill `github-sdlc`
+
+## Idioma
+
+Respostas em português; código em inglês.

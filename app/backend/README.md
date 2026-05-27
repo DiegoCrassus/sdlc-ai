@@ -38,7 +38,7 @@ app/backend/
 │   ├── unit/
 │   └── integration/
 ├── migrations/         ← Database migration files (Alembic)
-└── README.md           ← (this file, extended with setup instructions)
+└── README.md
 ```
 
 ## Technology
@@ -49,69 +49,11 @@ app/backend/
 - **Framework:** TBD (FastAPI is a likely candidate)
 - **Tests:** pytest
 
-## API Server
+## Setup (When Implemented)
+
+Follow `docs/sdlc/change-lifecycle.md` before any implementation.
 
 ```bash
-make backend-dev
-# http://localhost:8000/docs
+pip install -e ".[dev]"
+python -m pytest app/backend/tests/ -v
 ```
-
-### Endpoints
-
-| Method | Path | Description |
-|--------|------|-------------|
-| GET | `/health` | Liveness |
-| GET | `/api/v1/market/search?q=` | Asset search |
-| GET | `/api/v1/market/price/{symbol}?asset_type=` | Current price |
-| GET | `/api/v1/market/history/{symbol}?asset_type=&range=&interval=` | OHLC history |
-| GET | `/api/v1/market/metadata/{symbol}?asset_type=` | Company metadata |
-| GET | `/api/v1/market/summary` | Market indexes summary |
-| GET | `/api/v1/market/providers/health` | Provider chain health |
-
-### Docker
-
-```bash
-make backend-docker
-```
-
-## Market Data Provider Layer
-
-Implemented in `src/market_data/` — see [docs/market-data-sources.md](../../../docs/market-data-sources.md).
-
-### Providers
-
-| Provider | Class | Role |
-|----------|-------|------|
-| Composite | `CompositeMarketDataProvider` | Cache → API → CSV → Scraping → Mock |
-| API | `ApiMarketDataProvider` | Finnhub, brapi, CoinGecko, BCB PTAX |
-| CSV | `CsvMarketDataProvider` | Stooq downloadable CSV |
-| Scraping | `ScrapingMarketDataProvider` | Stooq pages (disabled by default) |
-| Mock | `MockMarketDataProvider` | Dev/CI/outage fallback |
-
-### Environment
-
-```bash
-MARKET_DATA_MODE=live          # or mock
-MARKET_DATA_SCRAPING_ENABLED=false
-REDIS_URL=redis://localhost:6379/0
-FINNHUB_API_KEY=...            # free at https://finnhub.io
-COINGECKO_API_KEY=...          # free Demo at https://www.coingecko.com/en/api
-BRAPI_API_KEY=...              # optional; PETR4/VALE3/MGLU3/ITUB4 work without key
-TWELVE_DATA_API_KEY=...        # optional fallback only
-```
-
-### Usage
-
-```python
-from app.backend.src.market_data.factory import build_market_data_provider
-
-provider = await build_market_data_provider()
-price = await provider.get_current_price("AAPL", AssetType.STOCK)
-```
-
-### Tests
-
-```bash
-PYTHONPATH=. pytest app/backend/tests/ -v
-```
-

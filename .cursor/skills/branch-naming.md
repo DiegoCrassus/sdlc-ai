@@ -44,15 +44,15 @@ Garantir que todo branch criado no repositório tenha um nome significativo, ras
 ### Caso 1 — Tarefa Plane (sem Issue GitHub)
 
 ```
-<prefixo>/SDLCINVEST-<N>-<slug>
+<prefixo>/INVESTIMENTS-<N>-<slug>
 ```
 
 Exemplos:
 ```
-feature/SDLCINVEST-12-add-plane-endpoint
-bugfix/SDLCINVEST-15-fix-token-count
-docs/SDLCINVEST-18-update-arch-overview
-infra/SDLCINVEST-21-setup-obs-server
+feature/INVESTIMENTS-12-add-plane-endpoint
+bugfix/INVESTIMENTS-15-fix-token-count
+docs/INVESTIMENTS-18-update-arch-overview
+infra/INVESTIMENTS-21-setup-obs-server
 ```
 
 ### Caso 2 — Issue GitHub (sem tarefa Plane prévia)
@@ -71,14 +71,14 @@ docs/issue-gh-63-update-local-dev-guide
 ### Caso 3 — Tarefa Plane + Issue GitHub vinculada (caso mais comum)
 
 ```
-<prefixo>/SDLCINVEST-<N>-issue-gh-<N>-<slug>
+<prefixo>/INVESTIMENTS-<N>-issue-gh-<N>-<slug>
 ```
 
 Exemplos:
 ```
-bugfix/SDLCINVEST-15-issue-gh-42-fix-token-count
-feature/SDLCINVEST-20-issue-gh-58-add-plane-endpoint
-infra/SDLCINVEST-21-issue-gh-61-add-obs-server
+bugfix/INVESTIMENTS-15-issue-gh-42-fix-token-count
+feature/INVESTIMENTS-20-issue-gh-58-add-plane-endpoint
+infra/INVESTIMENTS-21-issue-gh-61-add-obs-server
 ```
 
 ### Caso 4 — Hotfix urgente (sem tempo de criar card Plane antes)
@@ -108,14 +108,14 @@ hotfix/issue-gh-<N>-<slug>
 ## Procedimento de criação
 
 ```bash
-# 1. Confirmar ID do card Plane
-#    Ex: SDLCINVEST-20
+# 1. Confirmar ID do card Plane (project investiments)
+#    Ex: INVESTIMENTS-20
 
 # 2. Confirmar número da Issue GitHub (se existir)
 #    Ex: GH #58
 
 # 3. Construir o nome conforme o padrão
-BRANCH="feature/SDLCINVEST-20-issue-gh-58-add-plane-endpoint"
+BRANCH="feature/INVESTIMENTS-20-issue-gh-58-add-plane-endpoint"
 
 # 4. Criar a partir do develop atualizado
 git checkout develop
@@ -179,7 +179,7 @@ O Doctor verifica se existem branches remotos sem PR associado há mais de 7 dia
 ## Validação checklist
 
 - [ ] Prefixo correto para o tipo de trabalho
-- [ ] Referência ao card Plane (`SDLCINVEST-N`) se existir
+- [ ] Referência ao card Plane (`INVESTIMENTS-N`) se existir
 - [ ] Referência à Issue GitHub (`issue-gh-N`) se existir
 - [ ] Slug em inglês, kebab-case, máx 5 palavras, imperativo
 - [ ] Branch criado a partir do `develop` atualizado

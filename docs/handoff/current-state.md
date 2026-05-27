@@ -1,43 +1,29 @@
 # Current State — Handoff
 
 > **Updated:** 2026-05-27  
-> **Branch:** `develop` @ `287a8a0`
+> **Branch:** `develop`  
+> **Phase:** SDLC operating system initialized — **no product application code**
 
-## What Works
+## Summary
 
-- **SDLC operating system** — `.sdlc/`, `.cursor/`, Doctor DSL, observability tool
-- **Market data layer** — composite providers (Finnhub, brapi, CoinGecko, BCB, Stooq CSV, mock)
-- **FastAPI backend** — REST API at `/api/v1/market/*` with OpenAPI docs
-- **22 tests passing** — unit + integration (mock mode)
-- **Docker Compose** — backend + Redis
+The repository contains the AI-Native SDLC harness (`.sdlc/`, `.cursor/`, `docs/sdlc/`, observability tool). Product boundaries `app/backend/` and `app/frontend/` are empty placeholders.
 
-## Quick Start
+Previous market-data implementation was **removed** to restart from zero following `docs/sdlc/change-lifecycle.md`.
 
-```bash
-make backend-test          # run tests
-make backend-dev           # http://localhost:8000/docs
-make backend-docker        # docker compose up
-```
+## Workflow (source of truth)
 
-## API Keys Needed (free)
+**Read first:** [docs/sdlc/change-lifecycle.md](../sdlc/change-lifecycle.md)
 
-Register and add to `.env`:
+- Plane workspace: `investments-sdlc`
+- Plane project: `investiments`
+- Delivery: Plane card → feature branch → PR → CI green → merge `develop`
 
-| Key | Provider | URL |
-|-----|----------|-----|
-| `FINNHUB_API_KEY` | US stocks | https://finnhub.io |
-| `COINGECKO_API_KEY` | Crypto | https://www.coingecko.com/en/api |
-| `BRAPI_API_KEY` | B3 (optional) | https://brapi.dev/dashboard |
+## What works today
 
-PETR4, VALE3, MGLU3, ITUB4 work on brapi without token.
+- `make sdlc-doctor`
+- `make sdlc-audit`
+- `make obs-server` (observability dashboard)
 
-## Next Steps
+## Next step
 
-- [ ] Add frontend pages consuming market API
-- [ ] Wire CI to run `make backend-test`
-- [ ] Portfolio / watchlist domain models
-- [ ] Auth layer
-
-## Research
-
-See [docs/market-data-sources.md](../market-data-sources.md) for provider decision matrix.
+Create a Plane card in project `investiments`, then `/sdlc-plan` for the next product increment.

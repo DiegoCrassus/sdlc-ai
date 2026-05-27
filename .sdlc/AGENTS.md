@@ -6,9 +6,16 @@ Leia este arquivo antes de qualquer ação.
 ## Identidade do Projeto
 
 - **Repositório:** `sdlc-ai`
-- **Projeto Plane:** `sdlc-investiment` (workspace: `rpg`)
-- **Repositório GitHub:** ver `.env` → `GITHUB_REPO`
+- **Plane workspace:** `investments-sdlc` → `PLANE_WORKSPACE_SLUG`
+- **Plane project:** `investiments` → `PLANE_PROJECT_NAME`
+- **Repositório GitHub:** ver `.env` → `GITHUB_REPOSITORY`
 - **SDLC version:** v2.0 — Autonomy Score 99%
+
+## Fonte da verdade do workflow
+
+**Leia primeiro:** [`docs/sdlc/change-lifecycle.md`](../docs/sdlc/change-lifecycle.md)
+
+Este documento prevalece sobre instruções ad hoc do chat. Skills e regras referenciam-no; não o contradizem.
 
 ## Contexto Rápido
 
@@ -21,12 +28,13 @@ Este repositório é um **AI-Native SDLC**. Seu propósito é:
 
 ```
 1. Leia este arquivo (feito ✓)
-2. Leia docs/sdlc/ai-native.md       → entenda o lifecycle
-3. Leia .sdlc/memory/operational-context.md → contexto de runtime
-4. Identifique o estágio SDLC da tarefa (ticket/req/arch/impl/qa/review/deploy/obs)
-5. Invoque o subagente correto para o estágio
-6. Siga .cursor/skills/ correspondente
-7. Emita métricas via pre_task.py e post_task.py
+2. Leia docs/sdlc/change-lifecycle.md     → workflow obrigatório (fonte da verdade)
+3. Leia docs/sdlc/ai-native-sdlc.md       → lifecycle e estágios
+4. Leia .sdlc/memory/operational-context.md → contexto de runtime
+5. Identifique o estágio SDLC da tarefa (ticket/req/arch/impl/qa/review/deploy/obs)
+6. Invoque o subagente correto para o estágio
+7. Siga .cursor/skills/ correspondente (start-change antes de codar)
+8. Emita métricas via pre_task.py e post_task.py
 ```
 
 ## Subagentes Disponíveis
@@ -71,7 +79,9 @@ Todas em `.cursor/skills/`:
 ## Convenções Obrigatórias
 
 - **Task names:** `[AI][TYPE] Short imperative title` — ex: `[AI][BACKEND] Add investment endpoint`
-- **Branch names:** `feature/SDLCINVEST-N-issue-gh-N-slug` — ver `.cursor/skills/branch-naming.md`
+- **Branch names:** `feature/INVESTIMENTS-N-<slug>` — ver `.cursor/skills/branch-naming.md`
+- **Antes de codar:** `.cursor/skills/start-change/SKILL.md` (card Plane + branch)
+- **Antes de merge:** `.cursor/skills/finish-change/SKILL.md` (PR + CI verde)
 - **Antes de qualquer tarefa:** métricas abertas automaticamente via `.cursor/hooks.json` (`sessionStart`); para stage/agent específicos, chamar `pre_task.py` manualmente
 - **Depois de qualquer tarefa:** fechadas automaticamente via `stop`; para métricas detalhadas (tokens, tools, doctor), chamar `post_task.py` manualmente
 - **Após mudança estrutural:** rodar `make sdlc-doctor`
@@ -98,8 +108,9 @@ make export-pdf    # gera PDF da simulação end-to-end
 - Health Score: **97%**
 - Agentes implementados: 15
 - Skills implementadas: 15
-- CI/CD: `.github/workflows/ci.yml` com 7 jobs
-- IaC: `app/infra/terraform/` com módulos PostgreSQL, Redis, backend, frontend
+- CI/CD: `.github/workflows/ci.yml` (Doctor + secrets scan)
+- Produto: `app/backend/` e `app/frontend/` — placeholders (sem código de app)
+- IaC: `app/infra/terraform/` — placeholders
 
 ## Quando Escalar para Humano
 

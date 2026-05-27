@@ -4,21 +4,25 @@
 
 ## Current State
 
-**Status:** SDLC observability active — `app/infra/sdlc_obs/` implemented. No product services yet.
+**Status:** SDLC observability active — `app/infra/sdlc_obs/` implemented. No product application code.
+
+## Workflow
+
+**Source of truth:** `docs/sdlc/change-lifecycle.md`
 
 ## Environments
 
 | Environment | Status       | Notes                          |
 |-------------|--------------|--------------------------------|
-| local       | active       | SQLite, no containers yet      |
-| dev         | not_ready    | Pending service implementation |
+| local       | active       | SQLite (obs), no product services |
+| dev         | not_ready    | Pending product implementation |
 | production  | not_ready    | Pending deployment setup       |
 
 ## Local Development
 
-- Database: SQLite at `./data/rpg_op.db`
+- Observability DB: `app/infra/sdlc_obs/data/`
 - Python environment: managed via `pyproject.toml`
-- No containers yet
+- No product containers yet
 
 ## SDLC Observability
 
@@ -37,14 +41,15 @@
 
 ## Plane — Projeto ativo
 
-- **Projeto:** sdlc-investiment (SDLCINVEST)
-- **ID Plane:** 3f1a57f9-d1ad-42eb-a1d4-c7c2fa3e3cb5
-- **Workspace:** rpg
-- **Wiki pages criadas:** Home, SDLC Foundation Status, Roadmap, Architecture, Guia SDLC
+- **Workspace:** `investments-sdlc` (`PLANE_WORKSPACE_SLUG`)
+- **Project:** `investiments` (`PLANE_PROJECT_NAME`)
+- **Card prefix:** `INVESTIMENTS-N` (branch: `feature/INVESTIMENTS-N-<slug>`)
+
+Cards são criados no project `investiments` **antes** de qualquer edição de código.
 
 ## Key Configuration
 
 - `AGENT_MODEL=openai:gpt-4.1-mini`
-- `LANGSMITH_PROJECT=RPG`
-- `PLANE_WORKSPACE_SLUG=rpg`
+- `PLANE_WORKSPACE_SLUG=investments-sdlc`
+- `PLANE_PROJECT_NAME=investiments`
 - `GITHUB_REPOSITORY=DiegoCrassus/sdlc-ai`
