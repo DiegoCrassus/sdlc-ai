@@ -43,10 +43,11 @@ alwaysApply: true
 
 Always load context in this order:
 1. `.sdlc/AGENTS.md`                        ← handbook with all agents, skills, and commands
-2. `.sdlc/sdlc.yaml`
-3. `.sdlc/memory/operational-context.md`
-4. `.sdlc/memory/architecture.md`
-5. Relevant `docs/` section for the current stage
+2. `docs/sdlc/change-lifecycle.md`          ← **workflow source of truth**
+3. `.sdlc/sdlc.yaml`
+4. `.sdlc/memory/operational-context.md`
+5. `.sdlc/memory/architecture.md`
+6. Relevant `docs/` section for the current stage
 
 ## New Repository Initialization
 

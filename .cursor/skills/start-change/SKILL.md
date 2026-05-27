@@ -1,4 +1,6 @@
-# Skill: Start Change (RPG-OP)
+# Skill: Start Change
+
+> **Workflow authority:** `docs/sdlc/change-lifecycle.md`
 
 ## Purpose
 
@@ -13,21 +15,21 @@ Iniciar uma unidade de trabalho **antes de qualquer edição de código**, crian
 
 ### 1. Criar card no Plane
 
-- **Workspace:** `rpg` (não `investments-sdlc`)
-- **Projeto:** `sdlc-investiment` (`SDLCINVEST`)
+- **Workspace:** `investments-sdlc` (`PLANE_WORKSPACE_SLUG`)
+- **Project:** `investiments` (`PLANE_PROJECT_NAME`)
 - **Título:** `[AI][TYPE] Short imperative title` (ver `task-creation.md`)
 - **Estado:** `In Progress`
 
 ### 2. Registrar número do card
 
-Anotar `SDLCINVEST-N` — obrigatório no nome do branch.
+Anotar `INVESTIMENTS-N` — obrigatório no nome do branch.
 
 ### 3. Criar branch a partir de develop
 
 ```bash
 git checkout develop
 git pull origin develop
-git checkout -b feature/SDLCINVEST-N-<slug>
+git checkout -b feature/INVESTIMENTS-N-<slug>
 ```
 
 Convenção completa: `.cursor/skills/branch-naming.md`
@@ -35,7 +37,7 @@ Convenção completa: `.cursor/skills/branch-naming.md`
 ### 4. Observer pre-task
 
 ```bash
-python app/infra/sdlc_obs/hooks/pre_task.py --task "SDLCINVEST-N: <title>"
+python app/infra/sdlc_obs/hooks/pre_task.py --task "INVESTIMENTS-N: <title>"
 ```
 
 ### 5. Só então editar código

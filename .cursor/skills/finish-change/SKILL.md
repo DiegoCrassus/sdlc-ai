@@ -1,4 +1,6 @@
-# Skill: Finish Change (RPG-OP)
+# Skill: Finish Change
+
+> **Workflow authority:** `docs/sdlc/change-lifecycle.md`
 
 ## Purpose
 
@@ -14,15 +16,15 @@ Finalizar uma unidade de trabalho: validar, abrir PR, vincular evidência no Pla
 ### 1. Validação local
 
 ```bash
-make backend-test          # ou testes equivalentes
 make sdlc-doctor
+# Quando app/backend existir: pytest app/backend/tests/ -v
 ```
 
 ### 2. Commit no feature branch (nunca em develop)
 
 ```bash
 git add <files>
-git commit -m "feat: <summary> (SDLCINVEST-N)"
+git commit -m "feat: <summary> (INVESTIMENTS-N)"
 ```
 
 ### 3. Push e abrir PR para develop
@@ -33,7 +35,7 @@ gh pr create --base develop --title "..." --body "..."
 ```
 
 PR body must include:
-- Link Plane `SDLCINVEST-N`
+- Link Plane `INVESTIMENTS-N`
 - Test plan checklist
 - Closes / relates issue if applicable
 
@@ -56,7 +58,7 @@ Mover card para `Done` com link do PR como evidência.
 ### 7. Observer post-task
 
 ```bash
-python app/infra/sdlc_obs/hooks/post_task.py --task "SDLCINVEST-N" --status completed
+python app/infra/sdlc_obs/hooks/post_task.py --task "INVESTIMENTS-N" --status completed
 ```
 
 ## Failure modes
@@ -64,5 +66,5 @@ python app/infra/sdlc_obs/hooks/post_task.py --task "SDLCINVEST-N" --status comp
 | Situation | Action |
 |-----------|--------|
 | CI falhou | Corrigir no mesmo branch; novo push; não merge |
-| Push direto em develop já feito | Documentar em audit; próximas entregas via PR; hotfix CI se necessário |
+| Push direto em develop já feito | Documentar; próximas entregas via PR |
 | Lint falhou | Corrigir antes de pedir review |

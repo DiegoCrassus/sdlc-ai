@@ -23,7 +23,7 @@ integrations:
       - work_items
       - sprints
       - pages
-    notes: MCP active via .cursor/mcp.json — uvx plane-mcp-server stdio. Project sdlc-investiment (SDLCINVEST). Workspace slug rpg.
+    notes: MCP active via .cursor/mcp.json — uvx plane-mcp-server stdio. Workspace investments-sdlc, project investiments (INVESTIMENTS). See docs/sdlc/change-lifecycle.md.
 
   - id: openai
     name: OpenAI
