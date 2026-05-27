@@ -73,7 +73,7 @@ src/
 
 ## Status
 
-**Implemented** (INVES-23). Production deploy and full local runbook: INVES-24 (not in scope here).
+**Implemented** (INVES-23). Full local runbook: [docs/product/investment-radar-runbook.md](../../docs/product/investment-radar-runbook.md).
 
 ## What does NOT belong here
 
