@@ -87,3 +87,68 @@ class WatchlistItemCreate(BaseModel):
 class WatchlistItemUpdate(BaseModel):
     notes: str | None = Field(None, max_length=500)
     sort_order: int | None = None
+
+
+TransactionType = Literal["buy", "sell"]
+
+
+class Portfolio(BaseModel):
+    id: str
+    name: str
+    base_currency: str
+    cash_balance: float
+    total_value: float
+    total_cost_basis: float
+    unrealized_pnl: float
+    updated_at: datetime
+
+
+class Holding(BaseModel):
+    asset_id: str
+    asset: Asset | None = None
+    quantity: float
+    avg_cost: float
+    market_price: float
+    market_value: float
+    cost_basis: float
+    unrealized_pnl: float
+    source: DataSource
+
+
+class Transaction(BaseModel):
+    id: str
+    type: TransactionType
+    asset_id: str
+    quantity: float
+    price: float
+    total: float
+    source: DataSource
+    executed_at: datetime
+    note: str | None = None
+
+
+class PaginatedHoldings(BaseModel):
+    items: list[Holding]
+    total: int
+    limit: int
+    offset: int
+
+
+class PaginatedTransactions(BaseModel):
+    items: list[Transaction]
+    total: int
+    limit: int
+    offset: int
+
+
+class TransactionCreate(BaseModel):
+    type: TransactionType
+    asset_id: str
+    quantity: float = Field(gt=0)
+    note: str | None = Field(None, max_length=500)
+
+
+class TransactionResponse(BaseModel):
+    transaction: Transaction
+    portfolio: Portfolio
+    holding: Holding | None = None
