@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.backend.config import settings
 from app.backend.database import init_db
-from app.backend.routers import health
+from app.backend.routers import assets, health
 
 
 @asynccontextmanager
@@ -25,6 +25,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 app.include_router(health.router, prefix="/api")
+app.include_router(assets.router, prefix="/api")
 
 
 @app.get("/")
