@@ -36,7 +36,7 @@
 | Service    | Purpose              | Configured Via          | MCP      |
 |------------|----------------------|-------------------------|----------|
 | GitHub     | Version control / PR | GITHUB_PERSONAL_ACCESS_TOKEN_CLASSIC | ✅ ativo |
-| Plane      | Task management      | PLANE_API_KEY           | ✅ ativo  |
+| Plane      | Task management      | PLANE_API_KEY           | MCP + `.sdlc/scripts/plane_state.py` |
 | OpenAI     | LLM inference        | OPENAI_API_KEY          | —        |
 
 ## Plane — Projeto ativo
@@ -46,6 +46,16 @@
 - **Card prefix:** `INVESTIMENTS-N` (branch: `feature/INVESTIMENTS-N-<slug>`)
 
 Cards são criados no project `investiments` **antes** de qualquer edição de código.
+
+## Process automation (2026-05-27)
+
+| Script | Purpose |
+|--------|---------|
+| `.sdlc/scripts/plane_state.py` | In Progress / Done / comment on INVES-N |
+| `.sdlc/scripts/auto_merge_pr.py` | Autonomous squash merge when CI green |
+| `.sdlc/scripts/github_issue_triage.py` | Close superseded GitHub issues |
+
+Makefile: `make plane-in-progress CARD=INVES-N`, `make auto-merge-pr PR=N CARD=INVES-N`, `make issue-triage TRIAGE=1`
 
 ## Key Configuration
 
