@@ -11,15 +11,30 @@ AI-Native SDLC platform — a project operating system for teams where AI agents
 ├── .cursor/          ← Cursor agent configuration (rules, commands, skills, subagents, hooks)
 ├── .sdlc/            ← SDLC configuration (YAML + Python DSL)
 ├── docs/             ← Human-readable documentation
-├── app/              ← Application code (not yet implemented)
-│   ├── frontend/     ← Future web frontend
-│   ├── backend/      ← Future Python backend
+├── app/              ← Application code
+│   ├── frontend/     ← Investment Radar React SPA
+│   ├── backend/      ← Investment Radar FastAPI backend
 │   ├── infra/        ← Future infrastructure-as-code
 │   └── shared/       ← Shared types and utilities
 ├── Makefile          ← SDLC and development commands
 ├── pyproject.toml    ← Python project configuration
 └── README.md         ← This file
 ```
+
+## Run Investment Radar locally
+
+Financial monitoring demo (stocks + crypto, simulated portfolio). **Not a trading platform.**
+
+```bash
+# Terminal 1 — API
+python3 -m pip install -e ".[dev]" --break-system-packages
+uvicorn app.backend.main:app --reload --port 8000
+
+# Terminal 2 — UI
+cd app/frontend && npm install && npm run dev
+```
+
+Open http://localhost:5173. Full guide: [docs/product/investment-radar-runbook.md](docs/product/investment-radar-runbook.md).
 
 ## Run the SDLC Doctor
 
