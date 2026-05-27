@@ -4,7 +4,11 @@ from __future__ import annotations
 
 import pytest
 
-from app.backend.src.market_data.adapters.brapi import BrapiAdapter, brapi_ticker, is_brazilian_symbol
+from app.backend.src.market_data.adapters.brapi import (
+    BrapiAdapter,
+    brapi_ticker,
+    is_brazilian_symbol,
+)
 from app.backend.src.market_data.adapters.finnhub import FinnhubAdapter, finnhub_symbol
 from app.shared.types.market_data import AssetType, PriceInterval, PriceRange
 

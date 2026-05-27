@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 import hashlib
+from collections.abc import Callable
 from datetime import UTC, datetime
-from typing import Callable, TypeVar
+from typing import TypeVar
 
 from app.backend.src.market_data.base import MarketDataProvider
 from app.backend.src.market_data.cache import MarketDataCache
