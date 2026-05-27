@@ -68,12 +68,23 @@ O script:
 
 Critérios de bloqueio (escalação humana): ver `auto-merge-policy.md` — auth, diff >500 linhas, security HIGH/CRITICAL, Reviewer ESCALATE.
 
-### 6. Plane → Done (se script não usou --plane-comment)
+### 6. Plane → Done (evidência estruturada)
+
+Preencher JSON de evidência (ver `.cursor/skills/plane-formatting/SKILL.md`):
+
+```bash
+python3 .sdlc/scripts/auto_merge_pr.py --pr <N> --card INVES-N --plane-comment \
+  --evidence-file .sdlc/templates/plane/evidence-INVES-N.json
+```
+
+Ou manualmente:
 
 ```bash
 python3 .sdlc/scripts/plane_state.py done --card INVES-N \
-  --comment "PR #N merged · pytest output attached"
+  --evidence-file .sdlc/templates/plane/evidence-INVES-N.json
 ```
+
+Evidência **obrigatória:** Problems Solved, Technical Delivery, Validation, Context for Future.
 
 ### 7. Observer post-task
 

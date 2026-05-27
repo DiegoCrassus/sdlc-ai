@@ -1,4 +1,4 @@
-.PHONY: sdlc-doctor sdlc-validate sdlc-stages docs-check obs-init obs-server obs-seed sdlc-audit plane-in-progress auto-merge-pr issue-triage help
+.PHONY: sdlc-doctor sdlc-validate sdlc-stages docs-check obs-init obs-server obs-seed sdlc-audit plane-in-progress auto-merge-pr issue-triage plane-reformat plane-evidence help
 
 help:
 	@echo "SDLC AI — Available targets:"
@@ -16,6 +16,8 @@ help:
 	@echo "  plane-in-progress  Move Plane card to In Progress (CARD=INVES-N)"
 	@echo "  auto-merge-pr  Autonomous squash merge when CI green (PR=N CARD=INVES-N)"
 	@echo "  issue-triage   Close superseded GitHub issues (TRIAGE=1 to apply)"
+	@echo "  plane-reformat Reformat Plane descriptions (CARD=INVES-N or ALL=1)"
+	@echo "  plane-evidence Post structured Done evidence (CARD=INVES-N)"
 	@echo ""
 	@echo "Workflow: docs/sdlc/change-lifecycle.md"
 
@@ -72,6 +74,16 @@ auto-merge-pr:
 
 issue-triage:
 	@$(PYTHON) .sdlc/scripts/github_issue_triage.py $(if $(TRIAGE),--close-superseded,--dry-run)
+
+plane-reformat:
+	@if [ "$(ALL)" = "1" ]; then $(PYTHON) .sdlc/scripts/plane_card.py reformat-all; \
+	else test -n "$(CARD)" || (echo "Usage: make plane-reformat CARD=INVES-N or ALL=1" && exit 1); \
+	$(PYTHON) .sdlc/scripts/plane_card.py reformat-description --card $(CARD); fi
+
+plane-evidence:
+	@test -n "$(CARD)" || (echo "Usage: make plane-evidence CARD=INVES-N" && exit 1)
+	@$(PYTHON) .sdlc/scripts/plane_card.py post-evidence --card $(CARD) \
+	  --file .sdlc/templates/plane/evidence-$(CARD).json
 
 export-pdf:
 	@echo "Generating simulation PDF..."

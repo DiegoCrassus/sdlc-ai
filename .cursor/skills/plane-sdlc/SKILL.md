@@ -33,7 +33,7 @@ Criar, atualizar estados e encerrar **work items exclusivamente no Plane**. Nunc
 1. Conectar via Plane MCP ou REST (`.sdlc/scripts/plane_state.py` usa REST).
 2. Criar issue no project `investiments`.
 3. Título: `[AI][TYPE] Short imperative title`
-4. Descrição: plano completo (11 secções)
+4. **Descrição:** HTML TipTap via `plane_html.build_plan_html` — `.cursor/skills/plane-formatting/SKILL.md`
 5. Estado inicial: **Todo** (epic) ou **Todo** (sub-task aguardando start-change)
 6. Anotar `INVES-N` retornado
 
@@ -42,14 +42,14 @@ Criar, atualizar estados e encerrar **work items exclusivamente no Plane**. Nunc
 Executar **no start-change**, antes de branch/código:
 
 ```bash
-python3 .sdlc/scripts/plane_state.py in-progress --card INVES-N
+python3 .sdlc/scripts/plane_state.py in-progress --card INVES-N --branch feature/INVES-N-<slug>
 ```
 
 ## Procedure — evidência e Done
 
-1. Comentar: link PR, pytest, doctor
-2. **Done** somente após merge autônomo em `develop` + CI verde
-3. Usar `auto_merge_pr.py --plane-comment` ou `plane_state.py done`
+1. Preencher `.sdlc/templates/plane/evidence-INVES-N.json` (Implementer/Reviewer)
+2. Postar evidência formatada — **não** comentário one-liner
+3. **Done** após merge + CI via `auto_merge_pr.py --plane-comment --evidence-file …`
 
 ## Proibições
 

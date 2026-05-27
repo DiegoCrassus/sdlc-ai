@@ -1,11 +1,5 @@
 #!/usr/bin/env python3
-"""Plane work item state transitions for SDLC workflow.
-
-Usage:
-  python3 .sdlc/scripts/plane_state.py in-progress --card INVES-20
-  python3 .sdlc/scripts/plane_state.py done --card INVES-20 --comment "PR #32 merged"
-  python3 .sdlc/scripts/plane_state.py comment --card INVES-20 --comment "Starting work"
-"""
+"""Plane work item state transitions for SDLC workflow."""
 
 from __future__ import annotations
 
@@ -16,6 +10,13 @@ import sys
 from pathlib import Path
 
 import httpx
+
+SCRIPTS = Path(__file__).resolve().parent
+if str(SCRIPTS) not in sys.path:
+    sys.path.insert(0, str(SCRIPTS))
+
+from plane_evidence import build_completion_evidence, build_start_comment  # noqa: E402
+from plane_html import document, paragraph_text  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_PROJECT_ID = "04ac3a5d-7457-40f3-b94f-fccd4c29a589"
@@ -89,17 +90,24 @@ def set_state(api_key: str, workspace: str, project_id: str, issue_uuid: str, st
         return resp.json()
 
 
-def add_comment(
-    api_key: str, workspace: str, project_id: str, issue_uuid: str, comment: str
+def add_comment_html(
+    api_key: str, workspace: str, project_id: str, issue_uuid: str, html: str
 ) -> None:
     url = (
         f"https://api.plane.so/api/v1/workspaces/{workspace}/projects/"
         f"{project_id}/issues/{issue_uuid}/comments/"
     )
-    html = comment if comment.strip().startswith("<") else f"<p>{comment}</p>"
     with httpx.Client(timeout=30.0) as client:
         resp = client.post(url, headers=_headers(api_key), json={"comment_html": html})
         resp.raise_for_status()
+
+
+def wrap_comment(comment: str) -> str:
+    if comment.strip().startswith("<div"):
+        return comment
+    if comment.strip().startswith("<"):
+        return document(paragraph_text(comment))
+    return document(paragraph_text(comment))
 
 
 def main() -> None:
@@ -116,11 +124,14 @@ def main() -> None:
         p = sub.add_parser(name)
         p.add_argument("--card", required=True)
         p.add_argument("--comment", default="")
+        p.add_argument("--branch", default="", help="For in-progress start comment")
+        p.add_argument("--evidence-file", default="", help="JSON completion evidence (done)")
         p.set_defaults(state_key=state_key)
 
     c = sub.add_parser("comment")
     c.add_argument("--card", required=True)
-    c.add_argument("--comment", required=True)
+    c.add_argument("--comment", default="")
+    c.add_argument("--evidence-file", default="")
     c.set_defaults(state_key=None)
 
     args = parser.parse_args()
@@ -128,16 +139,30 @@ def main() -> None:
     seq = parse_card(args.card)
     issue_uuid = find_issue_uuid(api_key, workspace, project_id, seq)
 
+    html_comment = ""
+    if args.evidence_file:
+        import json
+
+        data = json.loads(Path(args.evidence_file).read_text(encoding="utf-8"))
+        data.setdefault("card", args.card)
+        html_comment = build_completion_evidence(data)
+    elif args.command == "in-progress" and args.branch:
+        html_comment = build_start_comment(args.card, args.branch)
+    elif args.comment:
+        html_comment = wrap_comment(args.comment)
+
     if args.command == "comment":
-        add_comment(api_key, workspace, project_id, issue_uuid, args.comment)
+        if not html_comment:
+            sys.exit("ERROR: --comment or --evidence-file required")
+        add_comment_html(api_key, workspace, project_id, issue_uuid, html_comment)
         print(f"OK: comment on INVES-{seq}")
         return
 
     data = set_state(api_key, workspace, project_id, issue_uuid, args.state_key)
     state_name = (data.get("state_detail") or {}).get("name", args.state_key)
     print(f"OK: INVES-{seq} -> {state_name}")
-    if args.comment:
-        add_comment(api_key, workspace, project_id, issue_uuid, args.comment)
+    if html_comment:
+        add_comment_html(api_key, workspace, project_id, issue_uuid, html_comment)
 
 
 if __name__ == "__main__":
