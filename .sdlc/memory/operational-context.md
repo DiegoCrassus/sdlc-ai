@@ -4,7 +4,7 @@
 
 ## Current State
 
-**Status:** SDLC observability active — `app/infra/sdlc_obs/` implemented. No product application code.
+**Status:** App reset for SDLC retest — `app/backend/` and `app/frontend/` placeholders. Plane INVES-19..24 Done (historical). Observability: `app/infra/sdlc_obs/`.
 
 ## Workflow
 

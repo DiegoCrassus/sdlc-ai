@@ -11,30 +11,23 @@ AI-Native SDLC platform — a project operating system for teams where AI agents
 ├── .cursor/          ← Cursor agent configuration (rules, commands, skills, subagents, hooks)
 ├── .sdlc/            ← SDLC configuration (YAML + Python DSL)
 ├── docs/             ← Human-readable documentation
-├── app/              ← Application code
-│   ├── frontend/     ← Investment Radar React SPA
-│   ├── backend/      ← Investment Radar FastAPI backend
-│   ├── infra/        ← Future infrastructure-as-code
-│   └── shared/       ← Shared types and utilities
+├── app/              ← Application code (placeholders — ready for SDLC retest)
+│   ├── frontend/     ← Future web frontend (not implemented)
+│   ├── backend/      ← Future Python API (not implemented)
+│   ├── infra/        ← SDLC observability + terraform placeholders
+│   └── shared/       ← Shared types and utilities (placeholder)
 ├── Makefile          ← SDLC and development commands
 ├── pyproject.toml    ← Python project configuration
 └── README.md         ← This file
 ```
 
-## Run Investment Radar locally
+## SDLC retest (app reset)
 
-Financial monitoring demo (stocks + crypto, simulated portfolio). **Not a trading platform.**
+Product code was removed from `app/backend/` and `app/frontend/` to allow a **full greenfield SDLC run** in a new agent session.
 
-```bash
-# Terminal 1 — API
-python3 -m pip install -e ".[dev]" --break-system-packages
-uvicorn app.backend.main:app --reload --port 8000
+Start with: *Build a product called Investment Radar …* — see [docs/handoff/current-state.md](docs/handoff/current-state.md).
 
-# Terminal 2 — UI
-cd app/frontend && npm install && npm run dev
-```
-
-Open http://localhost:5173. Full guide: [docs/product/investment-radar-runbook.md](docs/product/investment-radar-runbook.md).
+Prior delivery reference: [docs/product/investment-radar-runbook.md](docs/product/investment-radar-runbook.md) · [docs/architecture/investment-radar-api.md](docs/architecture/investment-radar-api.md).
 
 ## Run the SDLC Doctor
 
