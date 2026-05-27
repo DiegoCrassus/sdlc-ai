@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable, Coroutine
 from datetime import UTC, datetime
-from typing import Any, Callable, Coroutine
+from typing import Any
 
 from app.backend.src.market_data.provenance import make_provenance
 from app.shared.types.market_data import (
