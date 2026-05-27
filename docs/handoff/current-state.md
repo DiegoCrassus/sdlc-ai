@@ -2,52 +2,46 @@
 
 > **Updated:** 2026-05-27  
 > **Branch:** `develop`  
-> **Phase:** Investment Radar MVP implemented locally
+> **Phase:** App reset — ready for SDLC greenfield retest
 
 ## Summary
 
-**Investment Radar** is a runnable financial monitoring demo: discover assets, watchlist, asset details with price history, and a simulated portfolio. Backend (FastAPI) + frontend (React/Vite) are implemented per Plane epic **INVES-19** (sub-tasks INVES-20..24).
+**`app/backend/` and `app/frontend/`** were reset to **placeholders** (no product code). Use a **new agent session** to run the full SDLC cycle again (e.g. “Build Investment Radar …”).
 
-This is **not a trading platform** — no real trades, brokerages, or payments.
+Previous delivery (Plane **INVES-19..24**, PRs #32–#36) remains **history on Plane and Git** — not deleted.
 
 ## What works today
 
 | Component | Status | Entry |
 |-----------|--------|-------|
-| Backend API | ✅ | `uvicorn app.backend.main:app --reload --port 8000` |
-| Frontend SPA | ✅ | `cd app/frontend && npm run dev` |
-| SQLite persistence | ✅ | `./data/investment_radar.db` |
-| Market data + fallback | ✅ | `source: live \| fallback` on quotes |
 | SDLC Doctor | ✅ | `make sdlc-doctor` |
-| Observability | ✅ | `make obs-server` |
+| SDLC Audit | ✅ | `make sdlc-audit` |
+| Observability | ✅ | `make obs-server` → http://localhost:7700 |
+| Plane scripts | ✅ | `plane_state.py`, `auto_merge_pr.py`, `plane_card.py` |
+| Backend API | ⬜ placeholder | `app/backend/README.md` |
+| Frontend SPA | ⬜ placeholder | `app/frontend/README.md` |
 
-## Documentation
+## Retest checklist (new agent)
 
-- **Local runbook:** [docs/product/investment-radar-runbook.md](../product/investment-radar-runbook.md)
-- **API contract:** [docs/architecture/investment-radar-api.md](../architecture/investment-radar-api.md)
-- **Architecture:** [docs/architecture/overview.md](../architecture/overview.md)
+1. Open **new chat** (Orchestrator Principal, gate closed).
+2. Prompt greenfield: *Build a product called Investment Radar …* (or reference new Plane epic).
+3. Expect: **Planner** → Plane cards → **Architect** → `start-change` per sub-task → implement.
+4. Plane descriptions: use **TipTap** via `.cursor/skills/plane-formatting/SKILL.md`.
+5. Done evidence: `.sdlc/templates/plane/evidence-INVES-N.json` pattern.
 
-## Workflow (source of truth)
+## Reference docs (from prior cycle — still valid)
 
-[docs/sdlc/change-lifecycle.md](../sdlc/change-lifecycle.md)
+- [investment-radar-api.md](../architecture/investment-radar-api.md) — API contract reference
+- [investment-radar-runbook.md](../product/investment-radar-runbook.md) — target runbook after rebuild
+- [change-lifecycle.md](../sdlc/change-lifecycle.md) — workflow law
 
-- Plane workspace: `investments-sdlc` · project: `investiments`
-- Delivery: Plane card → feature branch → PR → CI green → merge `develop`
+## Plane (historical)
 
-## Plane cards (Investment Radar)
+| ID | Notes |
+|----|--------|
+| INVES-19..24 | Done — first Investment Radar cycle |
+| New retest | Create **new epic/sub-tasks** on Plane or explicitly re-open scope |
 
-| ID | Title | Status |
-|----|-------|--------|
-| INVES-19 | Product epic | In Progress |
-| INVES-20 | Market data API | Done |
-| INVES-21 | Watchlist API | Done |
-| INVES-22 | Simulated portfolio | Done |
-| INVES-23 | Frontend SPA | Done |
-| INVES-24 | Runbook | Done (this update) |
+## Workflow
 
-## Next steps (optional)
-
-- Production deployment ADR (auth, Postgres, hosting)
-- `GET /api/v1/portfolio/summary` convenience endpoint
-- OpenAPI → TypeScript codegen
-- E2E tests (Playwright)
+[docs/sdlc/change-lifecycle.md](../sdlc/change-lifecycle.md) · workspace `investments-sdlc` · project `investiments`
