@@ -7,7 +7,7 @@ implementer_handoff:
   epic: INVES-32
   branch: feature/INVES-35-forecast-types
   status: completed
-  commits: ["04741e3"]
+  commits: ["03140ba"]
   next_agent: qa
   acceptance_criteria:
     AC-1:
