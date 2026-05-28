@@ -11,19 +11,34 @@ AI-Native SDLC platform — a project operating system for teams where AI agents
 ├── .cursor/          ← Cursor agent configuration (rules, commands, skills, subagents, hooks)
 ├── .sdlc/            ← SDLC configuration (YAML + Python DSL)
 ├── docs/             ← Human-readable documentation
-├── app/              ← Application code (placeholders — ready for SDLC retest)
-│   ├── frontend/     ← Future web frontend (not implemented)
-│   ├── backend/      ← Future Python API (not implemented)
+├── app/              ← MarketPulse application code
+│   ├── frontend/     ← React/Vite web frontend
+│   ├── backend/      ← FastAPI Python API
 │   ├── infra/        ← SDLC observability + terraform placeholders
-│   └── shared/       ← Shared types and utilities (placeholder)
+│   ├── shared/       ← Shared types and utilities
+│   └── Makefile      ← One-command local dev (make start)
 ├── Makefile          ← SDLC and development commands
 ├── pyproject.toml    ← Python project configuration
 └── README.md         ← This file
 ```
 
+## Run the app locally
+
+The MarketPulse app (FastAPI backend + React/Vite frontend) runs with a single command:
+
+```bash
+cd app
+make start
+```
+
+This installs dependencies if needed and runs the backend (http://127.0.0.1:8000/docs)
+and frontend (http://127.0.0.1:5173) together; press `Ctrl+C` to stop both.
+See [docs/infrastructure/local-development.md](docs/infrastructure/local-development.md)
+for the full list of targets and configurable variables.
+
 ## SDLC retest (app reset)
 
-Product code was removed from `app/backend/` and `app/frontend/` to allow a **full greenfield SDLC run** in a new agent session.
+The `app/` tree was reset to allow a **full greenfield SDLC run** in a new agent session, which produced the MarketPulse app now under `app/backend/` and `app/frontend/`.
 
 **Human guide (full context):** [SDLC-GUIDE.md](SDLC-GUIDE.md)  
 **Deep dive (papers P0/P1 + behavior):** [SDLC-DEEP-DIVE.md](SDLC-DEEP-DIVE.md)  
