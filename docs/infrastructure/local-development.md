@@ -52,17 +52,56 @@ make sdlc-doctor
 
 Expected output: all `[PASS]`, some `[WARN]` for unconfigured integrations.
 
-## Running Tests
+## Running the MarketPulse App
+
+The MarketPulse application (FastAPI backend + React/Vite frontend) ships with a
+Makefile in `app/` that provides one-command local development. Run all targets
+from the `app/` directory.
 
 ```bash
-# When tests exist:
-python -m pytest app/ -v
+cd app
+make start
+```
+
+`make start` installs dependencies if needed, then runs the backend and frontend
+together:
+
+- Backend (FastAPI): http://127.0.0.1:8000 — interactive docs at http://127.0.0.1:8000/docs
+- Frontend (Vite): http://127.0.0.1:5173
+
+Press `Ctrl+C` to stop both processes.
+
+### Available targets
+
+| Target              | Description                                                                 |
+|---------------------|-----------------------------------------------------------------------------|
+| `make start`        | Install deps (if needed) and run backend + frontend together                |
+| `make install`      | Install backend (`pip install -e ".[dev]"`) and frontend (`npm install`) deps |
+| `make backend`      | Run only the FastAPI backend (reload mode)                                   |
+| `make frontend`     | Run only the Vite frontend dev server                                        |
+| `make test`         | Run backend tests (pytest; works on a cold checkout via `PYTHONPATH`)        |
+| `make clean`        | Remove caches and build artifacts                                            |
+| `make help`         | List all available targets                                                   |
+
+### Configurable variables
+
+Override these on the command line as needed:
+
+| Variable       | Default     | Purpose                          |
+|----------------|-------------|----------------------------------|
+| `PYTHON`       | `python3`   | Python interpreter to use        |
+| `BACKEND_HOST` | `127.0.0.1` | Host the backend binds to        |
+| `BACKEND_PORT` | `8000`      | Port the backend listens on      |
+
+```bash
+# Example: run the backend on a different port
+cd app
+make start BACKEND_PORT=8080
 ```
 
 ## Known Local Setup Issues
 
-- No application services to run yet — this is the initialization phase.
-- Container setup (Docker) will be documented here when services are defined.
+- Container setup (Docker) will be documented here when container images are defined.
 
 ## IDE Configuration
 
