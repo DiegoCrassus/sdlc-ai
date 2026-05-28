@@ -70,7 +70,7 @@ start: install
 
 test:
 	@echo "==> Running backend tests"
-	@cd $(ROOT) && $(PYTHON) -m pytest app/backend/tests/ -v
+	@cd $(ROOT) && PYTHONPATH=app/backend/src $(PYTHON) -m pytest app/backend/tests/ -v
 
 clean:
 	@echo "==> Cleaning caches and build artifacts"
