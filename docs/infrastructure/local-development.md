@@ -56,7 +56,8 @@ Expected output: all `[PASS]`, some `[WARN]` for unconfigured integrations.
 
 The MarketPulse application (FastAPI backend + React/Vite frontend) ships with a
 Makefile in `app/` that provides one-command local development. Run all targets
-from the `app/` directory.
+from the `app/` directory. The Makefile was introduced in Plane card **INVES-30**
+and merged via [PR #44](https://github.com/DiegoCrassus/sdlc-ai/pull/44).
 
 `make install` and `make start` automatically create and use a project virtual
 environment at the repo root (`.venv`) when you run them from `app/`, avoiding
@@ -82,6 +83,8 @@ Press `Ctrl+C` to stop both processes.
 |---------------------|-----------------------------------------------------------------------------|
 | `make start`        | Install deps (if needed) and run backend + frontend together                |
 | `make install`      | Create `.venv` if needed, install backend + frontend deps                     |
+| `make install-backend` | Create `.venv` if needed, install backend deps (editable `.[dev]`)         |
+| `make install-frontend` | Install frontend npm dependencies                                        |
 | `make venv`         | Create repo-root `.venv` only (no package install)                            |
 | `make backend`      | Run only the FastAPI backend (reload mode)                                   |
 | `make frontend`     | Run only the Vite frontend dev server                                        |
