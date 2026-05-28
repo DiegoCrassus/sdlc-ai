@@ -62,7 +62,8 @@ Convert ideas, tickets, and requests into structured, SDLC-aligned plans using t
 
 ## Outputs
 
-- Each sub-task created as **Plane work item** via MCP (`INVESTIMENTS-N` in project `investiments`)
+- Each sub-task created as **Plane child work item** (parent = epic) via MCP
+- Epic: `[AI][EPIC]` — children: `[AI][BACKEND]`, `[AI][FRONTEND]`, etc. — **never lone `[AI][FULLSTACK]`**
 - Plan content lives in **Plane description**, not in repo files
 - Explicit handoff statement for the Architect
 

@@ -1,0 +1,353 @@
+"""SDLC workflow meta-tool — classify, plan, arch, start, implement, validate, review, finish, status."""
+
+from __future__ import annotations
+
+import argparse
+import json
+import re
+import subprocess
+import sys
+from pathlib import Path
+from typing import Any
+
+from gate import (  # type: ignore[import-not-found]
+    close_gate,
+    gate_status_text,
+    load_session_gate,
+    open_gate,
+    repo_root,
+    save_session_gate,
+)
+
+ROOT = repo_root()
+
+GREENFIELD_WORDS = (
+    "do zero",
+    "greenfield",
+    "não reaproveite",
+    "nao reaproveite",
+    "repense",
+    "from scratch",
+    "rethought",
+)
+
+READONLY_WORDS = (
+    "como funciona",
+    "explique",
+    "analise",
+    "analyze",
+    "what is",
+    "qual é",
+    "?",
+)
+
+SDLC_META_PREFIXES = (".sdlc/", ".cursor/", "docs/sdlc/", ".github/workflows/")
+
+
+def _app_is_placeholder() -> bool:
+    backend = ROOT / "app" / "backend"
+    frontend = ROOT / "app" / "frontend"
+    backend_files = [p for p in backend.rglob("*") if p.is_file() and p.name != "README.md"]
+    frontend_files = [p for p in frontend.rglob("*") if p.is_file() and p.name != "README.md"]
+    return len(backend_files) == 0 and len(frontend_files) == 0
+
+
+def classify_intent(text: str = "") -> dict[str, Any]:
+    t = (text or "").lower()
+    greenfield_words = any(w in t for w in GREENFIELD_WORDS)
+    empty_app = _app_is_placeholder()
+
+    if not text.strip():
+        intent = "READONLY"
+    elif any(w in t for w in ("sdlc", "orchestrator", "gate", "workflow", "doctor")) and any(
+        w in t for w in (".sdlc", ".cursor", "master-workflow")
+    ):
+        intent = "SDLC_META"
+    elif greenfield_words and empty_app:
+        intent = "GREENFIELD"
+    elif greenfield_words:
+        intent = "GREENFIELD"
+    elif any(w in t for w in ("bugfix", "corrigir bug", "fix bug")):
+        intent = "BUGFIX"
+    elif any(w in t for w in ("hotfix", "urgência produção")):
+        intent = "HOTFIX"
+    elif any(w in t for w in ("infra", "ci/cd", "terraform", "docker")):
+        intent = "INFRA"
+    elif any(w in t for w in ("docs only", "só docs", "documentação")):
+        intent = "DOCS_ONLY"
+    elif t.strip().endswith("?") or any(w in t for w in READONLY_WORDS):
+        intent = "READONLY"
+    else:
+        intent = "FEATURE"
+
+    requires_plane = intent not in ("READONLY",)
+    requires_branch = intent in (
+        "GREENFIELD",
+        "FEATURE",
+        "BUGFIX",
+        "HOTFIX",
+        "INFRA",
+        "SDLC_META",
+        "DOCS_ONLY",
+    )
+
+    next_agent = {
+        "READONLY": "none",
+        "SDLC_META": "planner",
+        "DOCS_ONLY": "planner",
+        "GREENFIELD": "planner",
+        "FEATURE": "planner",
+        "BUGFIX": "planner",
+        "HOTFIX": "planner",
+        "INFRA": "architect",
+    }.get(intent, "planner")
+
+    signals = []
+    if greenfield_words:
+        signals.append("user_words")
+    if empty_app:
+        signals.append("empty_app")
+
+    return {
+        "intent": intent,
+        "confidence": 0.85 if intent != "FEATURE" else 0.7,
+        "greenfield_signals": signals,
+        "scope_hint": text[:200] if text else "",
+        "requires_plane": requires_plane,
+        "requires_branch": requires_branch,
+        "next_agent": next_agent,
+        "rationale": f"classified as {intent}",
+    }
+
+
+def write_handoff(classification: dict[str, Any]) -> Path:
+    path = ROOT / ".sdlc" / "memory" / "orchestrator-handoff.md"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    lines = ["# Orchestrator Handoff (latest)", "", "```yaml"]
+    for key, val in classification.items():
+        if isinstance(val, list):
+            lines.append(f"{key}: {json.dumps(val)}")
+        elif isinstance(val, bool):
+            lines.append(f"{key}: {'true' if val else 'false'}")
+        else:
+            lines.append(f"{key}: {val}")
+    lines.append("```")
+    lines.append("")
+    path.write_text("\n".join(lines), encoding="utf-8")
+    return path
+
+
+def update_session_intent(classification: dict[str, Any]) -> None:
+    state = load_session_gate()
+    state.intent = classification.get("intent", "")
+    save_session_gate(state)
+
+
+def cmd_classify(args: argparse.Namespace) -> int:
+    text = args.text or ""
+    if args.file:
+        text = Path(args.file).read_text(encoding="utf-8")
+    result = classify_intent(text)
+    write_handoff(result)
+    update_session_intent(result)
+    print(json.dumps(result, indent=2))
+    return 0
+
+
+def cmd_plan(args: argparse.Namespace) -> int:
+    if not args.card:
+        print("ERROR: --card INVES-N required", file=sys.stderr)
+        return 1
+    script = ROOT / ".sdlc" / "scripts" / "plane_card.py"
+    proc = subprocess.run(
+        [sys.executable, str(script), "validate-all", "--card", args.card],
+        cwd=ROOT,
+    )
+    return proc.returncode
+
+
+def cmd_discover(_args: argparse.Namespace) -> int:
+    script = ROOT / ".sdlc" / "scripts" / "discovery_hook.py"
+    return subprocess.run([sys.executable, str(script)], cwd=ROOT).returncode
+
+
+def cmd_arch(args: argparse.Namespace) -> int:
+    state = load_session_gate()
+    if state.gate_status != "open":
+        print("WARN: gate not open — architecture stage should follow validated plan")
+    if not args.card and state.card:
+        args.card = state.card
+    if args.card:
+        return cmd_plan(args)
+    print("ERROR: no card — pass --card INVES-N", file=sys.stderr)
+    return 1
+
+
+def cmd_start(args: argparse.Namespace) -> int:
+    card = args.card
+    if not card:
+        print("ERROR: --card INVES-N required", file=sys.stderr)
+        return 1
+
+    # Block workflow start on epic — use child implementable card
+    try:
+        import httpx
+
+        sys.path.insert(0, str(ROOT / ".sdlc" / "scripts"))
+        from plane_card import _api, find_issue_uuid, get_issue, parse_card  # noqa: E402
+
+        api_key, workspace, project_id = _api()
+        seq = parse_card(card)
+        uuid = find_issue_uuid(api_key, workspace, project_id, seq)
+        issue = get_issue(api_key, workspace, project_id, uuid)
+        title = (issue.get("name") or "").upper()
+        if "[AI][EPIC]" in title:
+            print(
+                "ERROR: cannot workflow start on EPIC card — use a child card "
+                "(BACKEND/FRONTEND/INFRA)",
+                file=sys.stderr,
+            )
+            return 1
+    except SystemExit:
+        pass
+    except Exception as exc:
+        print(f"WARN: could not verify epic/child: {exc}")
+
+    stage = args.stage or "implementation"
+    branch = args.branch or f"feature/{card}-{args.slug or 'work'}"
+
+    if not args.skip_plane:
+        plane_script = ROOT / ".sdlc" / "scripts" / "plane_state.py"
+        if plane_script.is_file():
+            proc = subprocess.run(
+                [
+                    sys.executable,
+                    str(plane_script),
+                    "in-progress",
+                    "--card",
+                    card,
+                    "--branch",
+                    branch,
+                ],
+                cwd=ROOT,
+            )
+            if proc.returncode != 0 and not args.force:
+                print("WARN: plane_state in-progress failed (use --force to open gate anyway)")
+
+    if not args.skip_validate and stage != "sdlc_meta":
+        plan_rc = cmd_plan(argparse.Namespace(card=card))
+        if plan_rc != 0 and not args.force:
+            print("ERROR: validate-plan failed — fix Plane description or use --force", file=sys.stderr)
+            return plan_rc
+
+    intent = args.intent or load_session_gate().intent or "FEATURE"
+    open_gate(card=card, branch=branch, stage=stage, intent=intent)
+    print(f"OK: workflow start — {card} branch={branch} stage={stage}")
+    return 0
+
+
+def cmd_implement(args: argparse.Namespace) -> int:
+    state = load_session_gate()
+    if state.gate_status != "open":
+        print("ERROR: gate closed — run workflow start first", file=sys.stderr)
+        return 1
+    if state.stage not in ("implementation", "validation", "sdlc_meta"):
+        print(f"ERROR: stage '{state.stage}' does not allow implementation writes", file=sys.stderr)
+        return 1
+    print(f"OK: implementation gate ready — {state.card} stage={state.stage}")
+    return 0
+
+
+def cmd_validate(args: argparse.Namespace) -> int:
+    state = load_session_gate()
+    if state.gate_status == "open" and state.stage == "implementation":
+        open_gate(
+            card=state.card,
+            branch=state.branch,
+            stage="validation",
+            intent=state.intent,
+        )
+    proc = subprocess.run(["make", "sdlc-doctor"], cwd=ROOT)
+    return proc.returncode
+
+
+def cmd_review(args: argparse.Namespace) -> int:
+    state = load_session_gate()
+    if state.gate_status != "open":
+        print("WARN: gate closed during review prep")
+    print(f"OK: review gate prep — card={state.card or args.card or '(none)'}")
+    return 0
+
+
+def cmd_finish(args: argparse.Namespace) -> int:
+    card = args.card or load_session_gate().card
+    if args.pr and card:
+        merge = ROOT / ".sdlc" / "scripts" / "auto_merge_pr.py"
+        proc = subprocess.run(
+            [sys.executable, str(merge), "--pr", str(args.pr), "--card", card, "--plane-comment"],
+            cwd=ROOT,
+        )
+        close_gate()
+        return proc.returncode
+    close_gate()
+    print("OK: gate closed" + (f" — merge skipped (no --pr)" if not args.pr else ""))
+    return 0
+
+
+def cmd_status(_args: argparse.Namespace) -> int:
+    print(gate_status_text())
+    handoff = ROOT / ".sdlc" / "memory" / "orchestrator-handoff.md"
+    if handoff.is_file():
+        print("\n--- handoff ---")
+        print(handoff.read_text(encoding="utf-8")[:800])
+    return 0
+
+
+def run_workflow(argv: list[str]) -> int:
+    parser = argparse.ArgumentParser(prog="workflow")
+    sub = parser.add_subparsers(dest="wf_command", required=True)
+
+    c = sub.add_parser("classify")
+    c.add_argument("--text", default="")
+    c.add_argument("--file", default="")
+
+    p = sub.add_parser("plan")
+    p.add_argument("--card", required=True)
+
+    d = sub.add_parser("discover", help="Run discovery hook (legacy docs, app state)")
+
+    a = sub.add_parser("arch")
+    a.add_argument("--card", default="")
+
+    s = sub.add_parser("start")
+    s.add_argument("--card", required=True)
+    s.add_argument("--branch", default="")
+    s.add_argument("--slug", default="work")
+    s.add_argument("--stage", default="implementation")
+    s.add_argument("--intent", default="")
+    s.add_argument("--skip-plane", action="store_true")
+    s.add_argument("--skip-validate", action="store_true")
+    s.add_argument("--force", action="store_true")
+
+    sub.add_parser("implement")
+    sub.add_parser("validate")
+    sub.add_parser("review")
+    f = sub.add_parser("finish")
+    f.add_argument("--card", default="")
+    f.add_argument("--pr", default="")
+    sub.add_parser("status")
+
+    args = parser.parse_args(argv)
+    handlers = {
+        "classify": cmd_classify,
+        "discover": cmd_discover,
+        "plan": cmd_plan,
+        "arch": cmd_arch,
+        "start": cmd_start,
+        "implement": cmd_implement,
+        "validate": cmd_validate,
+        "review": cmd_review,
+        "finish": cmd_finish,
+        "status": cmd_status,
+    }
+    return handlers[args.wf_command](args)

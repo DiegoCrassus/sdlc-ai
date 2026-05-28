@@ -14,13 +14,10 @@ alwaysApply: true
 
 ## Before Any Major Task
 
-1. Read `.sdlc/AGENTS.md` — agent handbook.
-2. Read `docs/sdlc/change-lifecycle.md` — **workflow source of truth**.
-3. Inspect the repository structure.
-4. Read `.sdlc/sdlc.yaml` for SDLC configuration.
-5. Read `.sdlc/memory/operational-context.md` for runtime context.
-6. Identify the current SDLC stage.
-7. Check if a Doctor run is needed (`make sdlc-doctor`).
+1. Read **`AGENTS.md`** (repo root) — orchestrator entry + decision tree.
+2. Read `.sdlc/HANDBOOK.md` — agent handbook.
+3. Read `docs/sdlc/master-workflow.md` — **process source of truth**.
+4. Read `docs/sdlc/change-lifecycle.md` — gitflow + Plane.
 
 ## If SDLC Structure Is Missing (New Repo)
 
@@ -45,5 +42,5 @@ Do not improvise structure — the file is the single source of truth for initia
 
 ## Communication
 
-- Responses in Portuguese. Code in English.
+- User-facing chat responses in Portuguese; SDLC documentation and code in English.
 - Always report what changed, why, and what the next step is.

@@ -35,17 +35,17 @@
 
 | Service    | Purpose              | Configured Via          | MCP      |
 |------------|----------------------|-------------------------|----------|
-| GitHub     | Version control / PR | GITHUB_PERSONAL_ACCESS_TOKEN_CLASSIC | ✅ ativo |
+| GitHub     | Version control / PR | GITHUB_PERSONAL_ACCESS_TOKEN_CLASSIC | ✅ active |
 | Plane      | Task management      | PLANE_API_KEY           | MCP + `.sdlc/scripts/plane_state.py` |
 | OpenAI     | LLM inference        | OPENAI_API_KEY          | —        |
 
-## Plane — Projeto ativo
+## Plane — active project
 
 - **Workspace:** `investments-sdlc` (`PLANE_WORKSPACE_SLUG`)
 - **Project:** `investiments` (`PLANE_PROJECT_NAME`)
-- **Card prefix:** `INVESTIMENTS-N` (branch: `feature/INVESTIMENTS-N-<slug>`)
+- **Card prefix:** `INVES-N` (branch: `feature/INVES-N-<slug>`)
 
-Cards são criados no project `investiments` **antes** de qualquer edição de código.
+Cards are created in project `investiments` **before** any code edit.
 
 ## Process automation (2026-05-27)
 

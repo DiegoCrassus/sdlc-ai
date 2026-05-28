@@ -41,7 +41,7 @@ Every task name produced by this skill must follow this format:
 | `[SHARED]` | Primary change is in `app/shared/` |
 | `[SDLC]` | Change affects `.sdlc/`, `.cursor/`, `Makefile`, or project governance |
 | `[DOCS]` | Change is documentation-only (`docs/`) |
-| `[FULLSTACK]` | Change spans both `app/frontend/` and `app/backend/` |
+| `[FULLSTACK]` | **Deprecated for greenfield/FEATURE** — split into BACKEND + FRONTEND child cards (see `plane-task-creation/SKILL.md`) |
 
 ### Title rules
 
@@ -58,7 +58,7 @@ Every task name produced by this skill must follow this format:
 [AI][INFRA]     Add GitHub Actions CI pipeline for backend tests
 [AI][SDLC]      Update Doctor to validate integration env vars
 [AI][DOCS]      Document deployment procedure for staging environment
-[AI][FULLSTACK] Add work item list view with Plane sync
+[AI][FULLSTACK] Add work item list view with Plane sync   ← legacy; prefer epic + BACKEND + FRONTEND children
 ```
 
 ---

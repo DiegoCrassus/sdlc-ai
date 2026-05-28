@@ -5,33 +5,33 @@ alwaysApply: true
 
 # SDLC core — RPG-OP
 
-Deep Agent conduz engenharia; **Plane MCP** conduz tarefas; **GitHub MCP** conduz PR → merge.
+Deep Agent drives engineering; **Plane MCP** drives tasks; **GitHub MCP** drives PR → merge.
 
-## Fonte da verdade
+## Source of truth
 
-**`docs/sdlc/change-lifecycle.md`** — prevalece sobre instruções ad hoc do chat.
+**`docs/sdlc/change-lifecycle.md`** — prevails over ad hoc chat instructions.
 
-Plane: workspace `investments-sdlc`, project `investiments`, cards `INVESTIMENTS-N`.
+Plane: workspace `investments-sdlc`, project `investiments`, cards `INVES-N`.
 
-## Ordem de trabalho
+## Work order
 
-1. `.sdlc/AGENTS.md` + `docs/sdlc/change-lifecycle.md`
-2. **Plane MCP** — criar/atualizar work item (project `investiments`) — skill **plane-sdlc**
-3. Branch `feature/INVESTIMENTS-N-<slug>` via **start-change**
-4. Implement → commits apenas no feature branch
-5. PR + CI verde → merge **develop** via **finish-change**
-6. Evidência e Done **no card Plane** (nunca em arquivos locais)
+1. **`AGENTS.md` (root)** + `.sdlc/HANDBOOK.md` + `docs/sdlc/change-lifecycle.md`
+2. **Plane MCP** — create/update work item (project `investiments`) — skill **plane-sdlc**
+3. Branch `feature/INVES-N-<slug>` via **start-change** / `workflow start`
+4. Implement → commits on feature branch only
+5. PR + green CI → merge **develop** via **finish-change**
+6. Evidence and Done **on Plane card** (never in local files)
 
-## Proibição absoluta
+## Absolute prohibitions
 
-- **Nunca** criar pasta `specs/` nem tickets/backlog/evidência de tarefa no repositório.
-- **Nunca** criar tarefa localmente — somente Plane via MCP.
+- **Never** create a `specs/` folder or local tickets/backlog/task evidence in the repo.
+- **Never** create tasks locally — Plane via MCP only.
 
 ## MCP
 
 - Plane: `.cursor/mcp.json` — skill `plane-sdlc`
 - GitHub: `.cursor/mcp.json` — skill `github-sdlc`
 
-## Idioma
+## Language
 
-Respostas em português; código em inglês.
+User-facing chat responses in Portuguese; SDLC docs and code in English.

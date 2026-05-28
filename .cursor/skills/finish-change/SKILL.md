@@ -4,87 +4,87 @@
 
 ## Purpose
 
-Finalizar uma unidade de trabalho: validar, abrir PR, **merge autônomo** em `develop`, evidência no Plane.
+Finish a work unit: validate, open PR, **autonomous merge** into `develop`, evidence on Plane.
 
 ## When to use
 
-- Implementação completa e testes locais passando
-- Após **QA** e **Reviewer** (subagentes Task) — ver `.cursor/skills/sdlc-orchestrator/SKILL.md`
+- Implementation complete and local tests passing
+- After **QA** and **Reviewer** (Task subagents) — see `.cursor/skills/sdlc-orchestrator/SKILL.md`
 
 ## Procedure
 
-### 1. Validação local
+### 1. Local validation
 
 ```bash
 make sdlc-doctor
-python3 -m pytest app/backend/tests/ -v    # quando backend existir
-cd app/frontend && npm run build           # quando frontend existir
+python3 -m pytest app/backend/tests/ -v    # when backend exists
+cd app/frontend && npm run build           # when frontend exists
 ```
 
-### 2. Commit no feature branch (nunca em develop)
+### 2. Commit on feature branch (never on develop)
 
 ```bash
 git add <files>
 git commit -m "feat(scope): summary (INVES-N)"
 ```
 
-### 3. Push e abrir PR para develop
+### 3. Push and open PR to develop
 
 ```bash
 git push -u origin HEAD
 gh pr create --base develop --title "..." --body "..."
 ```
 
-Sem `gh` CLI:
+Without `gh` CLI:
 
 ```bash
-# GitHub REST API ou script — ver .sdlc/scripts/auto_merge_pr.py após PR criado
+# GitHub REST API or script — see .sdlc/scripts/auto_merge_pr.py after PR is created
 ```
 
 PR body must include:
-- Link Plane `INVES-N`
-- Test plan checklist com saídas reais
-- `Closes` apenas se houver issue GitHub vinculada (Plane é primário)
+- Plane link `INVES-N`
+- Test plan checklist with real outputs
+- `Closes` only if a linked GitHub issue exists (Plane is primary)
 
-### 4. Aguardar CI verde
+### 4. Wait for green CI
 
 Workflow: `.github/workflows/ci.yml`
 
-### 5. Merge autônomo (sem aprovação humana)
+### 5. Autonomous merge (no human approval)
 
-**O agente DevOps/Orchestrator executa merge** quando todos os gates passam (`.cursor/skills/auto-merge-policy.md`):
+**DevOps/Orchestrator runs merge** when all gates pass (`.cursor/skills/auto-merge-policy.md`):
 
 ```bash
 python3 .sdlc/scripts/auto_merge_pr.py --pr <N> --card INVES-N --plane-comment
 ```
 
-O script:
-1. Aguarda CI `success` no branch do PR
+The script:
+1. Waits for CI `success` on the PR branch
 2. Squash merge → `develop`
-3. Remove branch remoto
-4. Move card Plane → **Done** com link do PR
+3. Deletes remote branch
+4. Moves Plane card → **Done** with PR link
 
-**Proibido** pedir ao usuário para clicar em Merge no GitHub quando gates estão verdes.
+**Forbidden** to ask the user to click Merge on GitHub when gates are green.
 
-Critérios de bloqueio (escalação humana): ver `auto-merge-policy.md` — auth, diff >500 linhas, security HIGH/CRITICAL, Reviewer ESCALATE.
+Blocking criteria (human escalation): see `auto-merge-policy.md` — auth, diff >500 lines, security HIGH/CRITICAL, Reviewer ESCALATE.
 
-### 6. Plane → Done (evidência estruturada)
+### 6. Plane → Done (structured evidence)
 
-Preencher JSON de evidência (ver `.cursor/skills/plane-formatting/SKILL.md`):
+Fill evidence JSON (see `.cursor/skills/plane-formatting/SKILL.md`):
 
 ```bash
 python3 .sdlc/scripts/auto_merge_pr.py --pr <N> --card INVES-N --plane-comment \
   --evidence-file .sdlc/templates/plane/evidence-INVES-N.json
 ```
 
-Ou manualmente:
+Or manually:
 
 ```bash
 python3 .sdlc/scripts/plane_state.py done --card INVES-N \
   --evidence-file .sdlc/templates/plane/evidence-INVES-N.json
 ```
 
-Evidência **obrigatória:** Problems Solved, Technical Delivery, Validation, Context for Future.
+**Required evidence:** Problems Solved, Technical Delivery, Validation, Context for Future.
 
 ### 7. Observer post-task
 
@@ -92,18 +92,18 @@ Evidência **obrigatória:** Problems Solved, Technical Delivery, Validation, Co
 python3 .sdlc/obs/hooks/post_task.py --task "INVES-N" --status completed
 ```
 
-## Delegação obrigatória antes do merge
+## Mandatory delegation before merge
 
-| Subagente | Quando |
-|-----------|--------|
-| **QA** | Após Implementer — evidência pytest/build real |
-| **Reviewer** | Após QA — checklist code-review + auto-merge-policy |
-| **DevOps** | Executar `auto_merge_pr.py` — não delegar merge ao humano |
+| Subagent | When |
+|----------|------|
+| **QA** | After Implementer — real pytest/build evidence |
+| **Reviewer** | After QA — code-review checklist + auto-merge-policy |
+| **DevOps** | Run `auto_merge_pr.py` — do not delegate merge to human |
 
 ## Failure modes
 
 | Situation | Action |
 |-----------|--------|
-| CI falhou | Corrigir no branch; novo push; **não** merge |
-| Merge bloqueado por policy | Escalar humano; documentar no Plane |
-| Usuário pede merge manual | Explicar que finish-change é autônomo por design |
+| CI failed | Fix on branch; new push; **do not** merge |
+| Merge blocked by policy | Escalate human; document on Plane |
+| User asks for manual merge | Explain that finish-change is autonomous by design |

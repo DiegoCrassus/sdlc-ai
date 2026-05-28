@@ -1,80 +1,67 @@
 # Skill: SDLC Orchestrator
 
-> **Authority:** `docs/sdlc/change-lifecycle.md` · `002-sdlc-orchestrator-principal.mdc`
+> **Authority:** `docs/sdlc/master-workflow.md` · `003-orchestrator-delegation-only.mdc`
 
 ## Purpose
 
-Orchestrator Principal: classificar, gates, delegar Task, validar handoffs. **Nunca** colapsar QA/Reviewer/DevOps nem pedir merge humano.
+Orchestrator Principal: **spawn Tasks, read handoffs, spawn next Task**. Never implement, commit, lint, or test directly.
 
-## Plane state discipline
-
-| Evento | Ação obrigatória |
-|--------|------------------|
-| Implementação vai começar | `plane_state.py in-progress --card INVES-N` **antes** de branch/código |
-| PR criado | Comentário no card com URL |
-| CI verde + Reviewer APPROVE | `auto_merge_pr.py --pr N --card INVES-N --plane-comment` |
-| Epic filho Done | Verificar epic ainda In Progress até último filho |
-
-## GitHub Issues abertas
-
-Plane é fonte da verdade. Issues GitHub **não** iniciam implementação.
-
-1. No início de sessão ou quando usuário mencionar issues: **Task → Issue Analyst** (`issue-analyst.md`)
-2. Issue duplicada / legado `specs/` → fechar com comentário + link Plane
-3. Issue válida sem card → Planner (`plane-task-creation`) — **não** Implementer direto
-
-Script batch (superseded conhecidas):
-
-```bash
-python3 .sdlc/scripts/github_issue_triage.py --close-superseded
-```
-
-## Sequência por sub-tarefa INVES-N
+## Anti-pattern (MarketPulse lesson)
 
 ```
-start-change (Plane In Progress + branch)
-  → Task(Implementer)
-  → Task(QA)           # obrigatório — pytest/build real
-  → Task(Reviewer)     # obrigatório — auto-merge-policy
-  → finish-change      # auto_merge_pr.py — SEM humano
-  → post_task obs
+WRONG: Orchestrator → WebSearch → Write app/ → single FULLSTACK card
+RIGHT: Task(Intent) → Task(Planner) epic+3 children → per child: Task(Impl)→Task(QA)→Task(Review)
 ```
 
-**Proibido:** Implementer → commit → pedir usuário para merge.
+## Plane granularity
 
-## Task prompts — finish pipeline
+| Intent | Plane structure |
+|--------|-----------------|
+| GREENFIELD | 1 epic + ≥3 child cards |
+| FEATURE | 1 epic + ≥2 child cards |
+| BUGFIX/HOTFIX | 1 card OK |
 
-### QA
+Validate: `plane_card.py validate-all --card INVES-N`
 
-```
-Read .cursor/subagents/qa.md. Card INVES-N. Run real tests; return handoff YAML tests_passed: true/false.
-```
-
-### Reviewer
-
-```
-Read .cursor/subagents/reviewer.md + auto-merge-policy.md. Review diff; APPROVE or ESCALATE. handoff YAML.
-```
-
-### DevOps (merge)
+## Session loop
 
 ```
-Run: python3 .sdlc/scripts/auto_merge_pr.py --pr <N> --card INVES-N --plane-comment
-Report merge URL. No human approval if gates green.
+Task(Intent Analyst)
+→ Task(Planner) creates epic + children via Plane MCP
+→ workflow discover
+→ Task(Architect)
+→ for child in children:
+      workflow start --card child  # NOT epic
+      Task(Implementer)  # commits autonomously
+      Task(QA)           # ruff/pytest/build
+      loop AutoFixer max 2 if QA fail
+      Task(Reviewer)
+      Task(DevOps) push + PR
+      workflow finish
+→ epic Done when all children Done
 ```
 
-## Gate matrix
+## After every Task
 
-| Advance | Requires |
-|---------|----------|
-| → Implementation | Plane In Progress + branch |
-| → PR | QA handoff completed |
-| → Merge | Reviewer APPROVE + CI green |
-| → Done | auto_merge_pr success |
+1. Read `.sdlc/memory/orchestrator-handoff.md`
+2. If `stage_complete: false` → Task(same agent) or AutoFixer
+3. If `next_agent: qa` → Task(QA) — **do not run pytest yourself**
+4. Never merge without Task(Reviewer) APPROVE
+
+## Task prompt template
+
+```
+Read .cursor/subagents/<agent>.md and relevant skills.
+Card INVES-N (child card, not epic).
+Branch: feature/INVES-N-<slug>
+Return handoff YAML to .sdlc/memory/orchestrator-handoff.md
+Do not ask human to commit, push, or merge.
+```
 
 ## References
 
+- `.cursor/skills/subagent-delegation/SKILL.md`
+- `.cursor/skills/plane-task-creation/SKILL.md`
+- `.cursor/skills/qa-minimum-checklist/SKILL.md`
 - `.sdlc/scripts/plane_state.py`
 - `.sdlc/scripts/auto_merge_pr.py`
-- `.sdlc/scripts/github_issue_triage.py`
-- `.sdlc/memory/orchestrator-handoff.md`

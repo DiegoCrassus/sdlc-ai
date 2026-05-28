@@ -4,55 +4,55 @@
 
 ## Purpose
 
-Criar, atualizar estados e encerrar **work items exclusivamente no Plane**. Nunca backlog local (`specs/`).
+Create, update states, and close **work items exclusively on Plane**. Never local backlog (`specs/`).
 
 ## State lifecycle (mandatory)
 
-| Momento | Estado Plane | Como |
+| Moment | Plane state | How |
 |---------|--------------|------|
-| Plano criado (Planner) | **Todo** ou Backlog | MCP create issue |
-| `start-change` / início implementação | **In Progress** | `python3 .sdlc/scripts/plane_state.py in-progress --card INVES-N` |
-| PR aberto | In Progress (+ comentário PR) | comment no card |
-| Merge + CI verde | **Done** | `auto_merge_pr.py --plane-comment` ou `plane_state.py done` |
+| Plan created (Planner) | **Todo** or Backlog | MCP create issue |
+| `start-change` / start implementation | **In Progress** | `python3 .sdlc/scripts/plane_state.py in-progress --card INVES-N` |
+| PR opened | In Progress (+ PR comment) | comment on card |
+| Merge + green CI | **Done** | `auto_merge_pr.py --plane-comment` or `plane_state.py done` |
 
-**Falha de processo:** implementar com card em Todo/Backlog, ou marcar Done sem passar por In Progress.
+**Process failure:** implementing with card in Todo/Backlog, or marking Done without passing through In Progress.
 
 ## MCP
 
 - Config: `.cursor/mcp.json` — server `plane` (token **must** match `.env` `PLANE_API_KEY`)
 - Env: `PLANE_API_KEY`, `PLANE_WORKSPACE_SLUG`, `PLANE_PROJECT_NAME`
 
-| Campo | Valor |
+| Field | Value |
 |-------|-------|
 | Workspace | `investments-sdlc` |
 | Project | `investiments` |
 | Card ID | `INVES-N` |
 
-## Procedure — criar work item
+## Procedure — create work item
 
-1. Conectar via Plane MCP ou REST (`.sdlc/scripts/plane_state.py` usa REST).
-2. Criar issue no project `investiments`.
-3. Título: `[AI][TYPE] Short imperative title`
-4. **Descrição:** HTML TipTap via `plane_html.build_plan_html` — `.cursor/skills/plane-formatting/SKILL.md`
-5. Estado inicial: **Todo** (epic) ou **Todo** (sub-task aguardando start-change)
-6. Anotar `INVES-N` retornado
+1. Connect via Plane MCP or REST (`.sdlc/scripts/plane_state.py` uses REST).
+2. Create issue in project `investiments`.
+3. Title: `[AI][TYPE] Short imperative title`
+4. **Description:** HTML TipTap via `plane_html.build_plan_html` — `.cursor/skills/plane-formatting/SKILL.md`
+5. Initial state: **Todo** (epic) or **Todo** (sub-task awaiting start-change)
+6. Record returned `INVES-N`
 
 ## Procedure — In Progress
 
-Executar **no start-change**, antes de branch/código:
+Run **on start-change**, before branch/code:
 
 ```bash
 python3 .sdlc/scripts/plane_state.py in-progress --card INVES-N --branch feature/INVES-N-<slug>
 ```
 
-## Procedure — evidência e Done
+## Procedure — evidence and Done
 
-1. Preencher `.sdlc/templates/plane/evidence-INVES-N.json` (Implementer/Reviewer)
-2. Postar evidência formatada — **não** comentário one-liner
-3. **Done** após merge + CI via `auto_merge_pr.py --plane-comment --evidence-file …`
+1. Fill `.sdlc/templates/plane/evidence-INVES-N.json` (Implementer/Reviewer)
+2. Post formatted evidence — **not** a one-liner comment
+3. **Done** after merge + CI via `auto_merge_pr.py --plane-comment --evidence-file …`
 
-## Proibições
+## Prohibitions
 
-- Nunca `specs/` ou tickets locais
-- Nunca GitHub Issue como tracker primário (Issue Analyst tria/fecha duplicatas)
-- Nunca inventar `INVES-N`
+- Never `specs/` or local tickets
+- Never GitHub Issue as primary tracker (Issue Analyst triages/closes duplicates)
+- Never invent `INVES-N`

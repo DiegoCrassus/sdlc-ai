@@ -2,99 +2,99 @@
 
 ## Purpose
 
-Executar uma auditoria 100% autônoma do SDLC completo — estrutura, subagentes, skills, MCP, pipeline, observabilidade, gaps e CI/CD — gerando um canvas interativo de relatório com scores de autonomia.
+Run a fully autonomous audit of the complete SDLC — structure, subagents, skills, MCP, pipeline, observability, gaps, and CI/CD — generating an interactive canvas report with autonomy scores.
 
 ## When to run
 
-- `/sdlc-audit` — auditoria completa
-- Após adição ou modificação de subagentes, skills ou configurações SDLC
-- Antes de uma retrospectiva ou planejamento de sprint
-- Quando o score de autonomia precisa ser avaliado
+- `/sdlc-audit` — full audit
+- After adding or modifying subagents, skills, or SDLC configuration
+- Before a retrospective or sprint planning
+- When autonomy score needs evaluation
 
 ## Required context
 
-- Acesso ao repositório completo
-- Python 3.8+ disponível
-- `app/infra/sdlc_obs/auditor.py` presente
+- Access to the full repository
+- Python 3.8+ available
+- `app/infra/sdlc_obs/auditor.py` present
 
 ## Execution procedure
 
-### 1. Executar o auditor
+### 1. Run the auditor
 
 ```bash
 python app/infra/sdlc_obs/auditor.py
 ```
 
-O script:
-- Roda ~8 categorias de checks automaticamente
-- Gera o canvas em `~/.cursor/projects/.../canvases/sdlc-audit-report.canvas.tsx`
-- Imprime resultado no terminal
-- Retorna exit code 0 (sem FAILs) ou 1 (há FAILs)
+The script:
+- Runs ~8 check categories automatically
+- Generates the canvas at `~/.cursor/projects/.../canvases/sdlc-audit-report.canvas.tsx`
+- Prints results to the terminal
+- Returns exit code 0 (no FAILs) or 1 (FAILs present)
 
-### 2. Interpretar output
+### 2. Interpret output
 
-Ler o output e identificar:
+Read the output and identify:
 - Autonomy Score (%)
 - Health Score (%)
 - Counts: PASS / WARN / FAIL
-- Lista de FAILs com recomendações
+- FAIL list with recommendations
 
-### 3. Apresentar ao usuário
+### 3. Present to the user
 
 ```markdown
-## Resultado da Auditoria SDLC
+## SDLC Audit Result
 
 **Autonomy Score:** X% | **Health Score:** Y%
 
-**Resumo:** Z checks executados — A PASS / B WARN / C FAIL
+**Summary:** Z checks run — A PASS / B WARN / C FAIL
 
-### Gaps Críticos (FAIL)
-1. [categoria] check — recomendação
+### Critical gaps (FAIL)
+1. [category] check — recommendation
 2. ...
 
-### Avisos (WARN)
+### Warnings (WARN)
 1. ...
 
-### Próximos passos
-1. Fechar os FAILs de maior impacto
-2. Planejar sprint para gaps da simulação
+### Next steps
+1. Close highest-impact FAILs
+2. Plan sprint for simulation gaps
 ```
 
-### 4. Criar Issues GitHub (se FAILs encontrados)
+### 4. Create GitHub Issues (if FAILs found)
 
-Para cada FAIL de categoria "Gaps da Simulação" ou "Pipeline":
+For each FAIL in category "Simulation Gaps" or "Pipeline":
 ```
 github.createIssue(
   title="[SDLC Gap] <check>",
-  body="<detail>\n\n## Recomendação\n<recommendation>",
+  body="<detail>\n\n## Recommendation\n<recommendation>",
   labels=["sdlc-gap", "priority:high"]
 )
 ```
 
-### 5. Abrir canvas
+### 5. Open canvas
 
-Informar ao usuário o path do canvas gerado e sugerir abertura.
+Tell the user the generated canvas path and suggest opening it.
 
 ## Expected outputs
 
-- Terminal com todos os checks impressos
-- Canvas `sdlc-audit-report.canvas.tsx` gerado com dados reais
-- Resumo em texto no chat
-- Issues GitHub criadas para FAILs críticos (opcional)
+- Terminal with all checks printed
+- Canvas `sdlc-audit-report.canvas.tsx` generated with real data
+- Text summary in chat
+- GitHub Issues created for critical FAILs (optional)
 
 ## Validation
 
-- [ ] `auditor.py` executou sem erro de Python
-- [ ] Canvas foi gerado com dados reais (não placeholder)
-- [ ] Autonomy Score calculado corretamente
-- [ ] Recomendações apresentadas em ordem de prioridade (FAIL primeiro)
-- [ ] Usuário informado sobre path do canvas
+- [ ] `auditor.py` ran without Python error
+- [ ] Canvas generated with real data (not placeholder)
+- [ ] Autonomy Score calculated correctly
+- [ ] Recommendations presented in priority order (FAIL first)
+- [ ] User informed about canvas path
 
 ## Failure modes
 
-| Falha | Causa | Ação |
-|-------|-------|------|
-| `ModuleNotFoundError` | Python path incorreto | Executar do root do repositório |
-| Canvas não gerado | Path do diretório canvases não encontrado | Auditor cria automaticamente; verificar permissões |
-| Exit code 1 | FAILs encontrados | Listar FAILs e recomendar ações |
-| `make sdlc-doctor` falha | Estrutura SDLC degradada | Corrigir com `make sdlc-doctor` primeiro |
+| Failure | Cause | Action |
+|---------|-------|--------|
+| `ModuleNotFoundError` | Incorrect Python path | Run from repository root |
+| Canvas not generated | Canvases directory path not found | Auditor creates automatically; check permissions |
+| Exit code 1 | FAILs found | List FAILs and recommend actions |
+| `make sdlc-doctor` fails | Degraded SDLC structure | Fix with `make sdlc-doctor` first |

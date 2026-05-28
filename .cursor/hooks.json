@@ -6,6 +6,13 @@
         "command": "python3 .cursor/hooks/sdlc_obs_session.py pre"
       }
     ],
+    "preToolUse": [
+      {
+        "command": "python3 .cursor/hooks/sdlc_gate_hook.py",
+        "matcher": "Write",
+        "failClosed": false
+      }
+    ],
     "stop": [
       {
         "command": "python3 .cursor/hooks/sdlc_obs_session.py post"

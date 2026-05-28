@@ -30,10 +30,14 @@ checks:
   files:
     severity: required
     items:
+      - AGENTS.md
+      - .sdlc/HANDBOOK.md
       - .sdlc/sdlc.yaml
       - .sdlc/lifecycle.yaml
       - .sdlc/stages.yaml
       - .sdlc/workflows.yaml
+      - .sdlc/gate-paths.yaml
+      - .sdlc/plane-granularity.yaml
       - .sdlc/agents.yaml
       - .sdlc/skills.yaml
       - .sdlc/rules.yaml
@@ -41,6 +45,9 @@ checks:
       - .sdlc/doctor.yaml
       - .sdlc/dsl/cli.py
       - .sdlc/dsl/doctor.py
+      - .sdlc/dsl/gate.py
+      - .sdlc/dsl/workflow.py
+      - .sdlc/scripts/sdlc_gate.py
       - Makefile
       - README.md
 
@@ -54,10 +61,13 @@ checks:
       - .cursor/commands/sdlc-handoff.md
     rules:
       - .cursor/rules/000-project-governance.mdc
+      - .cursor/rules/001-sdlc-anti-bypass.mdc
+      - .cursor/rules/002-sdlc-orchestrator-principal.mdc
       - .cursor/rules/010-ai-native-sdlc.mdc
       - .cursor/rules/020-code-quality.mdc
       - .cursor/rules/030-docs-and-handoff.mdc
       - .cursor/rules/040-doctor-gates.mdc
+      - .cursor/rules/sdlc-core.mdc
     skills:
       - .cursor/skills/requirements-refinement.md
       - .cursor/skills/architecture-analysis.md
@@ -66,6 +76,12 @@ checks:
       - .cursor/skills/code-review.md
       - .cursor/skills/observability.md
       - .cursor/skills/documentation.md
+      - .cursor/skills/intent-classification/SKILL.md
+      - .cursor/skills/plane-task-creation/SKILL.md
+      - .cursor/skills/sdlc-orchestrator/SKILL.md
+      - .cursor/skills/start-change/SKILL.md
+      - .cursor/skills/finish-change/SKILL.md
+      - .cursor/skills/plane-sdlc/SKILL.md
     subagents:
       - .cursor/subagents/planner.md
       - .cursor/subagents/architect.md
@@ -74,11 +90,13 @@ checks:
       - .cursor/subagents/qa.md
       - .cursor/subagents/devops.md
       - .cursor/subagents/doctor.md
+      - .cursor/subagents/intent-analyst.md
     hooks:
       - .cursor/hooks/pre-task.md
       - .cursor/hooks/post-task.md
       - .cursor/hooks/pre-review.md
       - .cursor/hooks/post-review.md
+      - .cursor/hooks/sdlc_gate_hook.py
 
   docs:
     severity: required
@@ -99,6 +117,8 @@ checks:
       - docs/sdlc/workflows.md
       - docs/sdlc/gates.md
       - docs/sdlc/doctor.md
+      - docs/sdlc/master-workflow.md
+      - docs/sdlc/sdlc-workflow-gap-analysis.md
 
   yaml_validity:
     severity: required
@@ -112,6 +132,8 @@ checks:
       - .sdlc/rules.yaml
       - .sdlc/integrations.yaml
       - .sdlc/doctor.yaml
+      - .sdlc/gate-paths.yaml
+      - .sdlc/plane-granularity.yaml
 
   integrations:
     severity: warning
@@ -130,6 +152,8 @@ checks:
       - sdlc-validate
       - sdlc-stages
       - docs-check
+      - workflow-status
+      - workflow-discover
 
   python_dsl:
     severity: required

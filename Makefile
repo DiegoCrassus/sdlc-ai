@@ -1,4 +1,4 @@
-.PHONY: sdlc-doctor sdlc-validate sdlc-stages docs-check obs-init obs-server obs-seed sdlc-audit plane-in-progress auto-merge-pr issue-triage plane-reformat plane-evidence help
+.PHONY: sdlc-doctor sdlc-validate sdlc-stages docs-check obs-init obs-server obs-seed sdlc-audit plane-in-progress auto-merge-pr issue-triage plane-reformat plane-evidence workflow-status workflow-start workflow-discover help
 
 help:
 	@echo "SDLC AI — Available targets:"
@@ -18,6 +18,9 @@ help:
 	@echo "  issue-triage   Close superseded GitHub issues (TRIAGE=1 to apply)"
 	@echo "  plane-reformat Reformat Plane descriptions (CARD=INVES-N or ALL=1)"
 	@echo "  plane-evidence Post structured Done evidence (CARD=INVES-N)"
+	@echo "  workflow-status  Show SDLC session gate + handoff"
+	@echo "  workflow-start   Open gate (CARD=INVES-N SLUG=... STAGE=sdlc_meta|implementation)"
+	@echo "  workflow-discover  Refresh discovery context from repo + Plane"
 	@echo ""
 	@echo "Workflow: docs/sdlc/change-lifecycle.md"
 
@@ -84,6 +87,16 @@ plane-evidence:
 	@test -n "$(CARD)" || (echo "Usage: make plane-evidence CARD=INVES-N" && exit 1)
 	@$(PYTHON) .sdlc/scripts/plane_card.py post-evidence --card $(CARD) \
 	  --file .sdlc/templates/plane/evidence-$(CARD).json
+
+workflow-status:
+	@$(PYTHON) .sdlc/dsl/cli.py workflow status
+
+workflow-start:
+	@test -n "$(CARD)" || (echo "Usage: make workflow-start CARD=INVES-N SLUG=my-feature STAGE=implementation" && exit 1)
+	@$(PYTHON) .sdlc/dsl/cli.py workflow start --card $(CARD) --slug $(or $(SLUG),work) --stage $(or $(STAGE),implementation) $(if $(FORCE),--force,)
+
+workflow-discover:
+	@$(PYTHON) .sdlc/dsl/cli.py workflow discover
 
 export-pdf:
 	@echo "Generating simulation PDF..."
