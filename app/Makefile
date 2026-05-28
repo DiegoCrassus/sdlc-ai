@@ -6,13 +6,16 @@
 # Backend:  http://127.0.0.1:8000  (docs at /docs)
 # Frontend: http://127.0.0.1:5173
 
-.PHONY: help start install install-backend install-frontend backend frontend test clean
+.PHONY: help start install install-backend install-frontend backend frontend test clean venv
 
 # Repo root is one level above this app/ directory.
 ROOT := $(abspath $(dir $(abspath $(lastword $(MAKEFILE_LIST))))/..)
 FRONTEND_DIR := $(ROOT)/app/frontend
+VENV := $(ROOT)/.venv
+VENV_PYTHON := $(VENV)/bin/python
 
-PYTHON ?= $(shell command -v python3 2>/dev/null || command -v python 2>/dev/null)
+# Prefer repo .venv when present; fall back to system python3/python.
+PYTHON ?= $(shell if [ -x '$(ROOT)/.venv/bin/python' ]; then echo '$(ROOT)/.venv/bin/python'; else command -v python3 2>/dev/null || command -v python 2>/dev/null; fi)
 
 BACKEND_HOST ?= 127.0.0.1
 BACKEND_PORT ?= 8000
@@ -22,6 +25,7 @@ help:
 	@echo ""
 	@echo "  make start              Install deps (if needed) and run backend + frontend"
 	@echo "  make install            Install backend + frontend dependencies"
+	@echo "  make venv               Create repo-root .venv (if missing)"
 	@echo "  make backend            Run only the FastAPI backend (port $(BACKEND_PORT))"
 	@echo "  make frontend           Run only the Vite frontend (port 5173)"
 	@echo "  make test               Run backend tests"
@@ -30,13 +34,21 @@ help:
 	@echo "  Backend:  http://$(BACKEND_HOST):$(BACKEND_PORT)/docs"
 	@echo "  Frontend: http://127.0.0.1:5173"
 
+# --- Virtual environment -----------------------------------------------------
+
+venv:
+	@if [ ! -x "$(VENV_PYTHON)" ]; then \
+		echo "==> Creating virtual environment at $(VENV)"; \
+		python3 -m venv "$(VENV)"; \
+	fi
+
 # --- Install -----------------------------------------------------------------
 
 install: install-backend install-frontend
 
-install-backend:
+install-backend: venv
 	@echo "==> Installing backend (editable) from $(ROOT)"
-	@cd $(ROOT) && $(PYTHON) -m pip install -e ".[dev]"
+	@cd $(ROOT) && $(VENV_PYTHON) -m pip install -e ".[dev]"
 
 install-frontend:
 	@echo "==> Installing frontend dependencies"

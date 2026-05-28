@@ -58,6 +58,11 @@ The MarketPulse application (FastAPI backend + React/Vite frontend) ships with a
 Makefile in `app/` that provides one-command local development. Run all targets
 from the `app/` directory.
 
+`make install` and `make start` automatically create and use a project virtual
+environment at the repo root (`.venv`) when you run them from `app/`, avoiding
+PEP 668 “externally-managed-environment” errors on Debian/Ubuntu system Python.
+The manual venv step in Initial Setup above remains a valid alternative.
+
 ```bash
 cd app
 make start
@@ -76,7 +81,8 @@ Press `Ctrl+C` to stop both processes.
 | Target              | Description                                                                 |
 |---------------------|-----------------------------------------------------------------------------|
 | `make start`        | Install deps (if needed) and run backend + frontend together                |
-| `make install`      | Install backend (`pip install -e ".[dev]"`) and frontend (`npm install`) deps |
+| `make install`      | Create `.venv` if needed, install backend + frontend deps                     |
+| `make venv`         | Create repo-root `.venv` only (no package install)                            |
 | `make backend`      | Run only the FastAPI backend (reload mode)                                   |
 | `make frontend`     | Run only the Vite frontend dev server                                        |
 | `make test`         | Run backend tests (pytest; works on a cold checkout via `PYTHONPATH`)        |
@@ -89,7 +95,7 @@ Override these on the command line as needed:
 
 | Variable       | Default     | Purpose                          |
 |----------------|-------------|----------------------------------|
-| `PYTHON`       | `python3`   | Python interpreter to use        |
+| `PYTHON`       | `.venv/bin/python` when present, else `python3` | Python interpreter to use |
 | `BACKEND_HOST` | `127.0.0.1` | Host the backend binds to        |
 | `BACKEND_PORT` | `8000`      | Port the backend listens on      |
 
