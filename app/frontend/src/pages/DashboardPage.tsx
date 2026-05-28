@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 
 import { AssetSearch } from "../components/AssetSearch";
 import { MarketOverviewCards } from "../components/MarketOverview";
@@ -31,15 +32,7 @@ export function DashboardPage() {
   }, [overviewQuery.data]);
 
   return (
-    <div className="min-h-screen bg-surface">
-      <header className="border-b border-slate-800 bg-slate-950/80 px-6 py-5 backdrop-blur">
-        <p className="text-xs uppercase tracking-[0.2em] text-emerald-400">Live mock feed</p>
-        <h1 className="text-3xl font-bold text-white">MarketPulse</h1>
-        <p className="mt-1 text-sm text-slate-400">
-          Financial & crypto dashboard · refreshes every 30s
-        </p>
-      </header>
-
+    <>
       <TickerTape quotes={tickerQuery.data ?? []} />
 
       <main className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-6 lg:px-6">
@@ -61,6 +54,12 @@ export function DashboardPage() {
           <div className="flex flex-col gap-6">
             <AssetSearch onSelect={setSelectedSymbol} />
             <ProjectionPanel projection={projectionQuery.data} isLoading={projectionQuery.isLoading} />
+            <Link
+              to={`/forecast?symbol=${encodeURIComponent(selectedSymbol)}`}
+              className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-center text-sm font-medium text-emerald-400 transition-colors hover:bg-emerald-500/20"
+            >
+              Open full forecast chart →
+            </Link>
           </div>
         </div>
 
@@ -71,7 +70,7 @@ export function DashboardPage() {
           isLoading={watchlistQuery.isLoading}
         />
       </main>
-    </div>
+    </>
   );
 }
 
