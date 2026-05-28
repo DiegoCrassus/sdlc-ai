@@ -43,9 +43,9 @@ Record, aggregate, and surface SDLC observability metrics. Ensures every agent t
 
 ## Instrumentation Pattern
 
-**Automático** — `.cursor/hooks.json` abre/fecha um run em cada sessão do agente.
+**Automatic** — `.cursor/hooks.json` opens/closes a run on each agent session.
 
-**Manual** — para stage/agent/métricas detalhadas, use os CLIs:
+**Manual** — for stage/agent/detailed metrics, use the CLIs:
 
 ```bash
 # 1. Pre-task (hook)

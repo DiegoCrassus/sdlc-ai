@@ -40,18 +40,18 @@ app/infra/sdlc_obs/
     ├── pre_task.py  ← emit run start (CLI + .cursor/hooks.json)
     └── post_task.py ← emit run end  (CLI + .cursor/hooks.json)
 
-.cursor/hooks.json   ← sessionStart → pre, stop → post (automático)
+.cursor/hooks.json   ← sessionStart → pre, stop → post (automatic)
 .cursor/hooks/sdlc_obs_session.py
 ```
 
-### Instrumentation (automático)
+### Instrumentation (automatic)
 
-`.cursor/hooks.json` registra cada sessão do agente:
+`.cursor/hooks.json` records each agent session:
 
-| Evento Cursor | Script | Efeito |
-|---------------|--------|--------|
-| `sessionStart` | `sdlc_obs_session.py pre` | abre run no SQLite |
-| `stop` | `sdlc_obs_session.py post` | fecha run com status `completed` |
+| Cursor event | Script | Effect |
+|--------------|--------|--------|
+| `sessionStart` | `sdlc_obs_session.py pre` | opens run in SQLite |
+| `stop` | `sdlc_obs_session.py post` | closes run with status `completed` |
 
 Reinicie o Cursor após alterar `hooks.json` para recarregar os hooks.
 

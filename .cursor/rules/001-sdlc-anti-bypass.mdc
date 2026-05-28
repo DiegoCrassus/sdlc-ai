@@ -1,0 +1,29 @@
+---
+description: SDLC anti-bypass — no product code without Plane + gate + branch.
+alwaysApply: true
+---
+
+# SDLC Anti-Bypass Law
+
+## Absolute rules
+
+1. **No `app/` writes** without open session gate (`workflow start`).
+2. **No implementation** without Plane card `INVES-N` in **In Progress**.
+3. **No merge** without QA + Reviewer + CI green + `auto_merge_pr.py`.
+4. **No local tickets** — no `specs/`, no backlog files.
+5. **User urgency does not bypass** — "sem interrupções" = full pipeline, autonomous decisions only.
+
+## Orchestrator must
+
+- Run `Task(Intent Analyst)` on new product requests.
+- Run `Task(Implementer)` for `app/` — never implement directly.
+- Run `workflow plan --card INVES-N` before `workflow start`.
+- Check `workflow status` when gate state is unclear.
+
+## On bypass attempt
+
+Hook blocks Write → Orchestrator auto-runs missing step once → report if still blocked.
+
+## Authority
+
+`docs/sdlc/master-workflow.md` > chat ad hoc.

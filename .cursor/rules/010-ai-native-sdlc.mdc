@@ -42,12 +42,13 @@ alwaysApply: true
 ## Context Loading
 
 Always load context in this order:
-1. `.sdlc/AGENTS.md`                        ← handbook with all agents, skills, and commands
-2. `docs/sdlc/change-lifecycle.md`          ← **workflow source of truth**
-3. `.sdlc/sdlc.yaml`
-4. `.sdlc/memory/operational-context.md`
-5. `.sdlc/memory/architecture.md`
-6. Relevant `docs/` section for the current stage
+1. **`AGENTS.md`** (repo root)              ← L0 manifest + decision tree
+2. `.sdlc/HANDBOOK.md`                        ← handbook (catalog)
+3. `docs/sdlc/master-workflow.md`           ← approved process
+4. `docs/sdlc/change-lifecycle.md`          ← gitflow + Plane authority
+5. `.sdlc/sdlc.yaml`
+6. `.sdlc/memory/operational-context.md`
+7. Relevant skill/subagent for current stage
 
 ## New Repository Initialization
 

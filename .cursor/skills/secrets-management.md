@@ -2,61 +2,61 @@
 
 ## Purpose
 
-Garantir que nenhum segredo (chaves de API, senhas, tokens, certificados) seja commitado no repositório, usando verificação automática em cada commit e em cada PR.
+Ensure no secrets (API keys, passwords, tokens, certificates) are committed to the repository, using automatic verification on every commit and every PR.
 
 ## When to use
 
-- Como hook pré-commit em toda máquina de desenvolvimento
-- Como gate obrigatório no CI antes de qualquer outro check
-- Ao revisar PRs que alteram arquivos de configuração ou infraestrutura
+- As pre-commit hook on every development machine
+- As mandatory CI gate before any other check
+- When reviewing PRs that change configuration or infrastructure files
 
 ## Required inputs
 
-- Diff do PR ou arquivos staged para commit
-- `.gitleaks.toml` (regras personalizadas — opcional)
-- Lista de allowlist para falsos positivos conhecidos
+- PR diff or staged files for commit
+- `.gitleaks.toml` (custom rules — optional)
+- Allowlist for known false positives
 
 ## Procedure
 
-### Pré-commit (local)
+### Pre-commit (local)
 
 ```bash
-# Instalar gitleaks
+# Install gitleaks
 brew install gitleaks
-# ou: pip install gitleaks-python / download binary
+# or: pip install gitleaks-python / download binary
 
-# Configurar hook pré-commit (.git/hooks/pre-commit)
+# Configure pre-commit hook (.git/hooks/pre-commit)
 cat > .git/hooks/pre-commit << 'EOF'
 #!/bin/bash
 gitleaks protect --staged --redact --exit-code 1
 if [ $? -ne 0 ]; then
-  echo "ERROR: Segredo detectado no staged diff. Remova antes de commitar."
+  echo "ERROR: Secret detected in staged diff. Remove before committing."
   exit 1
 fi
 EOF
 chmod +x .git/hooks/pre-commit
 ```
 
-### CI (por PR)
+### CI (per PR)
 
 ```bash
-# Escanear o repositório completo
+# Scan entire repository
 gitleaks detect --source . \
   --report-format json \
   --report-path gitleaks-report.json \
   --redact \
   --exit-code 1
 
-# Escanear apenas o diff do PR
+# Scan PR diff only
 gitleaks detect --source . \
   --log-opts="origin/develop..HEAD" \
   --report-format json \
   --exit-code 1
 ```
 
-### Padrões detectados automaticamente
+### Automatically detected patterns
 
-| Tipo | Exemplos |
+| Type | Examples |
 |------|---------|
 | AWS keys | `AKIA...`, `aws_secret_access_key` |
 | GitHub tokens | `ghp_`, `github_pat_` |
@@ -65,41 +65,41 @@ gitleaks detect --source . \
 | Private keys | `-----BEGIN RSA PRIVATE KEY-----` |
 | Database URLs | `postgres://user:password@host` |
 | JWT secrets | `JWT_SECRET=`, `SECRET_KEY=` |
-| Qualquer padrão `= "sk-"`, `= "key-"` | Heurística genérica |
+| Any pattern `= "sk-"`, `= "key-"` | Generic heuristic |
 
-## Regras do .env
+## .env rules
 
-- `.env` deve estar em `.gitignore` — nunca commitado
-- `.env.example` deve conter apenas chaves sem valores reais
-- Comentar no `.env.example` qual serviço cada variável pertence
+- `.env` must be in `.gitignore` — never committed
+- `.env.example` must contain only keys without real values
+- Comment in `.env.example` which service each variable belongs to
 
 ```bash
-# Verificar que .env está ignorado
-git check-ignore .env || echo "AVISO: .env não está no .gitignore"
+# Verify .env is ignored
+git check-ignore .env || echo "WARNING: .env is not in .gitignore"
 
-# Verificar que .env.example não tem valores reais
+# Verify .env.example has no real values
 grep -E "=.{8,}" .env.example | grep -v "^#" | grep -v "=your_" | grep -v "=<" | grep -v "=placeholder"
 ```
 
 ## Outputs
 
-- `gitleaks-report.json` com todos os findings
-- Lista de arquivos + linhas onde segredos foram detectados
-- Código de saída: 0 (limpo) ou 1 (segredo detectado)
+- `gitleaks-report.json` with all findings
+- List of files + lines where secrets were detected
+- Exit code: 0 (clean) or 1 (secret detected)
 
 ## Validation checklist
 
-- [ ] Hook pré-commit instalado e funcionando
-- [ ] `.env` está no `.gitignore`
-- [ ] `.env.example` não contém valores reais
-- [ ] CI gate de gitleaks está ativo no workflow
-- [ ] Nenhum `console.log()` ou `print()` expondo variáveis de ambiente
+- [ ] Pre-commit hook installed and working
+- [ ] `.env` is in `.gitignore`
+- [ ] `.env.example` contains no real values
+- [ ] CI gitleaks gate active in workflow
+- [ ] No `console.log()` or `print()` exposing environment variables
 
 ## Failure modes
 
-| Falha | Ação imediata |
+| Failure | Immediate action |
 |-------|---------------|
-| Segredo encontrado no diff | Remover do código, revogar credencial, force push se necessário |
-| Segredo encontrado em commit antigo | `git filter-repo` para remover da história + revogar |
-| Falso positivo bloqueando CI | Adicionar ao allowlist em `.gitleaks.toml` com justificativa |
-| `.env` commitado acidentalmente | Remover do histórico imediatamente + revogar todas as credenciais do arquivo |
+| Secret found in diff | Remove from code, revoke credential, force push if necessary |
+| Secret found in old commit | `git filter-repo` to remove from history + revoke |
+| False positive blocking CI | Add to allowlist in `.gitleaks.toml` with justification |
+| `.env` committed accidentally | Remove from history immediately + revoke all credentials in file |

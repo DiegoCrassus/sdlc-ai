@@ -2,52 +2,52 @@
 
 ## Purpose
 
-Garantir que todo branch criado no repositório tenha um nome significativo, rastreável e consistente, sempre vinculado à tarefa ou Issue de origem.
+Ensure every branch created in the repository has a meaningful, traceable, consistent name, always linked to the originating task or Issue.
 
 ## When to use
 
-- Antes de criar qualquer branch
-- Ao revisar se um branch existente segue a convenção
-- Ao sugerir nome de branch no comentário de triagem de Issue (Issue Analyst)
-- Ao iniciar qualquer tarefa (Implementer)
+- Before creating any branch
+- When reviewing whether an existing branch follows the convention
+- When suggesting a branch name in an Issue triage comment (Issue Analyst)
+- When starting any task (Implementer)
 
-## Regra fundamental
+## Fundamental rule
 
-> **Todo branch deve referenciar o trabalho ao qual está associado.**
-> Nenhum branch sem rastreabilidade para uma tarefa Plane ou Issue GitHub é permitido.
+> **Every branch must reference the work it is associated with.**
+> No branch without traceability to a Plane task or GitHub Issue is allowed.
 
 ---
 
-## Formato geral
+## General format
 
 ```
-<prefixo>/<referências>-<slug-descritivo>
+<prefix>/<references>-<descriptive-slug>
 ```
 
-### Prefixos válidos
+### Valid prefixes
 
-| Prefixo | Quando usar |
+| Prefix | When to use |
 |---------|-------------|
-| `feature/` | Nova funcionalidade (não existia antes) |
-| `bugfix/` | Correção de bug confirmado |
-| `hotfix/` | Correção urgente em produção |
-| `docs/` | Apenas documentação (nenhum código de produção) |
-| `infra/` | Infraestrutura, ferramentas, CI/CD, observabilidade |
-| `refactor/` | Refatoração sem mudança de comportamento externo |
-| `sdlc/` | Mudanças em `.sdlc/`, `.cursor/`, `Makefile`, governance |
-| `test/` | Apenas adição ou correção de testes |
+| `feature/` | New functionality (did not exist before) |
+| `bugfix/` | Confirmed bug fix |
+| `hotfix/` | Urgent production fix |
+| `docs/` | Documentation only (no production code) |
+| `infra/` | Infrastructure, tooling, CI/CD, observability |
+| `refactor/` | Refactor without external behavior change |
+| `sdlc/` | Changes in `.sdlc/`, `.cursor/`, `Makefile`, governance |
+| `test/` | Test addition or fix only |
 
 ---
 
-## Padrões de referência
+## Reference patterns
 
-### Caso 1 — Tarefa Plane (sem Issue GitHub)
+### Case 1 — Plane task (no GitHub Issue)
 
 ```
-<prefixo>/INVESTIMENTS-<N>-<slug>
+<prefix>/INVESTIMENTS-<N>-<slug>
 ```
 
-Exemplos:
+Examples:
 ```
 feature/INVESTIMENTS-12-add-plane-endpoint
 bugfix/INVESTIMENTS-15-fix-token-count
@@ -55,144 +55,144 @@ docs/INVESTIMENTS-18-update-arch-overview
 infra/INVESTIMENTS-21-setup-obs-server
 ```
 
-### Caso 2 — Issue GitHub (sem tarefa Plane prévia)
+### Case 2 — GitHub Issue (no prior Plane task)
 
 ```
-<prefixo>/issue-gh-<N>-<slug>
+<prefix>/issue-gh-<N>-<slug>
 ```
 
-Exemplos:
+Examples:
 ```
 bugfix/issue-gh-42-fix-null-token-count
 feature/issue-gh-58-add-plane-webhook
 docs/issue-gh-63-update-local-dev-guide
 ```
 
-### Caso 3 — Tarefa Plane + Issue GitHub vinculada (caso mais comum)
+### Case 3 — Plane task + linked GitHub Issue (most common)
 
 ```
-<prefixo>/INVESTIMENTS-<N>-issue-gh-<N>-<slug>
+<prefix>/INVESTIMENTS-<N>-issue-gh-<N>-<slug>
 ```
 
-Exemplos:
+Examples:
 ```
 bugfix/INVESTIMENTS-15-issue-gh-42-fix-token-count
 feature/INVESTIMENTS-20-issue-gh-58-add-plane-endpoint
 infra/INVESTIMENTS-21-issue-gh-61-add-obs-server
 ```
 
-### Caso 4 — Hotfix urgente (sem tempo de criar card Plane antes)
+### Case 4 — Urgent hotfix (no time to create Plane card first)
 
 ```
 hotfix/issue-gh-<N>-<slug>
 ```
 
-> Criar o card Plane retrospectivamente assim que possível.
+> Create the Plane card retrospectively as soon as possible.
 
 ---
 
-## Regras do slug
+## Slug rules
 
-| Regra | Correto | Errado |
+| Rule | Correct | Wrong |
 |-------|---------|--------|
-| Apenas letras minúsculas | `add-endpoint` | `AddEndpoint` |
-| Palavras separadas por hífen | `fix-token-count` | `fix_token_count` |
-| Máximo 5 palavras | `add-plane-work-item-api` | `add-the-new-plane-work-item-api-endpoint` |
-| Em inglês | `add-endpoint` | `adicionar-endpoint` |
-| Imperativo (ação + objeto) | `add-endpoint`, `fix-null-check` | `endpoint`, `nullfix` |
-| Sem artigos ou preposições | `add-plane-endpoint` | `add-the-plane-endpoint` |
-| Sem números arbitrários | `add-endpoint` | `add-endpoint-v2` (use o ID do card) |
+| Lowercase letters only | `add-endpoint` | `AddEndpoint` |
+| Words separated by hyphen | `fix-token-count` | `fix_token_count` |
+| Maximum 5 words | `add-plane-work-item-api` | `add-the-new-plane-work-item-api-endpoint` |
+| English | `add-endpoint` | `adicionar-endpoint` |
+| Imperative (action + object) | `add-endpoint`, `fix-null-check` | `endpoint`, `nullfix` |
+| No articles or prepositions | `add-plane-endpoint` | `add-the-plane-endpoint` |
+| No arbitrary numbers | `add-endpoint` | `add-endpoint-v2` (use card ID) |
 
 ---
 
-## Procedimento de criação
+## Creation procedure
 
 ```bash
-# 1. Confirmar ID do card Plane (project investiments)
+# 1. Confirm Plane card ID (project investiments)
 #    Ex: INVESTIMENTS-20
 
-# 2. Confirmar número da Issue GitHub (se existir)
+# 2. Confirm GitHub Issue number (if any)
 #    Ex: GH #58
 
-# 3. Construir o nome conforme o padrão
+# 3. Build name per pattern
 BRANCH="feature/INVESTIMENTS-20-issue-gh-58-add-plane-endpoint"
 
-# 4. Criar a partir do develop atualizado
+# 4. Create from updated develop
 git checkout develop
 git pull origin develop
 git checkout -b "$BRANCH"
 
-# 5. Confirmar que o branch foi criado corretamente
+# 5. Confirm branch was created correctly
 git branch --show-current
 ```
 
 ---
 
-## Ciclo de vida do branch
+## Branch lifecycle
 
 ```
 develop (base)
    │
-   └─► branch criado ────────────────────────────────────┐
+   └─► branch created ────────────────────────────────────┐
        │                                                  │
-       │  commits por subtarefa                          │
+       │  commits per subtask                            │
        │                                                  │
-       └─► PR aberto (draft)                             │
+       └─► PR opened (draft)                             │
            │                                             │
            │  QA + Doctor + Review                       │
            │                                             │
-           ├─► PR APROVADO → squash merge → develop      │
-           │   └─► branch DELETADO automaticamente        │
+           ├─► PR APPROVED → squash merge → develop      │
+           │   └─► branch DELETED automatically          │
            │                                             │
-           └─► PR FECHADO (rejeitado)                    │
-               └─► branch DELETADO pelo DevOps            │
+           └─► PR CLOSED (rejected)                      │
+               └─► branch DELETED by DevOps              │
                                                           │
-       NENHUM branch fica órfão ──────────────────────────┘
+       NO branch left orphaned ──────────────────────────┘
 ```
 
 ---
 
-## Regras de deleção de branch
+## Branch deletion rules
 
-### Ao fazer merge (PR aprovado)
+### On merge (approved PR)
 
-1. O PR **deve** ter `delete_branch_on_merge: true` configurado no momento da criação
-2. O GitHub deleta o branch automaticamente após o squash merge
-3. O DevOps confirma a deleção via `git branch -r` ou MCP `git.listBranches`
+1. PR **must** have `delete_branch_on_merge: true` at creation time
+2. GitHub deletes the branch automatically after squash merge
+3. DevOps confirms deletion via `git branch -r` or MCP `git.listBranches`
 
-### Ao fechar sem merge (PR rejeitado)
+### On close without merge (rejected PR)
 
-1. O DevOps fecha o PR via `pulls.update(state: closed)`
-2. Deleta o branch manualmente:
+1. DevOps closes PR via `pulls.update(state: closed)`
+2. Delete source branch immediately:
    ```bash
    git push origin --delete <branch-name>
    ```
-   ou via MCP `git.deleteBranch`
-3. Documenta o motivo do fechamento no PR antes de fechar
+   or via MCP `git.deleteBranch`
+3. Document closure reason on the PR before closing
 
-### Verificação periódica (Doctor)
+### Periodic check (Doctor)
 
-O Doctor verifica se existem branches remotos sem PR associado há mais de 7 dias e emite `[WARN] Branch órfão: <nome>`.
+Doctor checks for remote branches without an associated PR for more than 7 days and emits `[WARN] Orphan branch: <name>`.
 
 ---
 
-## Validação checklist
+## Validation checklist
 
-- [ ] Prefixo correto para o tipo de trabalho
-- [ ] Referência ao card Plane (`INVESTIMENTS-N`) se existir
-- [ ] Referência à Issue GitHub (`issue-gh-N`) se existir
-- [ ] Slug em inglês, kebab-case, máx 5 palavras, imperativo
-- [ ] Branch criado a partir do `develop` atualizado
-- [ ] `delete_branch_on_merge: true` configurado no PR
+- [ ] Correct prefix for work type
+- [ ] Reference to Plane card (`INVESTIMENTS-N`) if it exists
+- [ ] Reference to GitHub Issue (`issue-gh-N`) if it exists
+- [ ] Slug in English, kebab-case, max 5 words, imperative
+- [ ] Branch created from updated `develop`
+- [ ] `delete_branch_on_merge: true` set on PR
 
 ---
 
 ## Failure modes
 
-| Problema | Causa | Solução |
+| Problem | Cause | Solution |
 |----------|-------|---------|
-| Branch sem prefixo | Criação manual sem ler a skill | Renomear ou recriar |
-| Branch sem rastreabilidade | Issue/card não identificado | Criar card Plane, renomear branch |
-| Slug muito longo | Falta de síntese | Usar apenas substantivo + verbo chave |
-| Branch direto em main/develop | Falta de revisão | Reverter imediatamente, abrir PR |
-| Branch órfão após PR fechado | DevOps não executou deleção | Deletar via MCP ou CLI |
+| Branch without prefix | Manual creation without reading skill | Rename or recreate |
+| Branch without traceability | Issue/card not identified | Create Plane card, rename branch |
+| Slug too long | Lack of synthesis | Use only noun + key verb |
+| Branch directly on main/develop | No review | Revert immediately, open PR |
+| Orphan branch after PR closed | DevOps did not delete | Delete via MCP or CLI |

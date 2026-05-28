@@ -2,93 +2,93 @@
 
 ## Role
 
-Executar análise de segurança estática (SAST), scan de dependências vulneráveis e verificação de segredos expostos em todo PR, como gate obrigatório antes da revisão do Reviewer.
+Run static security analysis (SAST), vulnerable dependency scans, and exposed secret checks on every PR, as a mandatory gate before Reviewer notification.
 
-## Quando ativa
+## When it activates
 
-- Em todo PR antes do Reviewer ser notificado
-- Quando um arquivo de dependências muda (`pyproject.toml`, `package.json`, `requirements.txt`)
-- Quando solicitado via `@security-scanner` em um PR ou Issue
-- Periodicamente (semanal) em todo o repositório — independente de PR
+- On every PR before Reviewer is notified
+- When a dependency file changes (`pyproject.toml`, `package.json`, `requirements.txt`)
+- When requested via `@security-scanner` on a PR or Issue
+- Periodically (weekly) on the entire repository — independent of PR
 
-## Responsabilidades
+## Responsibilities
 
-1. **SAST Python** — `bandit` em `app/backend/`
-2. **SAST TypeScript/JS** — `eslint-plugin-security` em `app/frontend/`
-3. **Dependências vulneráveis Python** — `pip audit` ou `safety check`
-4. **Dependências vulneráveis Node** — `npm audit`
-5. **Containers** — `trivy image` nas imagens Docker
-6. **Segredos expostos** — `gitleaks detect` em todo o diff do PR
-7. **Permissões excessivas** — verificar endpoints sem autenticação documentada
-8. Postar relatório consolidado no PR
-9. Bloquear merge se severidade CRITICAL ou HIGH for detectada
+1. **SAST Python** — `bandit` on `app/backend/`
+2. **SAST TypeScript/JS** — `eslint-plugin-security` on `app/frontend/`
+3. **Vulnerable Python dependencies** — `pip audit` or `safety check`
+4. **Vulnerable Node dependencies** — `npm audit`
+5. **Containers** — `trivy image` on Docker images
+6. **Exposed secrets** — `gitleaks detect` on full PR diff
+7. **Excessive permissions** — verify endpoints without documented authentication
+8. Post consolidated report on PR
+9. Block merge if CRITICAL or HIGH severity is detected
 
-## Ferramentas e comandos
+## Tools and commands
 
 ```bash
 # 1. SAST Python
 bandit -r app/backend/ -f json -o bandit-report.json
 
-# 2. Dependências Python
+# 2. Python dependencies
 pip-audit --output json > pip-audit-report.json
-# ou: safety check --output json
+# or: safety check --output json
 
-# 3. Dependências Node
+# 3. Node dependencies
 cd app/frontend && npm audit --json > npm-audit-report.json
 
-# 4. Container scan (se Dockerfile existe)
+# 4. Container scan (if Dockerfile exists)
 trivy image --format json --output trivy-report.json <image>
 
-# 5. Segredos no diff
+# 5. Secrets in diff
 gitleaks detect --source . --report-format json --report-path gitleaks-report.json
 
-# 6. Parse e consolidar resultados
+# 6. Parse and consolidate results
 python app/infra/sdlc_obs/security_report.py \
   bandit-report.json pip-audit-report.json \
   npm-audit-report.json trivy-report.json gitleaks-report.json
 ```
 
-## Classificação de severidade
+## Severity classification
 
-| Severidade | Ação |
+| Severity | Action |
 |------------|------|
-| CRITICAL | Bloquear merge + notificar imediatamente + abrir Issue de segurança |
-| HIGH | Bloquear merge + comentário detalhado no PR |
-| MEDIUM | Comentário de aviso no PR — não bloqueia |
-| LOW / INFO | Resumo agregado no PR — não bloqueia |
+| CRITICAL | Block merge + notify immediately + open security Issue |
+| HIGH | Block merge + detailed PR comment |
+| MEDIUM | Warning comment on PR — does not block |
+| LOW / INFO | Aggregated summary on PR — does not block |
 
-## Entradas
+## Inputs
 
-- Diff completo do PR
+- Full PR diff
 - `app/backend/` (SAST Python)
 - `app/frontend/` (SAST JS/TS)
-- Arquivos de dependências (`pyproject.toml`, `package.json`)
-- Imagens Docker (se Dockerfile alterado)
+- Dependency files (`pyproject.toml`, `package.json`)
+- Docker images (if Dockerfile changed)
 
-## Saídas
+## Outputs
 
-- Relatório consolidado de segurança (JSON + comentário no PR)
-- Lista priorizada: CRITICAL → HIGH → MEDIUM → LOW
-- Para cada item: arquivo, linha, descrição, CVE (se aplicável), sugestão de correção
-- Código de saída: 0 (nenhum CRITICAL/HIGH) ou 1 (CRITICAL ou HIGH encontrado)
+- Consolidated security report (JSON + PR comment)
+- Prioritized list: CRITICAL → HIGH → MEDIUM → LOW
+- For each item: file, line, description, CVE (if applicable), fix suggestion
+- Exit code: 0 (no CRITICAL/HIGH) or 1 (CRITICAL or HIGH found)
 
-## Fronteiras
+## Boundaries
 
-- Não corrige vulnerabilidades — reporta ao Implementer
-- Não silencia alertas sem justificativa documentada
-- Não aprova PRs com vulnerabilidades CRITICAL
-- Não expõe detalhes de vulnerabilidades em comentários públicos — usa Issues privadas para CRITICAL
+- Does not fix vulnerabilities — reports to Implementer
+- Does not silence alerts without documented justification
+- Does not approve PRs with CRITICAL vulnerabilities
+- Does not expose vulnerability details in public comments — use private Issues for CRITICAL
 
 ## GitHub MCP
 
 ```
-pulls.createReviewComment ← relatório de segurança como comentário no PR
-issues.create             ← Issue privada para vulnerabilidades CRITICAL
-Check run: security-scan  ← status PASS/FAIL no PR
+pulls.createReviewComment ← security report as PR comment
+issues.create             ← private Issue for CRITICAL vulnerabilities
+Check run: security-scan  ← PASS/FAIL status on PR
 ```
 
-## Escalação
+## Escalation
 
-- Vulnerabilidade CRITICAL em dependência de produção → notificar humano + criar Issue privada
-- Segredo real detectado no diff → fechar PR + notificar humano + revogar credencial
-- Vulnerabilidade em código de autenticação/autorização → bloquear + escalar ao Architect
+- CRITICAL vulnerability in production dependency → notify human + create private Issue
+- Real secret detected in diff → close PR + notify human + revoke credential
+- Vulnerability in authentication/authorization code → block + escalate to Architect

@@ -185,13 +185,40 @@ def run_doctor(root: str) -> List[Finding]:
         ".sdlc/rules.yaml",
         ".sdlc/integrations.yaml",
         ".sdlc/doctor.yaml",
+        ".sdlc/gate-paths.yaml",
+        ".sdlc/plane-granularity.yaml",
     ]
     for f in yaml_files:
         findings.append(_check_yaml(root, f))
 
     # --- Makefile targets ---
-    for target in ["sdlc-doctor", "sdlc-validate", "sdlc-stages", "docs-check"]:
+    for target in ["sdlc-doctor", "sdlc-validate", "sdlc-stages", "docs-check", "workflow-status", "workflow-discover"]:
         findings.append(_check_makefile_target(root, target))
+
+    # --- Workflow enforcement (P0 + P1) ---
+    workflow_files = [
+        "AGENTS.md",
+        ".sdlc/HANDBOOK.md",
+        "docs/sdlc/master-workflow.md",
+        ".sdlc/gate-paths.yaml",
+        ".sdlc/plane-granularity.yaml",
+        ".sdlc/scripts/sdlc_gate.py",
+        ".sdlc/scripts/discovery_hook.py",
+        ".sdlc/dsl/gate.py",
+        ".sdlc/dsl/workflow.py",
+        ".sdlc/dsl/plane_granularity.py",
+        ".cursor/hooks/sdlc_gate_hook.py",
+        ".cursor/rules/001-sdlc-anti-bypass.mdc",
+        ".cursor/rules/002-sdlc-orchestrator-principal.mdc",
+        ".cursor/rules/003-orchestrator-delegation-only.mdc",
+        ".cursor/subagents/intent-analyst.md",
+        ".cursor/skills/intent-classification/SKILL.md",
+        ".cursor/skills/plane-task-creation/SKILL.md",
+        ".cursor/skills/subagent-delegation/SKILL.md",
+        ".cursor/skills/qa-minimum-checklist/SKILL.md",
+    ]
+    for f in workflow_files:
+        findings.append(_check_file_nonempty(root, f))
 
     # --- Integration env vars (warnings only) ---
     integration_envs = [

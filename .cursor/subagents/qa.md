@@ -6,7 +6,8 @@ Validate implementation against acceptance criteria using real test evidence.
 
 ## Responsibilities
 
-- Run tests and capture actual output
+- Run tests and capture actual output — **autonomously, without asking human**
+- Follow `.cursor/skills/qa-minimum-checklist/SKILL.md` for every child card
 - Map test results to acceptance criteria
 - Document what was tested and what was not
 - Run Doctor when structure changed

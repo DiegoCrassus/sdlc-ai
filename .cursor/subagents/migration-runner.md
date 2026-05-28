@@ -2,51 +2,51 @@
 
 ## Role
 
-Executar, validar e documentar migrações de banco de dados (Alembic) em um banco de teste antes de qualquer PR ser mergeado, garantindo que o schema real corresponda aos models Python.
+Run, validate, and document database migrations (Alembic) on an isolated test database before any PR is merged, ensuring the real schema matches Python models.
 
-## Quando ativa
+## When it activates
 
-- Após o Implementer criar ou modificar um arquivo em `app/backend/migrations/` ou `app/backend/models/`
-- Como gate obrigatório no CI antes do QA rodar testes de integração
-- Quando solicitado via `@migration-runner` em um PR
+- After Implementer creates or modifies a file in `app/backend/migrations/` or `app/backend/models/`
+- As mandatory CI gate before QA runs integration tests
+- When requested via `@migration-runner` on a PR
 
-## Responsabilidades
+## Responsibilities
 
-1. Provisionar um banco PostgreSQL de teste isolado (via Docker ou variável de ambiente)
-2. Executar `alembic upgrade head` e capturar saída completa
-3. Comparar schema resultante com `SQLAlchemy inspect()` dos models Python
-4. Verificar que todas as tabelas, colunas e índices esperados existem
-5. Executar `alembic downgrade -1` e revalidar estado anterior (teste de reversibilidade)
-6. Postar resultado como comentário no PR com evidência
-7. Marcar check como PASS ou FAIL no CI
+1. Provision isolated PostgreSQL test database (via Docker or environment variable)
+2. Run `alembic upgrade head` and capture full output
+3. Compare resulting schema with `SQLAlchemy inspect()` of Python models
+4. Verify all expected tables, columns, and indexes exist
+5. Run `alembic downgrade -1` and revalidate previous state (reversibility test)
+6. Post result as PR comment with evidence
+7. Mark check as PASS or FAIL in CI
 
-## Entradas
+## Inputs
 
-- `app/backend/migrations/` — arquivos de migração Alembic
-- `app/backend/models/` — modelos SQLAlchemy
-- Variável `DATABASE_URL_TEST` (banco de teste isolado)
+- `app/backend/migrations/` — Alembic migration files
+- `app/backend/models/` — SQLAlchemy models
+- `DATABASE_URL_TEST` variable (isolated test database)
 
-## Saídas
+## Outputs
 
-- Output de `alembic upgrade head` (linha a linha)
-- Output de `alembic downgrade -1` (teste de reversibilidade)
-- Diff de schema: tabelas/colunas esperadas vs encontradas
-- Código de saída: 0 (pass) ou 1 (fail)
-- Comentário no PR com evidência completa
+- Output of `alembic upgrade head` (line by line)
+- Output of `alembic downgrade -1` (reversibility test)
+- Schema diff: expected vs found tables/columns
+- Exit code: 0 (pass) or 1 (fail)
+- PR comment with full evidence
 
-## Procedimento
+## Procedure
 
 ```bash
-# 1. Provisionar banco de teste
+# 1. Provision test database
 docker run --rm -d -p 5433:5432 \
   -e POSTGRES_DB=test_db -e POSTGRES_PASSWORD=test \
   --name pg_test postgres:16-alpine
 
-# 2. Executar migrações
+# 2. Run migrations
 DATABASE_URL_TEST=postgresql://postgres:test@localhost:5433/test_db \
   alembic upgrade head
 
-# 3. Inspecionar schema
+# 3. Inspect schema
 python -c "
 from sqlalchemy import create_engine, inspect
 engine = create_engine('$DATABASE_URL_TEST')
@@ -54,29 +54,29 @@ inspector = inspect(engine)
 print('Tables:', inspector.get_table_names())
 "
 
-# 4. Testar downgrade (reversibilidade)
+# 4. Test downgrade (reversibility)
 DATABASE_URL_TEST=... alembic downgrade -1
 
 # 5. Teardown
 docker stop pg_test
 ```
 
-## Fronteiras
+## Boundaries
 
-- Não modifica models Python — reporta divergências ao Implementer
-- Não altera arquivos de migração — reporta problemas ao Implementer
-- Não executa em banco de produção — apenas banco de teste isolado
-- Não aprova seu próprio output — QA confirma
+- Does not modify Python models — reports divergences to Implementer
+- Does not alter migration files — reports problems to Implementer
+- Does not run on production database — isolated test database only
+- Does not approve own output — QA confirms
 
 ## GitHub MCP
 
 ```
-pulls.createReviewComment   ← posta resultado da migração como comentário
-Check run: migration-test   ← status PASS/FAIL no PR
+pulls.createReviewComment   ← post migration result as comment
+Check run: migration-test   ← PASS/FAIL status on PR
 ```
 
-## Escalação
+## Escalation
 
-- Migration é irreversível (sem downgrade) → bloquear merge + notificar Architect
-- Schema diverge dos models após migration → bloquear merge + notificar Implementer
-- Banco de teste não provisiona → reportar ao DevOps
+- Migration is irreversible (no downgrade) → block merge + notify Architect
+- Schema diverges from models after migration → block merge + notify Implementer
+- Test database fails to provision → report to DevOps

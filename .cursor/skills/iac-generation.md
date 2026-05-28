@@ -2,30 +2,30 @@
 
 ## Purpose
 
-Gerar módulos Terraform reproduzíveis para os serviços da stack (PostgreSQL, Redis, backend, frontend) a partir da definição de arquitetura em `docs/architecture/`, garantindo que a infraestrutura seja provisionada de forma determinística e sem intervenção humana.
+Generate reproducible Terraform modules for stack services (PostgreSQL, Redis, backend, frontend) from architecture definition in `docs/architecture/`, ensuring infrastructure is provisioned deterministically without human intervention.
 
 ## When to use
 
-- Após o Architect finalizar o `docs/architecture/overview.md` e os ADRs
-- Quando o Implementer precisar de um ambiente de staging ou produção para testes de integração
-- Como gate do estágio de Deployment: IaC deve existir e ser válido antes do deploy
+- After Architect finalizes `docs/architecture/overview.md` and ADRs
+- When Implementer needs staging or production environment for integration tests
+- As Deployment stage gate: IaC must exist and be valid before deploy
 
 ## Required inputs
 
-- `docs/architecture/overview.md` — define os serviços e suas configurações
-- `docs/architecture/decisions.md` — ADRs com decisões de infraestrutura
-- `.sdlc/memory/architecture.md` — constraints de infraestrutura
-- Variáveis de ambiente: `TF_VAR_*` para credenciais e configurações
+- `docs/architecture/overview.md` — defines services and configurations
+- `docs/architecture/decisions.md` — ADRs with infrastructure decisions
+- `.sdlc/memory/architecture.md` — infrastructure constraints
+- Environment variables: `TF_VAR_*` for credentials and configuration
 
 ## Procedure
 
-### 1. Gerar estrutura base
+### 1. Generate base structure
 
 ```
 app/infra/terraform/
 ├── main.tf            ← provider config + workspace
-├── variables.tf       ← todas as variáveis configuráveis
-├── outputs.tf         ← outputs para outros módulos
+├── variables.tf       ← all configurable variables
+├── outputs.tf         ← outputs for other modules
 ├── modules/
 │   ├── database/      ← PostgreSQL (RDS / Cloud SQL / local)
 │   │   ├── main.tf
@@ -44,11 +44,11 @@ app/infra/terraform/
 │       ├── variables.tf
 │       └── outputs.tf
 └── environments/
-    ├── local.tfvars   ← variáveis para Docker Compose local
-    └── staging.tfvars ← variáveis para ambiente de staging
+    ├── local.tfvars   ← variables for local Docker Compose
+    └── staging.tfvars ← variables for staging environment
 ```
 
-### 2. Validar IaC gerado
+### 2. Validate generated IaC
 
 ```bash
 cd app/infra/terraform
@@ -56,11 +56,11 @@ terraform init -backend=false
 terraform validate
 terraform fmt -check
 
-# Para ambiente local com Docker
+# For local environment with Docker
 terraform plan -var-file=environments/local.tfvars -out=plan.tfplan
 ```
 
-### 3. Template de módulo database (PostgreSQL)
+### 3. Database module template (PostgreSQL)
 
 ```hcl
 # app/infra/terraform/modules/database/main.tf
@@ -88,7 +88,7 @@ output "connection_string" {
 }
 ```
 
-### 4. Template de módulo cache (Redis)
+### 4. Cache module template (Redis)
 
 ```hcl
 # app/infra/terraform/modules/cache/main.tf
@@ -110,25 +110,25 @@ output "redis_url" {
 
 ## Outputs
 
-- `app/infra/terraform/` com todos os módulos gerados
-- `terraform validate` passa sem erros
-- `terraform plan` produz plano sem erros de sintaxe
-- Outputs documentados em `outputs.tf` para consumo pelo backend
+- `app/infra/terraform/` with all modules generated
+- `terraform validate` passes without errors
+- `terraform plan` produces plan without syntax errors
+- Outputs documented in `outputs.tf` for backend consumption
 
 ## Validation checklist
 
-- [ ] `terraform init -backend=false` sem erros
-- [ ] `terraform validate` passa
-- [ ] `terraform fmt -check` sem diferenças (código formatado)
-- [ ] Nenhuma credencial hardcoded — tudo em `variables.tf` com `sensitive = true`
-- [ ] `environments/local.tfvars` existe e provê todos os valores necessários
-- [ ] Outputs incluem connection strings para banco e cache
+- [ ] `terraform init -backend=false` without errors
+- [ ] `terraform validate` passes
+- [ ] `terraform fmt -check` with no differences (formatted code)
+- [ ] No hardcoded credentials — all in `variables.tf` with `sensitive = true`
+- [ ] `environments/local.tfvars` exists and provides all required values
+- [ ] Outputs include connection strings for database and cache
 
 ## Failure modes
 
-| Falha | Causa | Ação |
+| Failure | Cause | Action |
 |-------|-------|------|
-| `terraform validate` falha | Syntax error no HCL | Corrigir conforme output do validate |
-| Provider não encontrado | `terraform init` não executado | Executar `terraform init -backend=false` primeiro |
-| Variável sensível exposta | Hardcoded no código | Mover para `variables.tf` com `sensitive = true` |
-| Module não encontrado | Path incorreto em `source` | Verificar estrutura de diretórios |
+| `terraform validate` fails | Syntax error in HCL | Fix per validate output |
+| Provider not found | `terraform init` not run | Run `terraform init -backend=false` first |
+| Sensitive variable exposed | Hardcoded in code | Move to `variables.tf` with `sensitive = true` |
+| Module not found | Incorrect `source` path | Verify directory structure |

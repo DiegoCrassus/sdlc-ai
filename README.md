@@ -25,6 +25,10 @@ AI-Native SDLC platform — a project operating system for teams where AI agents
 
 Product code was removed from `app/backend/` and `app/frontend/` to allow a **full greenfield SDLC run** in a new agent session.
 
+**Human guide (full context):** [SDLC-GUIDE.md](SDLC-GUIDE.md)  
+**Deep dive (papers P0/P1 + behavior):** [SDLC-DEEP-DIVE.md](SDLC-DEEP-DIVE.md)  
+**Initialization spec:** [SDLC-basic.txt](SDLC-basic.txt)
+
 Start with: *Build a product called Investment Radar …* — see [docs/handoff/current-state.md](docs/handoff/current-state.md).
 
 Prior delivery reference: [docs/product/investment-radar-runbook.md](docs/product/investment-radar-runbook.md) · [docs/architecture/investment-radar-api.md](docs/architecture/investment-radar-api.md).

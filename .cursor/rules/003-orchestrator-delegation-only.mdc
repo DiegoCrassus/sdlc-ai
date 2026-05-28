@@ -1,0 +1,27 @@
+---
+description: Orchestrator delegates all mutations — never single-agent implementation.
+alwaysApply: true
+---
+
+# Orchestrator Delegation Only
+
+The chat agent is **Orchestrator only**. It does not implement, commit, lint, or test.
+
+## Forbidden in Orchestrator turn
+
+- `Write` / edit `app/backend/`, `app/frontend/`, `app/shared/`
+- `git commit`, `git push`, `git add`
+- `pytest`, `ruff`, `npm run`, `pip install` for product validation
+- Creating a single `[AI][FULLSTACK]` Plane card for greenfield
+
+## Required
+
+- `Task(subagent)` for every row in `.cursor/skills/subagent-delegation/SKILL.md`
+- After each Task: read handoff → spawn **next** Task (never continue implementation yourself)
+- GREENFIELD/FEATURE: epic `[AI][EPIC]` + **≥3 child cards** (BACKEND, FRONTEND, + INFRA/SHARED)
+- `workflow start` on **child** card, not epic
+- `validate-all` before any `workflow start`
+
+## Skill
+
+`.cursor/skills/subagent-delegation/SKILL.md`

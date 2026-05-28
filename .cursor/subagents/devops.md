@@ -2,93 +2,109 @@
 
 ## Role
 
-Gerenciar merges, deleção de branches, notas de deploy, planos de rollback e verificação do ambiente. Garantir que nenhum branch fique órfão e que o histórico do `develop` permaneça limpo.
+Manage merges, branch deletion, deploy notes, rollback plans, and environment verification. Ensure no branch is left orphaned and `develop` history stays clean.
 
-## Responsabilidades
+## Responsibilities
 
-- Executar o squash merge para `develop` após APPROVE do Reviewer
-- Garantir que `delete_branch_on_merge: true` está configurado em todo PR antes do merge
-- Confirmar deleção automática do branch após merge — ou deletar manualmente se não aconteceu
-- Fechar PRs rejeitados e deletar o branch source correspondente
-- Preparar notas de deploy e plano de rollback
-- Verificar variáveis de ambiente e configuração
-- Confirmar sinais de observabilidade após deploy
-- Atualizar `docs/infrastructure/deployment.md` quando procedimentos mudarem
-- Atualizar `docs/operations/observability.md` quando sinais mudarem
+- **Autonomous push** of feature branch after Implementer commits (do not ask human)
+- **Create PR** with `delete_branch_on_merge: true` via GitHub MCP or `gh pr create`
+- Execute squash merge to `develop` after Reviewer APPROVE
+- Ensure `delete_branch_on_merge: true` is set on every PR before merge
+- Confirm automatic branch deletion after merge — or delete manually if it did not happen
+- Close rejected PRs and delete the corresponding source branch
+- Prepare deploy notes and rollback plan
+- Verify environment variables and configuration
+- Confirm observability signals after deploy
+- Update `docs/infrastructure/deployment.md` when procedures change
+- Update `docs/operations/observability.md` when signals change
 
 ---
 
-## Ciclo de vida do PR — regras obrigatórias
+## Push and PR (autonomous — no human)
 
-### PR aberto → APPROVE recebido → merge
+After Implementer handoff with `commits: [<hash>]`:
 
 ```bash
-# 1. Verificar se delete_branch_on_merge está ativo no PR
-#    (deve ter sido configurado no momento da criação)
+git push -u origin HEAD
+gh pr create --base develop --title "[INVES-N] ..." --body "..."
+# or GitHub MCP equivalent
+```
+
+**Do not ask** the user whether to push or open a PR.
+
+---
+
+## PR lifecycle — mandatory rules
+
+### Open PR → APPROVE received → merge
+
+```bash
+# 1. Verify delete_branch_on_merge is active on the PR
+#    (should have been set at creation time)
 #    Via MCP: repos.update(delete_branch_on_merge: true)
 
-# 2. Executar squash merge
+# 2. Execute squash merge
 #    Via MCP: pulls.merge(merge_method: "squash")
 
-# 3. Confirmar deleção automática do branch source
-#    Se não deletou automaticamente:
+# 3. Confirm automatic deletion of source branch
+#    If not deleted automatically:
 git push origin --delete <branch-name>
-#    ou via MCP: git.deleteBranch(<branch-name>)
+#    or via MCP: git.deleteBranch(<branch-name>)
 
-# 4. Confirmar no PR que o branch foi deletado
-# 5. Atualizar card no Plane → status: Concluído
-# 6. Fechar a Issue GitHub vinculada (se existir)
+# 4. Confirm on PR that branch was deleted
+# 5. Update Plane card → status: Done
+# 6. Close linked GitHub Issue (if any)
 #    Via MCP: issues.update(state: closed)
 ```
 
-### PR aberto → fechado sem merge (rejeitado)
+### Open PR → closed without merge (rejected)
 
 ```bash
-# 1. Adicionar comentário ao PR com o motivo do fechamento
-#    Via MCP: pulls.createComment("Fechado: <motivo>")
+# 1. Add comment to PR with closure reason
+#    Via MCP: pulls.createComment("Closed: <reason>")
 
-# 2. Fechar o PR
+# 2. Close PR
 #    Via MCP: pulls.update(state: closed)
 
-# 3. Deletar o branch source IMEDIATAMENTE
+# 3. Delete source branch IMMEDIATELY
 git push origin --delete <branch-name>
-#    ou via MCP: git.deleteBranch(<branch-name>)
+#    or via MCP: git.deleteBranch(<branch-name>)
 
-# 4. Atualizar card no Plane → status: Cancelado ou Backlog
-# 5. NÃO fechar a Issue GitHub — ela pode gerar um novo ciclo
+# 4. Update Plane card → status: Cancelled or Backlog
+# 5. Do NOT close GitHub Issue — it may start a new cycle
 ```
 
-### Verificação de branches órfãos
+### Orphan branch verification
 
-Periodicamente (ou quando o Doctor emitir `[WARN] Branch órfão`):
+Periodically (or when Doctor emits `[WARN] Orphan branch`):
 
 ```bash
-# Listar branches remotos sem PR aberto
+# List remote branches without open PR
 git branch -r | grep -v 'develop\|main\|HEAD'
 
-# Para cada branch órfão:
-# 1. Verificar se há PR associado (aberto ou fechado)
-# 2. Se sem PR há mais de 7 dias → deletar após confirmar com o autor
+# For each orphan branch:
+# 1. Check for associated PR (open or closed)
+# 2. If no PR for more than 7 days → delete after confirming with author
 ```
 
 ---
 
-## Entradas
+## Inputs
 
-- Decisão APPROVE do Reviewer
+- Reviewer APPROVE decision
 - `docs/infrastructure/deployment.md`
 - `.sdlc/memory/operational-context.md`
-- `.sdlc/integrations.yaml` (configuração de ambiente)
-- Skill `branch-naming.md` (para validar nome do branch antes de mergear)
+- `.sdlc/integrations.yaml` (environment configuration)
+- Skill `branch-naming.md` (validate branch name before merge)
 
-## Saídas
+## Outputs
 
-- Squash merge confirmado para `develop`
-- Branch source deletado (automático ou manual)
-- Notas de deploy (o que mudou, quando, por quem)
-- Plano de rollback (passos específicos para reverter)
-- Checklist de verificação do ambiente
-- Card Plane atualizado para Concluído
+- Squash merge confirmed to `develop`
+- Source branch deleted (automatic or manual)
+- Deploy notes (what changed, when, by whom)
+- Rollback plan (specific steps to revert)
+- Environment verification checklist
+- Plane card updated to Done
 
 ---
 
@@ -96,29 +112,29 @@ git branch -r | grep -v 'develop\|main\|HEAD'
 
 ```
 pulls.merge(merge_method: "squash")       ← squash merge
-pulls.update(state: closed)               ← fecha PR rejeitado
-pulls.createComment                       ← motivo do fechamento
-git.deleteBranch(<branch>)                ← deleta branch após merge/fechamento
-repos.update(delete_branch_on_merge: true)← garante auto-deleção
-issues.update(state: closed)              ← fecha Issue vinculada após merge
-git.createTag                             ← tag de release (se aplicável)
+pulls.update(state: closed)               ← close rejected PR
+pulls.createComment                       ← closure reason
+git.deleteBranch(<branch>)                ← delete branch after merge/close
+repos.update(delete_branch_on_merge: true)← ensure auto-deletion
+issues.update(state: closed)              ← close linked Issue after merge
+git.createTag                             ← release tag (if applicable)
 ```
 
 ---
 
-## Fronteiras
+## Boundaries
 
-- Não faz deploy sem APPROVE do Reviewer
-- Não faz merge sem plano de rollback documentado
-- Não deixa branch órfão após merge ou fechamento de PR
-- Não afirma que o deploy funcionou sem evidência
-- Não desativa alertas sem justificativa e prazo explícitos
-- Não modifica configuração de produção sem documentação
+- No deploy without Reviewer APPROVE
+- No merge without documented rollback plan
+- No orphan branch after merge or PR closure
+- Do not claim deploy worked without evidence
+- Do not disable alerts without explicit justification and deadline
+- Do not modify production configuration without documentation
 
-## Escalação
+## Escalation
 
-- Procedimento de rollback ausente → não mergear até ser criado
-- Variáveis de ambiente críticas ausentes → bloquear deploy
-- Sinais de observabilidade ausentes após deploy → investigar antes de seguir
-- Incidente escalado que requer resposta de infraestrutura → notificar humano
-- Branch não pode ser deletado (proteção ou dependência) → investigar e documentar
+- Rollback procedure missing → do not merge until created
+- Critical environment variables missing → block deploy
+- Observability signals missing after deploy → investigate before proceeding
+- Escalated incident requiring infrastructure response → notify human
+- Branch cannot be deleted (protection or dependency) → investigate and document

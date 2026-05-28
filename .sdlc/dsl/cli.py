@@ -60,10 +60,19 @@ def cmd_list_stages() -> int:
     return 0
 
 
+def cmd_workflow() -> int:
+    dsl_path = os.path.join(_ROOT, ".sdlc", "dsl")
+    if dsl_path not in sys.path:
+        sys.path.insert(0, dsl_path)
+    from workflow import run_workflow  # type: ignore[import-not-found]
+
+    return run_workflow(sys.argv[2:])
+
+
 def main() -> int:
     if len(sys.argv) < 2:
         print("Usage: python .sdlc/dsl/cli.py <command>")
-        print("Commands: doctor | validate | list-stages")
+        print("Commands: doctor | validate | list-stages | workflow")
         return 1
 
     command = sys.argv[1]
@@ -77,9 +86,11 @@ def main() -> int:
         return cmd_validate()
     elif command == "list-stages":
         return cmd_list_stages()
+    elif command == "workflow":
+        return cmd_workflow()
     else:
         print(f"Unknown command: {command}")
-        print("Commands: doctor | validate | list-stages")
+        print("Commands: doctor | validate | list-stages | workflow")
         return 1
 
 

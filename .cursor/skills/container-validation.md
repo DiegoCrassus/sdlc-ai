@@ -2,36 +2,36 @@
 
 ## Purpose
 
-Verificar que o Docker build e o `docker compose up` passam antes de qualquer PR ser mergeado, garantindo que a stack completa sobe corretamente no ambiente de CI.
+Verify Docker build and `docker compose up` pass before any PR is merged, ensuring the full stack starts correctly in the CI environment.
 
 ## When to use
 
-- Após qualquer alteração em `Dockerfile*`, `docker-compose*.yml`, `pyproject.toml`, `requirements.txt`, `package.json`
-- Como gate obrigatório no CI após os testes unitários e antes dos testes de integração
+- After any change to `Dockerfile*`, `docker-compose*.yml`, `pyproject.toml`, `requirements.txt`, `package.json`
+- As mandatory CI gate after unit tests and before integration tests
 
 ## Required inputs
 
-- `app/infra/docker-compose.yml` (ou `docker-compose.dev.yml`)
-- Dockerfiles de cada serviço
-- `.env.example` (variáveis necessárias)
+- `app/infra/docker-compose.yml` (or `docker-compose.dev.yml`)
+- Dockerfiles for each service
+- `.env.example` (required variables)
 
 ## Procedure
 
 ```bash
-# 1. Validar sintaxe dos Dockerfiles (sem build)
+# 1. Validate Dockerfile syntax (without build)
 docker build --check -f app/infra/docker/Dockerfile.backend .
 docker build --check -f app/infra/docker/Dockerfile.frontend .
 
-# 2. Build completo de cada imagem
+# 2. Full build of each image
 docker compose -f app/infra/docker-compose.yml build --no-cache 2>&1 | tee build.log
 BUILD_EXIT=$?
 
-# 3. Se build passou, subir a stack
+# 3. If build passed, start stack
 if [ $BUILD_EXIT -eq 0 ]; then
   docker compose -f app/infra/docker-compose.yml up -d
-  sleep 10  # aguardar services ficarem healthy
+  sleep 10  # wait for services to become healthy
 
-  # 4. Health checks de cada serviço
+  # 4. Health checks per service
   docker compose ps --format json | python3 -c "
 import json, sys
 services = [json.loads(l) for l in sys.stdin]
@@ -51,24 +51,24 @@ exit $BUILD_EXIT
 
 ## Outputs
 
-- Log de build (stdout + stderr)
-- Status de health de cada container
-- Código de saída: 0 (todos healthy) ou 1 (qualquer falha)
+- Build log (stdout + stderr)
+- Health status per container
+- Exit code: 0 (all healthy) or 1 (any failure)
 
 ## Validation checklist
 
-- [ ] `docker build` passou sem erros para cada imagem
-- [ ] Nenhum `docker compose up` ficou em `unhealthy` por mais de 30s
-- [ ] Backend `/health` retorna 200 após `up`
-- [ ] PostgreSQL aceita conexão após `up`
-- [ ] Redis aceita `PING` após `up`
-- [ ] Nenhum segredo hardcoded nas imagens (verificar com `docker inspect`)
+- [ ] `docker build` passed without errors for each image
+- [ ] No `docker compose up` service stayed `unhealthy` for more than 30s
+- [ ] Backend `/health` returns 200 after `up`
+- [ ] PostgreSQL accepts connection after `up`
+- [ ] Redis accepts `PING` after `up`
+- [ ] No secrets hardcoded in images (verify with `docker inspect`)
 
 ## Failure modes
 
-| Falha | Causa comum | Ação |
+| Failure | Common cause | Action |
 |-------|-------------|------|
-| Build error | Dependência ausente no Dockerfile | Reportar ao Implementer |
-| Container unhealthy | Env var faltando | Verificar `.env.example` e reportar ao DevOps |
-| Port conflict | Porta já em uso no CI | Usar portas alternativas no docker-compose.ci.yml |
-| Build timeout | Layer cache inválido ou imagem base lenta | Otimizar Dockerfile com multi-stage build |
+| Build error | Missing dependency in Dockerfile | Report to Implementer |
+| Container unhealthy | Missing env var | Check `.env.example` and report to DevOps |
+| Port conflict | Port already in use on CI | Use alternate ports in docker-compose.ci.yml |
+| Build timeout | Invalid layer cache or slow base image | Optimize Dockerfile with multi-stage build |

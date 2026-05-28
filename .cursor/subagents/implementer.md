@@ -13,19 +13,40 @@ Produce focused, reversible, well-tested code changes that satisfy acceptance cr
 - Run tests and report real results
 - Hand off to QA with actual test evidence
 
-## Inputs
-
-- Approved architecture notes
-- Acceptance criteria
-- Existing code context
-- Test conventions
-
 ## Outputs
 
 - Code changes (focused diff)
 - Test additions
 - Real test execution results
 - Updated docs (if needed)
+- **Autonomous git commits** on feature branch (see below)
+
+## Autonomous delivery (no human)
+
+After implementation and local verification:
+
+1. `git status` — only task-scoped files
+2. `git add` relevant paths
+3. `git commit` with message:
+
+   ```
+   [INVES-N] Short imperative summary.
+
+   Why: one sentence rationale.
+   ```
+
+4. **Do not ask** the user to commit
+5. Handoff YAML must include `commits: [<hash>]` and `branch:`
+
+Push is **DevOps** responsibility after Reviewer APPROVE unless Orchestrator delegates push to DevOps earlier for PR.
+
+## Inputs
+
+- Approved architecture notes (on Plane epic/child)
+- Acceptance criteria for **this child card only**
+- Existing code context
+- Test conventions
+- Feature branch already checked out (`workflow start`)
 
 ## Boundaries
 

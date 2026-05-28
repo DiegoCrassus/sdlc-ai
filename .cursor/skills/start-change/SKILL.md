@@ -4,41 +4,41 @@
 
 ## Purpose
 
-Iniciar uma unidade de trabalho **antes de qualquer edição de código**, criando rastreabilidade Plane + branch gitflow.
+Start a work unit **before any code edit**, creating Plane traceability + gitflow branch.
 
 ## When to use
 
-- Antes de implementar qualquer feature, bugfix ou infra
-- Quando o usuário pede implementação (mesmo com urgência — gitflow não é opcional)
-- **Somente após** `plane-task-creation` ter preenchido o card com plano completo
+- Before implementing any feature, bugfix, or infra change
+- When the user asks for implementation (even with urgency — gitflow is not optional)
+- **Only after** `plane-task-creation` has filled the card with a complete plan
 
 ## Procedure
 
-### 0. Verificar plano no Plane
+### 0. Verify plan on Plane
 
-Confirmar que o card `INVES-N` passou no gate de `.cursor/skills/plane-task-creation/SKILL.md`. Se o corpo só tem AC stubs → **parar** e completar plano.
+Confirm card `INVES-N` passed the gate in `.cursor/skills/plane-task-creation/SKILL.md`. If the body only has AC stubs → **stop** and complete the plan.
 
-### 1. Plane → **In Progress** (obrigatório)
+### 1. Plane → **In Progress** (required)
 
-**Antes** de criar branch ou editar código, mover o card para **In Progress**:
+**Before** creating a branch or editing code, move the card to **In Progress**:
 
 ```bash
 python3 .sdlc/scripts/plane_state.py in-progress --card INVES-N \
   --comment "start-change: branch feature/INVES-N-<slug>"
 ```
 
-| Gate | Se falhar |
+| Gate | If it fails |
 |------|-----------|
-| Card existe no Plane | Parar — criar via `plane-task-creation` |
-| Estado = In Progress | Parar — não implementar enquanto Todo/Backlog |
+| Card exists on Plane | Stop — create via `plane-task-creation` |
+| State = In Progress | Stop — do not implement while Todo/Backlog |
 
-Se o card ainda não existe, criar via MCP (`.cursor/skills/plane-sdlc/SKILL.md`) já em **In Progress**.
+If the card does not exist yet, create via MCP (`.cursor/skills/plane-sdlc/SKILL.md`) already in **In Progress**.
 
-### 2. Registrar número do card
+### 2. Record card number
 
-Anotar `INVES-N` — obrigatório no nome do branch.
+Note `INVES-N` — required in the branch name.
 
-### 3. Criar branch a partir de develop
+### 3. Create branch from develop
 
 ```bash
 git checkout develop
@@ -46,31 +46,37 @@ git pull origin develop
 git checkout -b feature/INVES-N-<slug>
 ```
 
-Convenção: `.cursor/skills/branch-naming.md`
+Convention: `.cursor/skills/branch-naming.md`
 
-### 4. Observer pre-task (quando disponível)
+### 4. Observer pre-task (when available)
 
 ```bash
 python3 .sdlc/obs/hooks/pre_task.py --task "INVES-N: <title>" --stage implementation --agent implementer
 ```
 
-Fallback se path legado: `python3 app/infra/sdlc_obs/hooks/pre_task.py`
+Fallback if legacy path: `python3 app/infra/sdlc_obs/hooks/pre_task.py`
 
-### 5. Abrir gate mecânico (quando hooks presentes)
+### 6. Open mechanical gate (required)
 
 ```bash
-python3 .cursor/hooks/sdlc_gate.py open --card INVES-N --branch feature/INVES-N-<slug>
-python3 .cursor/hooks/sdlc_gate.py status   # deve retornar open
+python3 .sdlc/dsl/cli.py workflow start --card INVES-N --slug <slug> --stage implementation
+python3 .sdlc/dsl/cli.py workflow status   # gate open + card
 ```
 
-### 6. Só então editar código
+Legacy (still valid):
 
-Nunca commitar em `develop` ou `main` durante implementação.
+```bash
+python3 .sdlc/scripts/sdlc_gate.py open --card INVES-N --stage implementation
+```
+
+### 7. Only then edit code
+
+Never commit on `develop` or `main` during implementation.
 
 ## Failure modes
 
 | Situation | Action |
 |-----------|--------|
-| Card em Todo/Backlog durante implementação | **Parar** — `plane_state.py in-progress` primeiro |
-| Plane indisponível | **Parar** — corrigir token; não criar backlog local |
-| Sem card ID | **Parar** — criar card no Plane primeiro |
+| Card in Todo/Backlog during implementation | **Stop** — `plane_state.py in-progress` first |
+| Plane unavailable | **Stop** — fix token; do not create local backlog |
+| No card ID | **Stop** — create Plane card first |

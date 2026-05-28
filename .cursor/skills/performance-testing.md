@@ -2,57 +2,57 @@
 
 ## Purpose
 
-Detectar regressões de performance antes do deploy, medindo latência, throughput e uso de recursos sob carga realista, usando k6 como ferramenta principal.
+Detect performance regressions before deploy, measuring latency, throughput, and resource usage under realistic load, using k6 as the primary tool.
 
 ## When to use
 
-- Em PRs que afetam endpoints de alta frequência ou queries de banco
-- Antes de qualquer deploy para produção
-- Após mudanças no schema de banco ou índices
-- Após adicionar/modificar cache Redis
+- On PRs affecting high-frequency endpoints or database queries
+- Before any production deploy
+- After database schema or index changes
+- After adding/modifying Redis cache
 
 ## Required inputs
 
-- Stack rodando em ambiente de teste (use `container-validation.md`)
-- `app/backend/tests/performance/` — scripts k6
-- Baselines de performance anteriores (em `.sdlc/memory/`)
+- Stack running in test environment (use `container-validation.md`)
+- `app/backend/tests/performance/` — k6 scripts
+- Previous performance baselines (in `.sdlc/memory/`)
 
 ## Procedure
 
 ```bash
-# 1. Instalar k6
+# 1. Install k6
 brew install k6
-# ou: docker pull grafana/k6
+# or: docker pull grafana/k6
 
-# 2. Executar teste de carga
+# 2. Run load test
 k6 run \
   --out json=k6-results.json \
   --vus 10 \
   --duration 30s \
   app/backend/tests/performance/load-test.js
 
-# 3. Smoke test (1 VU, 1 min) para detectar erros básicos
+# 3. Smoke test (1 VU, 1 min) to detect basic errors
 k6 run --vus 1 --duration 60s \
   app/backend/tests/performance/smoke-test.js
 
-# 4. Comparar com baseline
+# 4. Compare with baseline
 python3 .sdlc/dsl/perf_compare.py \
   --current k6-results.json \
   --baseline .sdlc/memory/perf-baseline.json \
-  --threshold 20  # % de regressão aceitável
+  --threshold 20  # acceptable regression %
 ```
 
-## Thresholds de baseline (padrão)
+## Baseline thresholds (default)
 
-| Métrica | Threshold de alerta | Threshold de bloqueio |
+| Metric | Alert threshold | Block threshold |
 |---------|--------------------|-----------------------|
-| p95 latência | > 200ms (+20% do baseline) | > 500ms |
-| p99 latência | > 500ms (+30% do baseline) | > 2000ms |
+| p95 latency | > 200ms (+20% from baseline) | > 500ms |
+| p99 latency | > 500ms (+30% from baseline) | > 2000ms |
 | Error rate | > 0.1% | > 1% |
-| Throughput | < 80% do baseline | < 60% do baseline |
-| CPU uso médio | > 70% | > 90% |
+| Throughput | < 80% of baseline | < 60% of baseline |
+| Average CPU usage | > 70% | > 90% |
 
-## Template de script k6
+## k6 script template
 
 ```javascript
 // app/backend/tests/performance/load-test.js
@@ -81,23 +81,23 @@ export default function () {
 
 ## Outputs
 
-- `k6-results.json` com métricas completas
-- Relatório de comparação com baseline (% de mudança por métrica)
-- Código de saída: 0 (dentro dos thresholds) ou 1 (regressão detectada)
+- `k6-results.json` with full metrics
+- Comparison report with baseline (% change per metric)
+- Exit code: 0 (within thresholds) or 1 (regression detected)
 
 ## Validation checklist
 
-- [ ] Smoke test passa sem erros
-- [ ] p95 dentro do threshold
+- [ ] Smoke test passes without errors
+- [ ] p95 within threshold
 - [ ] Error rate < 0.1%
-- [ ] Nenhuma query N+1 detectada (via OTel traces)
-- [ ] Redis hit rate > 80% para endpoints cacheados
+- [ ] No N+1 queries detected (via OTel traces)
+- [ ] Redis hit rate > 80% for cached endpoints
 
 ## Failure modes
 
-| Falha | Causa comum | Ação |
+| Failure | Common cause | Action |
 |-------|-------------|------|
-| Regressão de latência | Query sem índice | Reportar ao Implementer + sugerir `EXPLAIN ANALYZE` |
-| Error rate alta | Bug em endpoint | Reportar ao QA como CA não atendido |
-| Throughput baixo | Lock de banco | Revisar transações com Architect |
-| Degradação com Redis | Cache miss alto | Verificar TTL e invalidação de cache |
+| Latency regression | Query without index | Report to Implementer + suggest `EXPLAIN ANALYZE` |
+| High error rate | Endpoint bug | Report to QA as unmet acceptance criterion |
+| Low throughput | Database lock | Review transactions with Architect |
+| Degradation with Redis | High cache miss | Verify TTL and cache invalidation |

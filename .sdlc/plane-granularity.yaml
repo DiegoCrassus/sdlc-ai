@@ -1,0 +1,48 @@
+version: "1.0"
+description: Mandatory Plane task decomposition — no monolithic FULLSTACK cards.
+
+# Intents that require epic + child cards (not a single implementable card).
+requires_epic:
+  - GREENFIELD
+  - FEATURE
+
+# Single-card allowed only for these intents.
+single_card_allowed:
+  - BUGFIX
+  - HOTFIX
+  - SDLC_META
+  - DOCS_ONLY
+  - INFRA
+
+# Epic title must include this tag (not FULLSTACK).
+epic_tag: "[AI][EPIC]"
+
+# Forbidden as the only implementable card when requires_epic applies.
+forbidden_sole_tags:
+  - "[AI][FULLSTACK]"
+
+# Minimum distinct implementation layers in epic Task Breakdown.
+min_impl_layers:
+  GREENFIELD: 3   # e.g. BACKEND + FRONTEND + INFRA or SHARED
+  FEATURE: 2
+
+# Required child card types for GREENFIELD (at least one of each group).
+greenfield_required_groups:
+  - tags: ["[AI][BACKEND]"]
+    label: backend
+  - tags: ["[AI][FRONTEND]"]
+    label: frontend
+  - tags: ["[AI][INFRA]", "[AI][SHARED]", "[AI][SDLC]"]
+    label: infra_or_shared
+    min_match: 1
+
+# Minimum child Plane cards linked to epic (via parent or breakdown list).
+min_child_cards:
+  GREENFIELD: 3
+  FEATURE: 2
+
+# Each child card gets its own branch + workflow cycle.
+one_branch_per_child: true
+
+# Child title pattern
+child_title_pattern: "[AI][TYPE] Short imperative title"
