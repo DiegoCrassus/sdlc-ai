@@ -134,7 +134,9 @@ def reformat_description(card: str) -> None:
 
 
 def _strip_html(html: str) -> str:
-    text = re.sub(r"<[^>]+>", " ", html or "")
+    # Preserve list items as "- " bullets before stripping tags
+    text = re.sub(r"<li[^>]*>", "\n- ", html or "", flags=re.IGNORECASE)
+    text = re.sub(r"<[^>]+>", " ", text)
     text = re.sub(r"\s+", " ", text)
     return text.strip()
 
