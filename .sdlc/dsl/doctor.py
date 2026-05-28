@@ -1,4 +1,4 @@
-"""Repository-level Doctor checks for SDLC compliance."""
+"""Repository-level Doctor checks driven by .sdlc/doctor.yaml."""
 
 import os
 import sys
@@ -13,17 +13,21 @@ except ImportError:
 
 Finding = Tuple[str, str]  # (level, message)  level: PASS | FAIL | WARN
 
+DOCTOR_YAML = ".sdlc/doctor.yaml"
+
+
+# ─────────────────────────────────────────────
+# Low-level check helpers
+# ─────────────────────────────────────────────
 
 def _check_dir(root: str, rel_path: str) -> Finding:
-    full = os.path.join(root, rel_path)
-    if os.path.isdir(full):
+    if os.path.isdir(os.path.join(root, rel_path)):
         return ("PASS", f"Required directory exists: {rel_path}")
     return ("FAIL", f"Missing directory: {rel_path}")
 
 
 def _check_file(root: str, rel_path: str) -> Finding:
-    full = os.path.join(root, rel_path)
-    if os.path.isfile(full):
+    if os.path.isfile(os.path.join(root, rel_path)):
         return ("PASS", f"Required file exists: {rel_path}")
     return ("FAIL", f"Missing file: {rel_path}")
 
@@ -42,21 +46,21 @@ def _check_yaml(root: str, rel_path: str) -> Finding:
     if not os.path.isfile(full):
         return ("FAIL", f"YAML file missing: {rel_path}")
     try:
-        with open(full, "r", encoding="utf-8") as f:
-            data = yaml.safe_load(f)
+        with open(full, "r", encoding="utf-8") as fh:
+            data = yaml.safe_load(fh)
         if data is None:
             return ("FAIL", f"YAML file is empty: {rel_path}")
         return ("PASS", f"YAML valid: {rel_path}")
-    except yaml.YAMLError as e:
-        return ("FAIL", f"YAML parse error in {rel_path}: {e}")
+    except yaml.YAMLError as exc:
+        return ("FAIL", f"YAML parse error in {rel_path}: {exc}")
 
 
 def _check_makefile_target(root: str, target: str) -> Finding:
     makefile = os.path.join(root, "Makefile")
     if not os.path.isfile(makefile):
         return ("FAIL", f"Makefile missing — cannot check target: {target}")
-    with open(makefile, "r", encoding="utf-8") as f:
-        content = f.read()
+    with open(makefile, "r", encoding="utf-8") as fh:
+        content = fh.read()
     if f"{target}:" in content:
         return ("PASS", f"Makefile target exists: {target}")
     return ("FAIL", f"Missing Makefile target: {target}")
@@ -68,175 +72,73 @@ def _check_integration_env(integration_id: str, env_var: str) -> Finding:
     return ("WARN", f"Integration not configured: {integration_id} ({env_var} not set)")
 
 
+# ─────────────────────────────────────────────
+# Main runner — reads checks from doctor.yaml
+# ─────────────────────────────────────────────
+
 def run_doctor(root: str) -> List[Finding]:
-    """Run all Doctor checks and return findings."""
+    """Run all Doctor checks driven by .sdlc/doctor.yaml and return findings."""
     findings: List[Finding] = []
 
-    # --- Required directories ---
-    required_dirs = [
-        ".cursor",
-        ".cursor/rules",
-        ".cursor/commands",
-        ".cursor/skills",
-        ".cursor/subagents",
-        ".cursor/hooks",
-        ".sdlc",
-        ".sdlc/dsl",
-        ".sdlc/memory",
-        "docs",
-        "docs/architecture",
-        "docs/infrastructure",
-        "docs/handoff",
-        "docs/roadmap",
-        "docs/operations",
-        "docs/sdlc",
-        "app",
-        "app/frontend",
-        "app/backend",
-        "app/infra",
-        "app/shared",
-    ]
-    for d in required_dirs:
-        findings.append(_check_dir(root, d))
+    doctor_path = os.path.join(root, DOCTOR_YAML)
+    if not os.path.isfile(doctor_path):
+        findings.append(("FAIL", f"Doctor config missing: {DOCTOR_YAML}"))
+        return findings
+
+    with open(doctor_path, "r", encoding="utf-8") as fh:
+        config = yaml.safe_load(fh)
+
+    checks = config.get("checks", {})
+
+    # --- Directories ---
+    for item in checks.get("directories", {}).get("items", []):
+        findings.append(_check_dir(root, item))
 
     # --- Required files ---
-    required_files = [
-        ".sdlc/sdlc.yaml",
-        ".sdlc/lifecycle.yaml",
-        ".sdlc/stages.yaml",
-        ".sdlc/workflows.yaml",
-        ".sdlc/agents.yaml",
-        ".sdlc/skills.yaml",
-        ".sdlc/rules.yaml",
-        ".sdlc/integrations.yaml",
-        ".sdlc/doctor.yaml",
-        ".sdlc/dsl/cli.py",
-        ".sdlc/dsl/doctor.py",
-        "Makefile",
-        "README.md",
-    ]
-    for f in required_files:
-        findings.append(_check_file(root, f))
+    for item in checks.get("files", {}).get("items", []):
+        findings.append(_check_file(root, item))
 
-    # --- Cursor structure ---
-    cursor_files = [
-        ".cursor/commands/sdlc-doctor.md",
-        ".cursor/commands/sdlc-plan.md",
-        ".cursor/commands/sdlc-implement.md",
-        ".cursor/commands/sdlc-review.md",
-        ".cursor/commands/sdlc-handoff.md",
-        ".cursor/rules/000-project-governance.mdc",
-        ".cursor/rules/010-ai-native-sdlc.mdc",
-        ".cursor/rules/020-code-quality.mdc",
-        ".cursor/rules/030-docs-and-handoff.mdc",
-        ".cursor/rules/040-doctor-gates.mdc",
-        ".cursor/skills/requirements-refinement.md",
-        ".cursor/skills/architecture-analysis.md",
-        ".cursor/skills/implementation.md",
-        ".cursor/skills/qa-validation.md",
-        ".cursor/skills/code-review.md",
-        ".cursor/skills/observability.md",
-        ".cursor/skills/documentation.md",
-        ".cursor/subagents/planner.md",
-        ".cursor/subagents/architect.md",
-        ".cursor/subagents/implementer.md",
-        ".cursor/subagents/reviewer.md",
-        ".cursor/subagents/qa.md",
-        ".cursor/subagents/devops.md",
-        ".cursor/subagents/doctor.md",
-        ".cursor/hooks/pre-task.md",
-        ".cursor/hooks/post-task.md",
-        ".cursor/hooks/pre-review.md",
-        ".cursor/hooks/post-review.md",
-    ]
-    for f in cursor_files:
-        findings.append(_check_file(root, f))
+    # --- Cursor structure (commands, rules, skills, agents, hooks) ---
+    cursor = checks.get("cursor", {})
+    for section in ("commands", "rules", "skills", "agents", "hooks"):
+        for item in cursor.get(section, []):
+            findings.append(_check_file(root, item))
 
     # --- Docs (non-empty) ---
-    doc_files = [
-        "docs/architecture/overview.md",
-        "docs/architecture/decisions.md",
-        "docs/architecture/system-context.md",
-        "docs/infrastructure/overview.md",
-        "docs/infrastructure/local-development.md",
-        "docs/infrastructure/deployment.md",
-        "docs/handoff/template.md",
-        "docs/handoff/current-state.md",
-        "docs/roadmap/roadmap.md",
-        "docs/operations/observability.md",
-        "docs/operations/incident-response.md",
-        "docs/operations/maintenance.md",
-        "docs/sdlc/ai-native-sdlc.md",
-        "docs/sdlc/workflows.md",
-        "docs/sdlc/gates.md",
-        "docs/sdlc/doctor.md",
-    ]
-    for f in doc_files:
-        findings.append(_check_file_nonempty(root, f))
+    for item in checks.get("docs", {}).get("items", []):
+        findings.append(_check_file_nonempty(root, item))
 
     # --- YAML validity ---
-    yaml_files = [
-        ".sdlc/sdlc.yaml",
-        ".sdlc/lifecycle.yaml",
-        ".sdlc/stages.yaml",
-        ".sdlc/workflows.yaml",
-        ".sdlc/agents.yaml",
-        ".sdlc/skills.yaml",
-        ".sdlc/rules.yaml",
-        ".sdlc/integrations.yaml",
-        ".sdlc/doctor.yaml",
-        ".sdlc/gate-paths.yaml",
-        ".sdlc/plane-granularity.yaml",
-    ]
-    for f in yaml_files:
-        findings.append(_check_yaml(root, f))
+    for item in checks.get("yaml_validity", {}).get("files", []):
+        findings.append(_check_yaml(root, item))
 
     # --- Makefile targets ---
-    for target in ["sdlc-doctor", "sdlc-validate", "sdlc-stages", "docs-check", "workflow-status", "workflow-discover"]:
+    for target in checks.get("makefile", {}).get("targets", []):
         findings.append(_check_makefile_target(root, target))
 
-    # --- Workflow enforcement (P0 + P1) ---
-    workflow_files = [
-        "AGENTS.md",
-        ".sdlc/HANDBOOK.md",
-        "docs/sdlc/master-workflow.md",
-        ".sdlc/gate-paths.yaml",
-        ".sdlc/plane-granularity.yaml",
-        ".sdlc/scripts/sdlc_gate.py",
-        ".sdlc/scripts/discovery_hook.py",
-        ".sdlc/dsl/gate.py",
-        ".sdlc/dsl/workflow.py",
-        ".sdlc/dsl/plane_granularity.py",
-        ".cursor/hooks/sdlc_gate_hook.py",
-        ".cursor/rules/001-sdlc-anti-bypass.mdc",
-        ".cursor/rules/002-sdlc-orchestrator-principal.mdc",
-        ".cursor/rules/003-orchestrator-delegation-only.mdc",
-        ".cursor/subagents/intent-analyst.md",
-        ".cursor/skills/intent-classification/SKILL.md",
-        ".cursor/skills/plane-task-creation/SKILL.md",
-        ".cursor/skills/subagent-delegation/SKILL.md",
-        ".cursor/skills/qa-minimum-checklist/SKILL.md",
-    ]
-    for f in workflow_files:
-        findings.append(_check_file_nonempty(root, f))
+    # --- Workflow enforcement files (non-empty) ---
+    for item in checks.get("workflow_files", {}).get("items", []):
+        findings.append(_check_file_nonempty(root, item))
 
     # --- Integration env vars (warnings only) ---
-    integration_envs = [
-        ("github", "GITHUB_PERSONAL_ACCESS_TOKEN_CLASSIC"),
-        ("plane", "PLANE_API_KEY"),
-        ("openai", "OPENAI_API_KEY"),
-    ]
-    for integration_id, env_var in integration_envs:
-        findings.append(_check_integration_env(integration_id, env_var))
+    for entry in checks.get("integrations", {}).get("items", []):
+        findings.append(_check_integration_env(entry["id"], entry["env"]))
+
+    # --- Python DSL importable ---
+    dsl_entry = checks.get("python_dsl", {}).get("importable")
+    if dsl_entry:
+        findings.append(_check_file(root, dsl_entry))
 
     return findings
 
 
+# ─────────────────────────────────────────────
+# Report printer
+# ─────────────────────────────────────────────
+
 def print_report(findings: List[Finding]) -> int:
     """Print the Doctor report and return exit code (0=pass, 1=fail)."""
-    pass_count = 0
-    warn_count = 0
-    fail_count = 0
+    pass_count = warn_count = fail_count = 0
 
     for level, message in findings:
         if level == "PASS":

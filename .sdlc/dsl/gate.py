@@ -23,6 +23,9 @@ class SessionGate:
     stage: str = ""
     intent: str = ""
     opened_at: str = ""
+    last_agent: str = ""       # last agent that updated the gate (e.g. "implementer")
+    last_commit: str = ""      # last commit hash on the feature branch
+    stage_started_at: str = "" # ISO timestamp when the current stage began
     meta: dict[str, Any] = field(default_factory=dict)
 
     @classmethod
@@ -34,6 +37,9 @@ class SessionGate:
             stage=data.get("stage", ""),
             intent=data.get("intent", ""),
             opened_at=data.get("opened_at", ""),
+            last_agent=data.get("last_agent", ""),
+            last_commit=data.get("last_commit", ""),
+            stage_started_at=data.get("stage_started_at", ""),
             meta=data.get("meta") or {},
         )
 
@@ -156,15 +162,21 @@ def open_gate(
     branch: str,
     stage: str,
     intent: str = "",
+    last_agent: str = "",
+    last_commit: str = "",
     root: Path | None = None,
 ) -> SessionGate:
+    now = datetime.now(UTC).isoformat()
     state = SessionGate(
         gate_status="open",
         card=card,
         branch=branch,
         stage=stage,
         intent=intent,
-        opened_at=datetime.now(UTC).isoformat(),
+        opened_at=now,
+        last_agent=last_agent,
+        last_commit=last_commit,
+        stage_started_at=now,
     )
     save_session_gate(state, root)
     return state
@@ -185,5 +197,8 @@ def gate_status_text(root: Path | None = None) -> str:
         f"stage: {state.stage or '(none)'}",
         f"intent: {state.intent or '(none)'}",
         f"opened_at: {state.opened_at or '(none)'}",
+        f"last_agent: {state.last_agent or '(none)'}",
+        f"last_commit: {state.last_commit or '(none)'}",
+        f"stage_started_at: {state.stage_started_at or '(none)'}",
     ]
     return "\n".join(lines)

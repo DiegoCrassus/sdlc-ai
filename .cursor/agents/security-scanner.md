@@ -1,3 +1,10 @@
+---
+name: security-scanner
+description: "Scan the codebase for SAST findings, hardcoded secrets, and security vulnerabilities using Bandit, Semgrep, or Gitleaks. Run before merge on security-sensitive changes or when reviewer escalates a security concern. Reports findings — does not fix code."
+model: inherit
+readonly: true
+---
+
 # Subagent: SecurityScanner
 
 ## Role

@@ -13,6 +13,12 @@
         "failClosed": false
       }
     ],
+    "postToolUse": [
+      {
+        "command": "python3 .cursor/hooks/post-tool-validator.py",
+        "failClosed": false
+      }
+    ],
     "stop": [
       {
         "command": "python3 .cursor/hooks/sdlc_obs_session.py post"

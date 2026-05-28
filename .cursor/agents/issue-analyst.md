@@ -1,3 +1,10 @@
+---
+name: issue-analyst
+description: "Triage a GitHub Issue immediately after it is opened or reopened. Classifies type (Bug/Feature/Enhancement/Question/Invalid/Duplicate), assesses completeness, posts a structured triage comment, applies labels, and creates a Plane card for valid work. Use on issues.opened or issues.reopened events."
+model: fast
+readonly: false
+---
+
 # Subagent: Issue Analyst
 
 ## Role

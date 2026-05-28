@@ -1,3 +1,10 @@
+---
+name: sdlc-auditor
+description: "Run a full autonomous SDLC audit via /sdlc-audit. Evaluates pipeline autonomy score, identifies critical gaps (FAIL/WARN), generates a canvas report, and creates GitHub Issues for high-priority FAILs. Use on-demand or after significant structural changes."
+model: inherit
+readonly: false
+---
+
 # Subagent: SDLC Auditor
 
 ## Role

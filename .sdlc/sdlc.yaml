@@ -1,23 +1,54 @@
-version: "1.0"
+version: "2.0"
 name: sdlc-ai
 description: AI-Native SDLC operating system for the sdlc-ai project.
 
-# Entry references
-lifecycle: lifecycle.yaml
-stages: stages.yaml
-workflows: workflows.yaml
-agents: agents.yaml
-skills: skills.yaml
-rules: rules.yaml
+# ─────────────────────────────────────────────
+# YAML catalog references
+# ─────────────────────────────────────────────
+manifest: manifest.yaml       # agent/skill catalog (replaces HANDBOOK.md)
+stages: stages.yaml           # 10 stages with mode, gates, evidence
+pipeline: pipeline.yaml       # agents + skills (merged from agents.yaml + skills.yaml)
+workflows: workflows.yaml     # stage transition preconditions
+rules: rules.yaml             # governance rules enforced at each stage
 integrations: integrations.yaml
 doctor: doctor.yaml
+gate_paths: gate-paths.yaml
+plane_granularity: plane-granularity.yaml
 
+# ─────────────────────────────────────────────
+# META-TOOLS (deterministic stage scripts)
+# Source: AWO / Meta-tools (arXiv 2601.22037)
+# ─────────────────────────────────────────────
+meta_tools:
+  - id: validate-and-start
+    script: .sdlc/scripts/meta-tools/validate-and-start.sh
+    usage: "Before implementation — validates Plane card, runs discovery, opens gate, checks branch"
+    replaces: [plane-validate-all, workflow-start, git-branch-check]
+  - id: commit-and-push
+    script: .sdlc/scripts/meta-tools/commit-and-push.sh
+    usage: "After implementation — lint, stage files, commit with SDLC message, push"
+    replaces: [ruff-check, git-add, git-commit, git-push]
+  - id: qa-to-review
+    script: .sdlc/scripts/meta-tools/qa-to-review.sh
+    usage: "After implementation — run tests, run doctor, write QA evidence JSON"
+    replaces: [pytest, make-sdlc-doctor, write-qa-evidence]
+
+# ─────────────────────────────────────────────
+# MEMORY files
+# ─────────────────────────────────────────────
 memory:
   architecture: memory/architecture.md
   business_rules: memory/business-rules.md
   operational_context: memory/operational-context.md
   incidents: memory/incidents.md
+  session_gate: memory/session-gate.json
+  test_skeleton: memory/test-skeleton.md
+  discovery_context: memory/discovery-context.json
+  session_gate_schema: session-gate.schema.json
 
+# ─────────────────────────────────────────────
+# SETTINGS
+# ─────────────────────────────────────────────
 settings:
   default_language: python
   docs_root: docs

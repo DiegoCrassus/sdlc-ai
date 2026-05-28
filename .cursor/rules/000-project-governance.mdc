@@ -15,14 +15,9 @@ alwaysApply: true
 ## Before Any Major Task
 
 1. Read **`AGENTS.md`** (repo root) — orchestrator entry + decision tree.
-2. Read `.sdlc/HANDBOOK.md` — agent handbook.
+2. Read `.sdlc/manifest.yaml` — agent/skill catalog.
 3. Read `docs/sdlc/master-workflow.md` — **process source of truth**.
 4. Read `docs/sdlc/change-lifecycle.md` — gitflow + Plane.
-
-## If SDLC Structure Is Missing (New Repo)
-
-Read `SDLC-basic.txt` at the root and follow it step by step.
-Do not improvise structure — the file is the single source of truth for initialization.
 
 ## Mandatory Rules
 

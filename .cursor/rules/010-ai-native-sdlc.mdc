@@ -43,20 +43,12 @@ alwaysApply: true
 
 Always load context in this order:
 1. **`AGENTS.md`** (repo root)              ← L0 manifest + decision tree
-2. `.sdlc/HANDBOOK.md`                        ← handbook (catalog)
+2. `.sdlc/manifest.yaml`                    ← agent/skill catalog
 3. `docs/sdlc/master-workflow.md`           ← approved process
 4. `docs/sdlc/change-lifecycle.md`          ← gitflow + Plane authority
-5. `.sdlc/sdlc.yaml`
+5. `.sdlc/sdlc.yaml`                        ← SDLC config index
 6. `.sdlc/memory/operational-context.md`
-7. Relevant skill/subagent for current stage
-
-## New Repository Initialization
-
-If this is a new blank repository and the SDLC structure does not exist yet:
-- Read `SDLC-basic.txt` (root of repository) for the complete initialization spec
-- Follow its EXECUTION RULES section step by step
-- Target: `make sdlc-audit` must pass with Autonomy Score ≥ 90%
-- Do not invent structure — follow SDLC-basic.txt exactly
+7. Relevant cursor agent or skill for current stage
 
 ## Available Commands
 
