@@ -1,0 +1,128 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sdlc-ai.local/schemas/forecast/asset-projection.json",
+  "title": "AssetProjection",
+  "description": "Canonical JSON Schema for GET /api/v1/projections/{symbol} responses (ADR-009).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "asset_id",
+    "horizon_days",
+    "current_price",
+    "indicators",
+    "scenarios",
+    "disclaimer",
+    "meta"
+  ],
+  "properties": {
+    "asset_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "horizon_days": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 90
+    },
+    "current_price": {
+      "type": "number"
+    },
+    "indicators": {
+      "$ref": "#/$defs/TechnicalIndicators"
+    },
+    "scenarios": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/ProjectionScenario"
+      }
+    },
+    "disclaimer": {
+      "type": "string"
+    },
+    "meta": {
+      "$ref": "#/$defs/SourceMeta"
+    }
+  },
+  "$defs": {
+    "TrendDirection": {
+      "type": "string",
+      "enum": ["bullish", "bearish", "neutral"]
+    },
+    "DataSource": {
+      "type": "string",
+      "enum": ["mock", "live", "fallback"]
+    },
+    "TechnicalIndicators": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "rsi_14",
+        "macd",
+        "macd_signal",
+        "sma_20",
+        "sma_50",
+        "bollinger_upper",
+        "bollinger_lower"
+      ],
+      "properties": {
+        "rsi_14": { "type": "number" },
+        "macd": { "type": "number" },
+        "macd_signal": { "type": "number" },
+        "sma_20": { "type": "number" },
+        "sma_50": { "type": "number" },
+        "bollinger_upper": { "type": "number" },
+        "bollinger_lower": { "type": "number" }
+      }
+    },
+    "ProjectionPoint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["timestamp", "price", "lower_bound", "upper_bound"],
+      "properties": {
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "price": { "type": "number" },
+        "lower_bound": { "type": "number" },
+        "upper_bound": { "type": "number" }
+      }
+    },
+    "ProjectionScenario": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "direction", "confidence", "points"],
+      "properties": {
+        "name": { "type": "string" },
+        "direction": { "$ref": "#/$defs/TrendDirection" },
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "points": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/ProjectionPoint" }
+        }
+      }
+    },
+    "SourceMeta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source", "provider", "fetched_at"],
+      "properties": {
+        "source": { "$ref": "#/$defs/DataSource" },
+        "provider": { "type": "string" },
+        "fetched_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "latency_ms": {
+          "type": ["number", "null"]
+        }
+      }
+    }
+  }
+}

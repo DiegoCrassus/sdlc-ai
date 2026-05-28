@@ -53,25 +53,15 @@ export interface PriceHistory {
   points: PricePoint[];
 }
 
-export interface ProjectionPoint {
-  timestamp: string;
-  price: number;
-  lower_bound: number;
-  upper_bound: number;
-}
-
-export interface AssetProjection {
-  asset_id: string;
-  horizon_days: number;
-  current_price: number;
-  scenarios: Array<{
-    name: string;
-    direction: string;
-    confidence: number;
-    points: ProjectionPoint[];
-  }>;
-  disclaimer: string;
-}
+export type {
+  AssetProjection,
+  DataSource,
+  ProjectionPoint,
+  ProjectionScenario,
+  SourceMeta,
+  TechnicalIndicators,
+  TrendDirection,
+} from "@shared/types/forecast";
 
 export interface WatchlistItem {
   symbol: string;
