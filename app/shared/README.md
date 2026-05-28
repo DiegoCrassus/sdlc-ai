@@ -6,7 +6,18 @@ Shared utilities, types, and constants used by both frontend and backend.
 
 ## Status
 
-**Not yet implemented.** This boundary is reserved for cross-cutting concerns.
+**Implemented (INVES-35):** Forecast projection JSON Schema + TypeScript types for `GET /api/v1/projections/{symbol}`.
+
+## Structure
+
+```
+app/shared/
+├── contracts/
+│   └── forecast.schema.json   ← Canonical AssetProjection JSON Schema (ADR-009)
+├── types/
+│   └── forecast.ts            ← TypeScript mirror for frontend (@shared alias)
+└── README.md
+```
 
 ## What Belongs Here
 
@@ -32,16 +43,6 @@ Add code to `app/shared/` only when:
 
 Do not add code "just in case" it might be shared later.
 
-## Expected Future Structure
+## Frontend import
 
-```
-app/shared/
-├── types/              ← Shared type definitions
-├── constants/          ← Shared constants and enumerations
-├── utils/              ← Shared pure utility functions
-└── README.md           ← (this file, extended)
-```
-
-## Setup (When Implemented)
-
-TBD. If Python-only, this will be a package installed as a dependency by backend (and potentially compiled/bundled for frontend use).
+Vite alias `@shared` → `app/shared` (see `app/frontend/vite.config.ts`). Re-export from `app/frontend/src/types/market.ts` for backward-compatible imports.
