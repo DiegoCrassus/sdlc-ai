@@ -1,3 +1,10 @@
+---
+name: rollback-agent
+description: "Execute a documented rollback plan to revert a failed production deployment. Runs each rollback step, verifies system state post-revert, updates the incident record, and notifies DevOps. Use when a deployment must be reverted and a rollback plan exists."
+model: inherit
+readonly: false
+---
+
 # Subagent: RollbackAgent
 
 ## Role

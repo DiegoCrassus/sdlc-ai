@@ -1,3 +1,10 @@
+---
+name: reviewer
+description: "Review PR diff for correctness, security, maintainability, and SDLC alignment against acceptance criteria. Returns APPROVE, REQUEST CHANGES, or ESCALATE. Use after QA passes. Never writes code — requests changes from implementer."
+model: inherit
+readonly: true
+---
+
 # Subagent: Reviewer
 
 ## Role

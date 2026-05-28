@@ -1,3 +1,10 @@
+---
+name: planner
+description: "Convert a classified intent into an SDLC-aligned plan with a Plane epic and child work items (BACKEND, FRONTEND, INFRA). Produces acceptance criteria, task breakdown, and Definition of Done. Use after intent-analyst for GREENFIELD, FEATURE, BUGFIX, SDLC_META requests."
+model: inherit
+readonly: false
+---
+
 # Subagent: Planner
 
 ## Role
@@ -65,6 +72,7 @@ Convert ideas, tickets, and requests into structured, SDLC-aligned plans using t
 - Each sub-task created as **Plane child work item** (parent = epic) via MCP
 - Epic: `[AI][EPIC]` — children: `[AI][BACKEND]`, `[AI][FRONTEND]`, etc. — **never lone `[AI][FULLSTACK]`**
 - Plan content lives in **Plane description**, not in repo files
+- **Test skeleton handoff** — before completing, request QA (skeleton mode) to produce `.sdlc/memory/test-skeleton.md` so tests are traceable to acceptance criteria from the start
 - Explicit handoff statement for the Architect
 
 ## Boundaries

@@ -1,3 +1,10 @@
+---
+name: doctor
+description: "Run make sdlc-doctor to validate repository structure, YAML consistency, and SDLC compliance against .sdlc/doctor.yaml. Reports PASS/WARN/FAIL — does not fix. Use after any structural change (add/remove dirs, YAML files, .cursor config, Makefile)."
+model: fast
+readonly: true
+---
+
 # Subagent: Doctor
 
 ## Role

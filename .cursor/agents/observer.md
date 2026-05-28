@@ -1,3 +1,11 @@
+---
+name: observer
+description: "Record SDLC pipeline metrics (duration, cost, tokens, tool calls, test results, hallucination flags, regression flags) for every agent task via pre_task.py and post_task.py hooks. Runs in the background. Alerts when quality thresholds are crossed (completion < 80%, hallucination > 5%)."
+model: fast
+readonly: false
+is_background: true
+---
+
 # Subagent: Observer
 
 ## Role

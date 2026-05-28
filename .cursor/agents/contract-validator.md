@@ -1,3 +1,10 @@
+---
+name: contract-validator
+description: "Validate OpenAPI spec against TypeScript type definitions to ensure backend/frontend API contracts are consistent. Run after API interface changes or before PR merge when both sides must stay in sync. Reports drift — does not fix."
+model: fast
+readonly: true
+---
+
 # Subagent: ContractValidator
 
 ## Role

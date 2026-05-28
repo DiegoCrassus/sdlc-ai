@@ -1,4 +1,4 @@
-.PHONY: sdlc-doctor sdlc-validate sdlc-stages docs-check obs-init obs-server obs-seed sdlc-audit plane-in-progress auto-merge-pr issue-triage plane-reformat plane-evidence workflow-status workflow-start workflow-discover help
+.PHONY: sdlc-doctor sdlc-validate sdlc-stages docs-check obs-init obs-server obs-seed sdlc-audit plane-in-progress auto-merge-pr issue-triage plane-reformat plane-evidence workflow-status workflow-start workflow-discover sdlc-compact-memory sdlc-session-status sdlc-meta-start sdlc-meta-commit sdlc-meta-qa help
 
 help:
 	@echo "SDLC AI — Available targets:"
@@ -21,6 +21,13 @@ help:
 	@echo "  workflow-status  Show SDLC session gate + handoff"
 	@echo "  workflow-start   Open gate (CARD=INVES-N SLUG=... STAGE=sdlc_meta|implementation)"
 	@echo "  workflow-discover  Refresh discovery context from repo + Plane"
+	@echo ""
+	@echo "  sdlc-compact-memory  Compact operational-context.md (rolling summary)"
+	@echo "  sdlc-session-status  Show session gate status with last_agent + last_commit"
+	@echo ""
+	@echo "  sdlc-meta-start   Meta-tool: validate + gate + branch (CARD=INVES-N SLUG=...)"
+	@echo "  sdlc-meta-commit  Meta-tool: lint + commit + push (CARD=INVES-N MSG='...')"
+	@echo "  sdlc-meta-qa      Meta-tool: tests + doctor + QA evidence (CARD=INVES-N)"
 	@echo ""
 	@echo "Workflow: docs/sdlc/change-lifecycle.md"
 
@@ -97,6 +104,25 @@ workflow-start:
 
 workflow-discover:
 	@$(PYTHON) .sdlc/dsl/cli.py workflow discover
+
+sdlc-compact-memory:
+	@echo "Compacting SDLC memory context..."
+	@$(PYTHON) .sdlc/scripts/compact_memory.py
+
+sdlc-session-status:
+	@$(PYTHON) .sdlc/dsl/cli.py workflow status
+
+sdlc-meta-start:
+	@test -n "$(CARD)" || (echo "Usage: make sdlc-meta-start CARD=INVES-N SLUG=my-feature [STAGE=implementation]" && exit 1)
+	@bash .sdlc/scripts/meta-tools/validate-and-start.sh --card $(CARD) --slug $(or $(SLUG),work) --stage $(or $(STAGE),implementation)
+
+sdlc-meta-commit:
+	@test -n "$(CARD)" || (echo "Usage: make sdlc-meta-commit CARD=INVES-N MSG='Short summary' [PATHS='.']" && exit 1)
+	@bash .sdlc/scripts/meta-tools/commit-and-push.sh --card $(CARD) --msg "$(MSG)" $(if $(PATHS),--paths "$(PATHS)",)
+
+sdlc-meta-qa:
+	@test -n "$(CARD)" || (echo "Usage: make sdlc-meta-qa CARD=INVES-N [TEST_CMD=pytest]" && exit 1)
+	@bash .sdlc/scripts/meta-tools/qa-to-review.sh --card $(CARD) $(if $(TEST_CMD),--test-cmd "$(TEST_CMD)",)
 
 export-pdf:
 	@echo "Generating simulation PDF..."

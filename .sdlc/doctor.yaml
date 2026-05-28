@@ -1,4 +1,4 @@
-version: "1.0"
+version: "2.0"
 description: Doctor validation rules for the SDLC repository.
 
 checks:
@@ -9,7 +9,7 @@ checks:
       - .cursor/rules
       - .cursor/commands
       - .cursor/skills
-      - .cursor/subagents
+      - .cursor/agents
       - .cursor/hooks
       - .sdlc
       - .sdlc/dsl
@@ -31,15 +31,13 @@ checks:
     severity: required
     items:
       - AGENTS.md
-      - .sdlc/HANDBOOK.md
+      - .sdlc/manifest.yaml
       - .sdlc/sdlc.yaml
-      - .sdlc/lifecycle.yaml
       - .sdlc/stages.yaml
+      - .sdlc/pipeline.yaml
       - .sdlc/workflows.yaml
       - .sdlc/gate-paths.yaml
       - .sdlc/plane-granularity.yaml
-      - .sdlc/agents.yaml
-      - .sdlc/skills.yaml
       - .sdlc/rules.yaml
       - .sdlc/integrations.yaml
       - .sdlc/doctor.yaml
@@ -82,15 +80,15 @@ checks:
       - .cursor/skills/start-change/SKILL.md
       - .cursor/skills/finish-change/SKILL.md
       - .cursor/skills/plane-sdlc/SKILL.md
-    subagents:
-      - .cursor/subagents/planner.md
-      - .cursor/subagents/architect.md
-      - .cursor/subagents/implementer.md
-      - .cursor/subagents/reviewer.md
-      - .cursor/subagents/qa.md
-      - .cursor/subagents/devops.md
-      - .cursor/subagents/doctor.md
-      - .cursor/subagents/intent-analyst.md
+    agents:
+      - .cursor/agents/planner.md
+      - .cursor/agents/architect.md
+      - .cursor/agents/implementer.md
+      - .cursor/agents/reviewer.md
+      - .cursor/agents/qa.md
+      - .cursor/agents/devops.md
+      - .cursor/agents/doctor.md
+      - .cursor/agents/intent-analyst.md
     hooks:
       - .cursor/hooks/pre-task.md
       - .cursor/hooks/post-task.md
@@ -124,16 +122,39 @@ checks:
     severity: required
     files:
       - .sdlc/sdlc.yaml
-      - .sdlc/lifecycle.yaml
+      - .sdlc/manifest.yaml
       - .sdlc/stages.yaml
+      - .sdlc/pipeline.yaml
       - .sdlc/workflows.yaml
-      - .sdlc/agents.yaml
-      - .sdlc/skills.yaml
       - .sdlc/rules.yaml
       - .sdlc/integrations.yaml
       - .sdlc/doctor.yaml
       - .sdlc/gate-paths.yaml
       - .sdlc/plane-granularity.yaml
+
+  # Non-empty checks for P0/P1 workflow enforcement files
+  workflow_files:
+    severity: required
+    items:
+      - AGENTS.md
+      - .sdlc/manifest.yaml
+      - docs/sdlc/master-workflow.md
+      - .sdlc/gate-paths.yaml
+      - .sdlc/plane-granularity.yaml
+      - .sdlc/scripts/sdlc_gate.py
+      - .sdlc/scripts/discovery_hook.py
+      - .sdlc/dsl/gate.py
+      - .sdlc/dsl/workflow.py
+      - .sdlc/dsl/plane_granularity.py
+      - .cursor/hooks/sdlc_gate_hook.py
+      - .cursor/rules/001-sdlc-anti-bypass.mdc
+      - .cursor/rules/002-sdlc-orchestrator-principal.mdc
+      - .cursor/rules/003-orchestrator-delegation-only.mdc
+      - .cursor/agents/intent-analyst.md
+      - .cursor/skills/intent-classification/SKILL.md
+      - .cursor/skills/plane-task-creation/SKILL.md
+      - .cursor/skills/subagent-delegation/SKILL.md
+      - .cursor/skills/qa-minimum-checklist/SKILL.md
 
   integrations:
     severity: warning

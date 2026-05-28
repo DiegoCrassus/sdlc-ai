@@ -1,3 +1,10 @@
+---
+name: migration-runner
+description: "Create and apply Alembic database migrations after schema changes during implementation. Generates migration scripts, validates them, verifies database state, and rolls back if the migration fails. Use when implementer modifies SQLAlchemy data models."
+model: inherit
+readonly: false
+---
+
 # Subagent: MigrationRunner
 
 ## Role
