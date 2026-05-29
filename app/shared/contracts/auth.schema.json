@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sdlc-ai.local/schemas/auth/contract.json",
+  "title": "AuthIdentityContract",
+  "description": "Canonical JSON Schema for auth endpoints POST /auth/identify, GET /auth/me, and session errors (ADR-010). Session cookie mp_session is HttpOnly — set by backend only.",
+  "$defs": {
+    "User": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "email"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Stable user identifier (UUID v4)."
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "Normalized email (lower(trim)) as stored server-side."
+        }
+      }
+    },
+    "AuthErrorCode": {
+      "type": "string",
+      "enum": ["UNAUTHORIZED", "VALIDATION_ERROR"],
+      "description": "UNAUTHORIZED: missing/invalid session (401). VALIDATION_ERROR: invalid identify body e.g. email format (422)."
+    },
+    "ApiErrorBody": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "message"],
+      "properties": {
+        "code": { "$ref": "#/$defs/AuthErrorCode" },
+        "message": { "type": "string", "minLength": 1 },
+        "details": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    },
+    "IdentifyRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["email"],
+      "properties": {
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "Email-only identity; no password."
+        }
+      }
+    },
+    "IdentifyResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["user"],
+      "properties": {
+        "user": { "$ref": "#/$defs/User" }
+      },
+      "description": "POST /api/v1/auth/identify success (200). Set-Cookie mp_session is not in JSON body."
+    },
+    "AuthMeResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["user"],
+      "properties": {
+        "user": { "$ref": "#/$defs/User" }
+      },
+      "description": "GET /api/v1/auth/me success (200)."
+    },
+    "SessionError": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["error"],
+      "properties": {
+        "error": { "$ref": "#/$defs/ApiErrorBody" }
+      },
+      "description": "Error envelope for auth failures (401/422). Aligns with ADR-008 error shape."
+    }
+  }
+}
