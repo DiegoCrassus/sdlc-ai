@@ -6,7 +6,32 @@ Shared utilities, types, and constants used by both frontend and backend.
 
 ## Status
 
-**Not yet implemented.** This boundary is reserved for cross-cutting concerns.
+**Implemented (INVES-37):** Auth identity JSON Schema + TypeScript types for email-only session API (ADR-010).
+
+**Planned:** Forecast projection contract (INVES-35) may land on another branch; import via `@shared` when present.
+
+## Structure
+
+```
+app/shared/
+├── contracts/
+│   └── auth.schema.json   ← User, Identify*, AuthMeResponse, SessionError (ADR-010)
+├── types/
+│   └── auth.ts            ← TypeScript mirror + session cookie constants
+└── README.md
+```
+
+## Auth contract (INVES-37)
+
+| Type | Use |
+|------|-----|
+| `User` | `{ id, email }` in success bodies |
+| `IdentifyRequest` | POST `/api/v1/auth/identify` body |
+| `IdentifyResponse` | Identify success JSON (cookie `mp_session` via Set-Cookie) |
+| `AuthMeResponse` | GET `/api/v1/auth/me` success JSON |
+| `SessionError` | 401 / 422 error envelope |
+
+Session: **HttpOnly cookie** `mp_session` — not Bearer. Frontend uses `credentials: "include"`.
 
 ## What Belongs Here
 
@@ -32,16 +57,10 @@ Add code to `app/shared/` only when:
 
 Do not add code "just in case" it might be shared later.
 
-## Expected Future Structure
+## Frontend import
 
+When `app/frontend` is present, configure Vite alias `@shared` → `app/shared` (see INVES-35 / ADR-009). Example:
+
+```ts
+import type { User, IdentifyRequest } from "@shared/types/auth";
 ```
-app/shared/
-├── types/              ← Shared type definitions
-├── constants/          ← Shared constants and enumerations
-├── utils/              ← Shared pure utility functions
-└── README.md           ← (this file, extended)
-```
-
-## Setup (When Implemented)
-
-TBD. If Python-only, this will be a package installed as a dependency by backend (and potentially compiled/bundled for frontend use).
