@@ -1,38 +1,31 @@
-version: "1.0"
-description: Stage-scoped write permissions for SDLC session gate.
-
-# Paths that require an open gate (any stage).
-protected_prefixes:
+gate_paths:
+  protected_prefixes:
   - app/backend/
   - app/frontend/
   - app/shared/
   - pyproject.toml
-
-stages:
-  planning:
-    allowed_prefixes:
+  stages:
+    planning:
+      allowed_prefixes:
       - .sdlc/
       - .cursor/
       - docs/sdlc/
       - docs/sdlc
-
-  architecture:
-    allowed_prefixes:
+    architecture:
+      allowed_prefixes:
       - .sdlc/
       - .cursor/
       - docs/sdlc/
       - docs/sdlc
-
-  implementation:
-    allowed_prefixes:
+    implementation:
+      allowed_prefixes:
       - app/backend/
       - app/frontend/
       - app/shared/
       - pyproject.toml
       - data/
-
-  sdlc_meta:
-    allowed_prefixes:
+    sdlc_meta:
+      allowed_prefixes:
       - .sdlc/
       - .cursor/
       - docs/sdlc/
@@ -40,14 +33,12 @@ stages:
       - .github/
       - Makefile
       - AGENTS.md
-
-  validation:
-    allowed_prefixes:
+    validation:
+      allowed_prefixes:
       - app/
       - pyproject.toml
       - .sdlc/templates/
-
-  review:
-    allowed_prefixes:
+    review:
+      allowed_prefixes:
       - .sdlc/templates/
       - docs/

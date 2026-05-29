@@ -15,7 +15,7 @@ Plane: workspace `investments-sdlc`, project `investiments`, cards `INVES-N`.
 
 ## Work order
 
-1. **`AGENTS.md` (root)** + `.sdlc/manifest.yaml` + `docs/sdlc/change-lifecycle.md`
+1. **`AGENTS.md` (root)** + `.sdlc/sdlc.yaml` + `docs/sdlc/change-lifecycle.md`
 2. **Plane MCP** — create/update work item (project `investiments`) — skill **plane-sdlc**
 3. Branch `feature/INVES-N-<slug>` via **start-change** / `workflow start`
 4. Implement → commits on feature branch only

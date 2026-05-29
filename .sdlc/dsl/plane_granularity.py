@@ -16,11 +16,14 @@ INVES_RE = re.compile(r"INVES-(\d+)", re.IGNORECASE)
 
 
 def load_granularity_config(root: Path) -> dict[str, Any]:
-    path = root / ".sdlc" / "plane-granularity.yaml"
+    modular = root / ".sdlc" / "workboard" / "granularity.yaml"
+    legacy = root / ".sdlc" / "plane-granularity.yaml"
+    path = modular if modular.is_file() else legacy
     if yaml is None or not path.is_file():
         return {}
     with path.open(encoding="utf-8") as f:
-        return yaml.safe_load(f) or {}
+        data = yaml.safe_load(f) or {}
+    return data.get("workboard_granularity") or data.get("plane_granularity") or data
 
 
 def strip_html(html: str) -> str:

@@ -1,0 +1,10 @@
+rules_index:
+- .cursor/rules/000-project-governance.mdc
+- .cursor/rules/001-sdlc-anti-bypass.mdc
+- .cursor/rules/002-sdlc-orchestrator-principal.mdc
+- .cursor/rules/003-orchestrator-delegation-only.mdc
+- .cursor/rules/010-ai-native-sdlc.mdc
+- .cursor/rules/030-docs-and-handoff.mdc
+- .cursor/rules/040-doctor-gates.mdc
+- .cursor/rules/050-sdlc-stage-governance.mdc
+- .cursor/rules/sdlc-core.mdc

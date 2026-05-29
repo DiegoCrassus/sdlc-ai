@@ -16,7 +16,7 @@ def cmd_doctor() -> int:
     from _sdlc_dsl.doctor import print_report, run_doctor  # type: ignore[import]
 
     findings = run_doctor(_ROOT)
-    return print_report(findings)
+    return print_report(findings, _ROOT)
 
 
 def cmd_validate() -> int:

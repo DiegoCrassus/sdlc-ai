@@ -1,42 +1,40 @@
-# .sdlc — SDLC Operating System
+# .sdlc — SDLC Operating System (v5.2)
 
-This directory contains the machine-readable SDLC configuration for the `sdlc-ai` project.
+> **Single entry:** [`sdlc.yaml`](sdlc.yaml) — read **`core`** first (vendors, env, paths).  
+> **Module map:** `contract.modules` → each folder README.
 
-## Files
+## Loading order
 
-| File                | Purpose                                              |
-|---------------------|------------------------------------------------------|
-| `sdlc.yaml`         | Main entrypoint — references all other files         |
-| `lifecycle.yaml`    | 10-stage lifecycle definition                        |
-| `stages.yaml`       | Stage inputs, outputs, evidence, and gates           |
-| `workflows.yaml`    | Stage transition workflows                           |
-| `agents.yaml`       | Agent-to-stage mapping                               |
-| `skills.yaml`       | Skill-to-stage mapping                               |
-| `rules.yaml`        | Governance rules                                     |
-| `integrations.yaml` | External service placeholders                        |
-| `doctor.yaml`       | Doctor validation rules                              |
+1. [`AGENTS.md`](../AGENTS.md)
+2. [`docs/sdlc/master-workflow.md`](../docs/sdlc/master-workflow.md) + [`change-lifecycle.md`](../docs/sdlc/change-lifecycle.md)
+3. **[`sdlc.yaml`](sdlc.yaml)** — `core` + `contract.modules`
+4. Module README for your task
 
-## Directories
+## Modules
 
-| Directory  | Purpose                                              |
-|------------|------------------------------------------------------|
-| `memory/`  | Persistent context for agents (architecture, rules, ops, incidents) |
-| `dsl/`     | Python DSL for loading, validating, and running the Doctor |
+| Module | README | Data |
+|--------|--------|------|
+| [Manifest](manifest/README.md) | Agent/skill catalog | `manifest/catalog.yaml` |
+| [Stages](stages/README.md) | Lifecycle + definitions | `stages/lifecycle.yaml`, `stages/definitions.yaml` |
+| [Gates](gates/README.md) | Write gate | `gates/paths.yaml` |
+| [Workboard](workboard/README.md) | Card rules | `workboard/granularity.yaml` |
+| [Pipeline](pipeline/README.md) | Agents ↔ stages | `pipeline/agents.yaml` |
+| [Workflows](workflows/README.md) | Transitions | `workflows/transitions.yaml` |
+| [Rules](rules/README.md) | Governance | `rules/governance.yaml` |
+| [Integrations](integrations/README.md) | Service roles | `integrations/services.yaml` |
+| [Doctor](doctor/README.md) | Structure checks | `doctor/checks.yaml` |
+| [Meta](meta/README.md) | Meta-tools | `meta/tools.yaml` |
+| [Settings](settings/README.md) | Flags & memory | `settings/config.yaml` |
 
-## Usage
+## Commands
 
 ```bash
-# Run the Doctor
-make sdlc-doctor
-
-# Validate YAML consistency
+make sdlc-doctor      # always writes health Canvas + doctor-health.json
 make sdlc-validate
-
-# List lifecycle stages
 make sdlc-stages
 ```
 
-## Rules
+## Canvases (IDE)
 
-Never edit YAML files to make the Doctor pass artificially.
-All changes must reflect the actual repository state.
+- **Doctor health:** `sdlc-doctor-health.canvas.tsx` (generated each doctor run)
+- **FEATURE flow:** `sdlc-feature-flow-simulation.canvas.tsx` (reference simulation)

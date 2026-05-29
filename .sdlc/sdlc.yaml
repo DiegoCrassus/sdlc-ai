@@ -1,59 +1,130 @@
-version: "2.0"
+# SDLC index (v5.2) — vendor-free
+# 1. Read `core` below (IDE, VCS, workboard, env, paths)
+# 2. Open module README: .sdlc/README.md → contract.modules.<name>.readme
+# 3. Module data YAML paths in contract.modules.<name>.data
+
+version: '5.2'
 name: sdlc-ai
-description: AI-Native SDLC operating system for the sdlc-ai project.
+description: AI-Native SDLC operating system — modular index.
 
-# ─────────────────────────────────────────────
-# YAML catalog references
-# ─────────────────────────────────────────────
-manifest: manifest.yaml       # agent/skill catalog (replaces HANDBOOK.md)
-stages: stages.yaml           # 10 stages with mode, gates, evidence
-pipeline: pipeline.yaml       # agents + skills (merged from agents.yaml + skills.yaml)
-workflows: workflows.yaml     # stage transition preconditions
-rules: rules.yaml             # governance rules enforced at each stage
-integrations: integrations.yaml
-doctor: doctor.yaml
-gate_paths: gate-paths.yaml
-plane_granularity: plane-granularity.yaml
+contract:
+  version: '5.2'
+  schema: sdlc-manifest/v2-modular
+  vendor_free: true
+  layers:
+    L0:
+      path: AGENTS.md
+      role: decision-tree
+    L1:
+      paths:
+        - docs/sdlc/master-workflow.md
+        - docs/sdlc/change-lifecycle.md
+      role: process-authority
+    L2:
+      path: .sdlc/sdlc.yaml
+      sections:
+        - core
+        - contract.modules
+      role: machine-index
+    governance:
+      path: core.paths.rules
+      role: prose-rules
+  toolchain:
+    loader: .sdlc/dsl/loader.py
+    gate: .sdlc/dsl/gate.py
+    workboard: .sdlc/dsl/plane_granularity.py
+    doctor: .sdlc/dsl/doctor.py
+  rules_ref:
+    - .cursor/rules/000-project-governance.mdc
+    - .cursor/rules/001-sdlc-anti-bypass.mdc
+    - .cursor/rules/002-sdlc-orchestrator-principal.mdc
+    - .cursor/rules/003-orchestrator-delegation-only.mdc
+    - .cursor/rules/010-ai-native-sdlc.mdc
+    - .cursor/rules/040-doctor-gates.mdc
+    - .cursor/rules/sdlc-core.mdc
+  index: .sdlc/README.md
+  modules:
+    manifest:
+      readme: manifest/README.md
+      data: manifest/catalog.yaml
+    stages:
+      readme: stages/README.md
+      data: stages/lifecycle.yaml
+    gates:
+      readme: gates/README.md
+      data: gates/paths.yaml
+    workboard:
+      readme: workboard/README.md
+      data: workboard/granularity.yaml
+    pipeline:
+      readme: pipeline/README.md
+      data: pipeline/agents.yaml
+    workflows:
+      readme: workflows/README.md
+      data: workflows/transitions.yaml
+    rules:
+      readme: rules/README.md
+      data: rules/governance.yaml
+    integrations:
+      readme: integrations/README.md
+      data: integrations/services.yaml
+    doctor:
+      readme: doctor/README.md
+      data: doctor/checks.yaml
+    meta:
+      readme: meta/README.md
+      data: meta/tools.yaml
+    settings:
+      readme: settings/README.md
+      data: settings/config.yaml
 
-# ─────────────────────────────────────────────
-# META-TOOLS (deterministic stage scripts)
-# Source: AWO / Meta-tools (arXiv 2601.22037)
-# ─────────────────────────────────────────────
-meta_tools:
-  - id: validate-and-start
-    script: .sdlc/scripts/meta-tools/validate-and-start.sh
-    usage: "Before implementation — validates Plane card, runs discovery, opens gate, checks branch"
-    replaces: [plane-validate-all, workflow-start, git-branch-check]
-  - id: commit-and-push
-    script: .sdlc/scripts/meta-tools/commit-and-push.sh
-    usage: "After implementation — lint, stage files, commit with SDLC message, push"
-    replaces: [ruff-check, git-add, git-commit, git-push]
-  - id: qa-to-review
-    script: .sdlc/scripts/meta-tools/qa-to-review.sh
-    usage: "After implementation — run tests, run doctor, write QA evidence JSON"
-    replaces: [pytest, make-sdlc-doctor, write-qa-evidence]
-
-# ─────────────────────────────────────────────
-# MEMORY files
-# ─────────────────────────────────────────────
-memory:
-  architecture: memory/architecture.md
-  business_rules: memory/business-rules.md
-  operational_context: memory/operational-context.md
-  incidents: memory/incidents.md
-  session_gate: memory/session-gate.json
-  test_skeleton: memory/test-skeleton.md
-  discovery_context: memory/discovery-context.json
-  session_gate_schema: session-gate.schema.json
-
-# ─────────────────────────────────────────────
-# SETTINGS
-# ─────────────────────────────────────────────
-settings:
-  default_language: python
-  docs_root: docs
-  app_root: app
-  cursor_root: .cursor
-  doctor_exit_on_fail: true
-  require_handoff_on_major_transition: true
-  require_doctor_after_structural_change: true
+core:
+  schema: sdlc-core/v1
+  vendor_free: true
+  project:
+    name: sdlc-ai
+    repository_slug: sdlc-ai
+    default_branch: develop
+    sdlc_version: '5.2'
+  vendors:
+    ide:
+      provider: cursor
+      root: .cursor
+      agents: agents
+      skills: skills
+      rules: rules
+      commands: commands
+      hooks: hooks
+      mcp_config: .cursor/mcp.json
+    vcs:
+      provider: github
+      host: github.com
+      owner: DiegoCrassus
+      repository: sdlc-ai
+      default_branch: develop
+    workboard:
+      provider: plane
+      card_prefix: INVES
+      workspace: investments-sdlc
+      project_slug: investiments
+      project_id: 04ac3a5d-7457-40f3-b94f-fccd4c29a589
+    llm:
+      provider: openai
+  env:
+    vcs_token: GITHUB_PERSONAL_ACCESS_TOKEN_CLASSIC
+    workboard_api_key: PLANE_API_KEY
+    llm_api_key: OPENAI_API_KEY
+  paths:
+    agents_entry: AGENTS.md
+    sdlc_index: .sdlc/sdlc.yaml
+    sdlc_readme: .sdlc/README.md
+    memory: .sdlc/memory
+    docs_sdlc: docs/sdlc
+    rules: .cursor/rules
+    app: app
+  conventions:
+    feature_branch: feature/{card}-{slug}
+    epic_tag: '[AI][EPIC]'
+  governance_refs:
+    - docs/sdlc/master-workflow.md
+    - docs/sdlc/change-lifecycle.md

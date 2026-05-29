@@ -43,7 +43,7 @@ alwaysApply: true
 
 Always load context in this order:
 1. **`AGENTS.md`** (repo root)              ← L0 manifest + decision tree
-2. `.sdlc/manifest.yaml`                    ← agent/skill catalog
+2. `.sdlc/sdlc.yaml` + `.sdlc/README.md`    ← SDLC index + modules
 3. `docs/sdlc/master-workflow.md`           ← approved process
 4. `docs/sdlc/change-lifecycle.md`          ← gitflow + Plane authority
 5. `.sdlc/sdlc.yaml`                        ← SDLC config index

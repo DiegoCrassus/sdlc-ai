@@ -2,7 +2,7 @@
 
 ## What Is the Doctor?
 
-The SDLC Doctor is a validation tool that checks the repository structure, YAML configuration, Cursor setup, documentation, and Makefile against the expected state defined in `.sdlc/doctor.yaml`.
+The SDLC Doctor is a validation tool that checks the repository structure, YAML configuration, Cursor setup, documentation, and Makefile against `.sdlc/doctor/checks.yaml`.
 
 The Doctor is the first line of defense against structural drift and configuration errors.
 
@@ -86,8 +86,9 @@ Run after:
 
 ## Doctor Configuration
 
-Doctor check rules are defined in `.sdlc/doctor.yaml`.
-The Python implementation is in `.sdlc/dsl/doctor.py`.
+Doctor check rules: `.sdlc/doctor/checks.yaml`. Implementation: `.sdlc/dsl/doctor.py` + `doctor_health_canvas.py`.
+
+Each run generates a health Canvas and `.sdlc/memory/doctor-health.json`.
 
 ## Important Rules
 

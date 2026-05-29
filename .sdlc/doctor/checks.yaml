@@ -1,0 +1,188 @@
+version: '2.0'
+description: Doctor validation rules for the SDLC repository.
+checks:
+  directories:
+    severity: required
+    items:
+    - .cursor
+    - .cursor/agents
+    - .cursor/commands
+    - .cursor/hooks
+    - .cursor/rules
+    - .cursor/skills
+    - .sdlc
+    - .sdlc/doctor
+    - .sdlc/dsl
+    - .sdlc/gates
+    - .sdlc/integrations
+    - .sdlc/manifest
+    - .sdlc/memory
+    - .sdlc/meta
+    - .sdlc/pipeline
+    - .sdlc/rules
+    - .sdlc/settings
+    - .sdlc/stages
+    - .sdlc/workboard
+    - .sdlc/workflows
+    - app
+    - app/backend
+    - app/frontend
+    - app/infra
+    - app/shared
+    - docs
+    - docs/architecture
+    - docs/handoff
+    - docs/infrastructure
+    - docs/operations
+    - docs/roadmap
+    - docs/sdlc
+  files:
+    severity: required
+    items:
+    - AGENTS.md
+    - .sdlc/sdlc.yaml
+    - .sdlc/README.md
+    - .sdlc/manifest/catalog.yaml
+    - .sdlc/stages/lifecycle.yaml
+    - .sdlc/stages/definitions.yaml
+    - .sdlc/gates/paths.yaml
+    - .sdlc/workboard/granularity.yaml
+    - .sdlc/pipeline/agents.yaml
+    - .sdlc/workflows/transitions.yaml
+    - .sdlc/rules/governance.yaml
+    - .sdlc/integrations/services.yaml
+    - .sdlc/doctor/checks.yaml
+    - .sdlc/dsl/cli.py
+    - .sdlc/dsl/doctor.py
+    - .sdlc/dsl/doctor_health_canvas.py
+    - .sdlc/dsl/gate.py
+    - .sdlc/dsl/loader.py
+    - .sdlc/dsl/core_config.py
+    - .sdlc/dsl/workflow.py
+    - .sdlc/scripts/sdlc_gate.py
+    - Makefile
+    - README.md
+  cursor:
+    severity: required
+    commands:
+    - .cursor/commands/sdlc-doctor.md
+    - .cursor/commands/sdlc-plan.md
+    - .cursor/commands/sdlc-implement.md
+    - .cursor/commands/sdlc-review.md
+    - .cursor/commands/sdlc-handoff.md
+    rules:
+    - .cursor/rules/000-project-governance.mdc
+    - .cursor/rules/001-sdlc-anti-bypass.mdc
+    - .cursor/rules/002-sdlc-orchestrator-principal.mdc
+    - .cursor/rules/010-ai-native-sdlc.mdc
+    - .cursor/rules/020-code-quality.mdc
+    - .cursor/rules/030-docs-and-handoff.mdc
+    - .cursor/rules/040-doctor-gates.mdc
+    - .cursor/rules/sdlc-core.mdc
+    skills:
+    - .cursor/skills/requirements-refinement.md
+    - .cursor/skills/architecture-analysis.md
+    - .cursor/skills/implementation.md
+    - .cursor/skills/qa-validation.md
+    - .cursor/skills/code-review.md
+    - .cursor/skills/observability.md
+    - .cursor/skills/documentation.md
+    - .cursor/skills/intent-classification/SKILL.md
+    - .cursor/skills/plane-task-creation/SKILL.md
+    - .cursor/skills/sdlc-orchestrator/SKILL.md
+    - .cursor/skills/start-change/SKILL.md
+    - .cursor/skills/finish-change/SKILL.md
+    - .cursor/skills/plane-sdlc/SKILL.md
+    - .cursor/skills/subagent-delegation/SKILL.md
+    - .cursor/skills/plane-formatting/SKILL.md
+    agents:
+    - .cursor/agents/planner.md
+    - .cursor/agents/architect.md
+    - .cursor/agents/implementer.md
+    - .cursor/agents/reviewer.md
+    - .cursor/agents/qa.md
+    - .cursor/agents/devops.md
+    - .cursor/agents/doctor.md
+    - .cursor/agents/intent-analyst.md
+    - .cursor/agents/auto-fixer.md
+    - .cursor/agents/contract-validator.md
+    hooks:
+    - .cursor/hooks/pre-task.md
+    - .cursor/hooks/post-task.md
+    - .cursor/hooks/pre-review.md
+    - .cursor/hooks/post-review.md
+    - .cursor/hooks/sdlc_gate_hook.py
+  docs:
+    severity: required
+    items:
+    - docs/architecture/overview.md
+    - docs/architecture/decisions.md
+    - docs/architecture/system-context.md
+    - docs/infrastructure/overview.md
+    - docs/infrastructure/local-development.md
+    - docs/infrastructure/deployment.md
+    - docs/handoff/template.md
+    - docs/handoff/current-state.md
+    - docs/roadmap/roadmap.md
+    - docs/operations/observability.md
+    - docs/operations/incident-response.md
+    - docs/operations/maintenance.md
+    - docs/sdlc/ai-native-sdlc.md
+    - docs/sdlc/workflows.md
+    - docs/sdlc/gates.md
+    - docs/sdlc/doctor.md
+    - docs/sdlc/master-workflow.md
+    - docs/sdlc/sdlc-workflow-gap-analysis.md
+  yaml_validity:
+    severity: required
+    files:
+    - .sdlc/sdlc.yaml
+    - .sdlc/manifest/catalog.yaml
+    - .sdlc/stages/lifecycle.yaml
+    - .sdlc/gates/paths.yaml
+    - .sdlc/doctor/checks.yaml
+  workflow_files:
+    severity: required
+    items:
+    - AGENTS.md
+    - .sdlc/sdlc.yaml
+    - .sdlc/README.md
+    - .sdlc/manifest/catalog.yaml
+    - docs/sdlc/master-workflow.md
+    - .sdlc/gates/paths.yaml
+    - .sdlc/workboard/granularity.yaml
+    - .sdlc/scripts/sdlc_gate.py
+    - .sdlc/scripts/discovery_hook.py
+    - .sdlc/dsl/gate.py
+    - .sdlc/dsl/workflow.py
+    - .sdlc/dsl/plane_granularity.py
+    - .cursor/hooks/sdlc_gate_hook.py
+    - .cursor/rules/001-sdlc-anti-bypass.mdc
+    - .cursor/rules/002-sdlc-orchestrator-principal.mdc
+    - .cursor/rules/003-orchestrator-delegation-only.mdc
+    - .cursor/agents/intent-analyst.md
+    - .cursor/skills/intent-classification/SKILL.md
+    - .cursor/skills/plane-task-creation/SKILL.md
+    - .cursor/skills/subagent-delegation/SKILL.md
+    - .cursor/skills/qa-minimum-checklist/SKILL.md
+  integrations:
+    severity: warning
+    items:
+    - role: vcs
+      env_logical: vcs_token
+    - role: workboard
+      env_logical: workboard_api_key
+    - role: llm
+      env_logical: llm_api_key
+  makefile:
+    severity: required
+    targets:
+    - sdlc-doctor
+    - sdlc-validate
+    - sdlc-stages
+    - docs-check
+    - workflow-status
+    - workflow-discover
+  python_dsl:
+    severity: required
+    importable: .sdlc/dsl/cli.py
