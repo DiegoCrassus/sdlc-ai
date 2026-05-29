@@ -306,6 +306,125 @@ When live history unavailable, backend may return fallback synthetic/static seri
 
 ---
 
+## Endpoints — Projections (MarketPulse / INVES-32)
+
+> **Canonical schema:** `app/shared/contracts/forecast.schema.json`  
+> **TypeScript mirror:** `app/shared/types/forecast.ts` (import via `@shared` in frontend)
+
+### `GET /api/v1/projections/{symbol}`
+
+Single-asset price projection with technical indicators and confidence bands.
+
+**Path**
+
+| Param    | Description                          |
+|----------|--------------------------------------|
+| `symbol` | Provider-native symbol (e.g. `BTC`, `AAPL`) |
+
+**Query**
+
+| Param          | Required | Description                    |
+|----------------|----------|--------------------------------|
+| `horizon_days` | no       | Default `7`; range `1`–`90`    |
+
+**Response 200 — `AssetProjection`**
+
+| Field           | Type                    | Required | Notes                                      |
+|-----------------|-------------------------|----------|--------------------------------------------|
+| `asset_id`      | string                  | yes      | Uppercase symbol used for the request      |
+| `horizon_days`  | integer                 | yes      | Projection horizon (matches query param)   |
+| `current_price` | number                  | yes      | Latest price at projection time            |
+| `indicators`    | `TechnicalIndicators`   | yes      | RSI, MACD, SMA, Bollinger from recent OHLCV |
+| `scenarios`     | `ProjectionScenario[]` | yes     | At least one scenario (MVP: `linear_trend`) |
+| `disclaimer`    | string                  | yes      | Non-advice disclaimer text                 |
+| `meta`          | `SourceMeta`            | yes      | Provider provenance                        |
+
+#### `TechnicalIndicators`
+
+| Field              | Type   | Required | Notes                    |
+|--------------------|--------|----------|--------------------------|
+| `rsi_14`           | number | yes      | 14-period RSI            |
+| `macd`             | number | yes      | MACD line                |
+| `macd_signal`      | number | yes      | MACD signal line         |
+| `sma_20`           | number | yes      | 20-period simple MA      |
+| `sma_50`           | number | yes      | 50-period simple MA      |
+| `bollinger_upper`  | number | yes      | Upper Bollinger band     |
+| `bollinger_lower`  | number | yes      | Lower Bollinger band     |
+
+#### `ProjectionScenario`
+
+| Field        | Type                 | Required | Notes                                      |
+|--------------|----------------------|----------|--------------------------------------------|
+| `name`       | string               | yes      | Scenario id (e.g. `linear_trend`)          |
+| `direction`  | string               | yes      | `bullish` \| `bearish` \| `neutral`       |
+| `confidence` | number               | yes      | `0`–`1` inclusive                          |
+| `points`     | `ProjectionPoint[]`  | yes      | One point per projected day                |
+
+#### `ProjectionPoint`
+
+| Field         | Type   | Required | Notes                          |
+|---------------|--------|----------|--------------------------------|
+| `timestamp`   | string | yes      | ISO 8601 UTC projected date    |
+| `price`       | number | yes      | Projected price                |
+| `lower_bound` | number | yes      | Lower confidence band          |
+| `upper_bound` | number | yes      | Upper confidence band          |
+
+#### `SourceMeta`
+
+| Field         | Type           | Required | Notes                              |
+|---------------|----------------|----------|------------------------------------|
+| `source`      | string         | yes      | `mock` \| `live` \| `fallback`     |
+| `provider`    | string         | yes      | Provider adapter name              |
+| `fetched_at`  | string         | yes      | ISO 8601 UTC fetch time            |
+| `latency_ms`  | number \| null | no       | Round-trip latency when available  |
+
+**Example 200**
+
+```json
+{
+  "asset_id": "BTC",
+  "horizon_days": 7,
+  "current_price": 65000.0,
+  "indicators": {
+    "rsi_14": 55.2,
+    "macd": 120.5,
+    "macd_signal": 108.45,
+    "sma_20": 64200.0,
+    "sma_50": 63100.0,
+    "bollinger_upper": 66300.0,
+    "bollinger_lower": 63700.0
+  },
+  "scenarios": [
+    {
+      "name": "linear_trend",
+      "direction": "bullish",
+      "confidence": 0.62,
+      "points": [
+        {
+          "timestamp": "2026-05-29T12:00:00Z",
+          "price": 65100.0,
+          "lower_bound": 64500.0,
+          "upper_bound": 65700.0
+        }
+      ]
+    }
+  ],
+  "disclaimer": "Projections are illustrative only and based on a simple linear trend from recent price history. Not financial advice.",
+  "meta": {
+    "source": "mock",
+    "provider": "mock",
+    "fetched_at": "2026-05-28T12:00:00Z",
+    "latency_ms": 1.0
+  }
+}
+```
+
+**Response 404:** unknown symbol.
+
+**Response 501:** projection provider not configured.
+
+---
+
 ## Endpoints — Watchlist (INVES-21)
 
 Single implicit watchlist per local instance (no user ID in paths).
@@ -483,6 +602,7 @@ Aggregated dashboard payload (convenience for frontend INVES-23).
 | INVES-22 | `/portfolio/*` |
 | INVES-23 | Consumes all; no new backend routes required for MVP |
 | INVES-24 | Documents base URL, env vars, `make`/uvicorn run |
+| INVES-35 | Shared forecast schema + TS types (`app/shared/contracts/forecast.schema.json`) |
 
 ## References
 
