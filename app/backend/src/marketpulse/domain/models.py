@@ -4,9 +4,14 @@ from __future__ import annotations
 
 from datetime import datetime
 
+from marketpulse.domain.enums import (
+    AlertDirection,
+    AssetClass,
+    DataSource,
+    Interval,
+    TrendDirection,
+)
 from pydantic import BaseModel, Field
-
-from marketpulse.domain.enums import AssetClass, DataSource, Interval, TrendDirection
 
 
 class SourceMeta(BaseModel):
@@ -144,3 +149,32 @@ class Watchlist(BaseModel):
 class HealthResponse(BaseModel):
     status: str
     provider: str
+
+
+class CreateAlertRequest(BaseModel):
+    symbol: str = Field(min_length=1)
+    direction: AlertDirection
+    target_price: float = Field(gt=0)
+
+
+class PriceAlert(BaseModel):
+    id: str
+    symbol: str
+    direction: AlertDirection
+    target_price: float = Field(gt=0)
+    triggered_at: datetime | None
+    created_at: datetime
+
+
+class AlertListResponse(BaseModel):
+    items: list[PriceAlert]
+
+
+class ApiErrorBody(BaseModel):
+    code: str
+    message: str
+    details: dict[str, object] | None = None
+
+
+class AlertErrorResponse(BaseModel):
+    error: ApiErrorBody
