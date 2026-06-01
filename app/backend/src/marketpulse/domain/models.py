@@ -13,7 +13,7 @@ from marketpulse.domain.enums import (
     Interval,
     TrendDirection,
 )
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class SourceMeta(BaseModel):
@@ -156,6 +156,8 @@ class Watchlist(BaseModel):
 
 
 class UpdateWatchlistAllocationRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     target_percent: Decimal | None
 
     @field_validator("target_percent", mode="before")
@@ -163,7 +165,7 @@ class UpdateWatchlistAllocationRequest(BaseModel):
     def validate_target_percent(cls, value: object) -> Decimal | None:
         if value is None:
             return None
-        if isinstance(value, bool):
+        if isinstance(value, bool) or not isinstance(value, int | float | Decimal):
             raise ValueError("target_percent must be a decimal percent")
         try:
             decimal_value = Decimal(str(value))

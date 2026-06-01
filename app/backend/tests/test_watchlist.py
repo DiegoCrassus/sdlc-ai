@@ -127,6 +127,28 @@ async def test_update_allocation_rejects_invalid_target_percent(client: AsyncCli
         assert response.status_code == 422
 
 
+async def test_update_allocation_rejects_numeric_string_target_percent(
+    client: AsyncClient,
+) -> None:
+    response = await client.patch(
+        "/api/v1/watchlist/items/AAPL/allocation",
+        json={"target_percent": "10"},
+    )
+
+    assert response.status_code == 422
+
+
+async def test_update_allocation_rejects_extra_body_properties(
+    client: AsyncClient,
+) -> None:
+    response = await client.patch(
+        "/api/v1/watchlist/items/AAPL/allocation",
+        json={"target_percent": 10, "unexpected": "value"},
+    )
+
+    assert response.status_code == 422
+
+
 async def test_update_allocation_accepts_encoded_symbol(client: AsyncClient) -> None:
     response = await client.patch(
         "/api/v1/watchlist/items/EUR%2FUSD/allocation",
