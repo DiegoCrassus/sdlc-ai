@@ -1,10 +1,11 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import type { AssetProjection } from "@shared/types/forecast";
 
 import { api } from "../api/client";
 
 const REFETCH_MS = 30_000;
+const WATCHLIST_QUERY_KEY = ["watchlist"] as const;
 
 export function useMarketOverview() {
   return useQuery({
@@ -40,9 +41,26 @@ export function useProjection(symbol: string, horizonDays = 7) {
 
 export function useWatchlist() {
   return useQuery({
-    queryKey: ["watchlist"],
+    queryKey: WATCHLIST_QUERY_KEY,
     queryFn: api.watchlist,
     refetchInterval: REFETCH_MS,
+  });
+}
+
+export function useUpdateWatchlistAllocation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      symbol,
+      target_percent,
+    }: {
+      symbol: string;
+      target_percent: number | null;
+    }) => api.updateWatchlistAllocation(symbol, { target_percent }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: WATCHLIST_QUERY_KEY });
+    },
   });
 }
 

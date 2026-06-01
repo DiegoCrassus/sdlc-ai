@@ -13,6 +13,7 @@ import {
   useOhlcv,
   useProjection,
   useTickerQuotes,
+  useUpdateWatchlistAllocation,
   useWatchlist,
 } from "../hooks/useMarketData";
 
@@ -23,6 +24,7 @@ export function DashboardPage() {
   const overviewQuery = useMarketOverview();
   const tickerQuery = useTickerQuotes(TICKER_SYMBOLS);
   const watchlistQuery = useWatchlist();
+  const updateAllocationMutation = useUpdateWatchlistAllocation();
   const alertsQuery = useAlerts();
   const ohlcvQuery = useOhlcv(selectedSymbol);
   const projectionQuery = useProjection(selectedSymbol, 7);
@@ -67,9 +69,13 @@ export function DashboardPage() {
 
         <WatchlistTable
           items={watchlistQuery.data?.items ?? []}
+          allocationSummary={watchlistQuery.data?.allocation_summary}
           selectedSymbol={selectedSymbol}
           onSelect={setSelectedSymbol}
           isLoading={watchlistQuery.isLoading}
+          onUpdateAllocation={updateAllocationMutation.mutateAsync}
+          isUpdatingAllocation={updateAllocationMutation.isPending}
+          updateAllocationError={updateAllocationMutation.error}
           alerts={alertsQuery.alerts}
           onCreateAlert={async (payload) => {
             await alertsQuery.createAlert(payload);

@@ -4,6 +4,10 @@ import type {
   PriceAlert,
 } from "@shared/types/alerts";
 import type {
+  UpdateWatchlistAllocationRequest,
+  UpdateWatchlistAllocationResponse,
+} from "@shared/types/allocation";
+import type {
   AssetProjection,
   MarketOverview,
   PriceHistory,
@@ -41,6 +45,18 @@ export const api = {
       `/projections/${encodeURIComponent(symbol)}?horizon_days=${horizonDays}`,
     ),
   watchlist: () => request<Watchlist>("/watchlist"),
+  updateWatchlistAllocation: (
+    symbol: string,
+    payload: UpdateWatchlistAllocationRequest,
+  ) =>
+    request<UpdateWatchlistAllocationResponse>(
+      `/watchlist/items/${encodeURIComponent(symbol)}/allocation`,
+      {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      },
+    ),
   alerts: {
     list: (symbol?: string) => {
       const query = symbol ? `?symbol=${encodeURIComponent(symbol)}` : "";
