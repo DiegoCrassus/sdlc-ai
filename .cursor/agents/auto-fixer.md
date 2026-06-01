@@ -50,7 +50,7 @@ Detect recurring CI/CD failures, identify error patterns, and apply fixes automa
 
 ## Outputs
 
-- Branch `fix/SDLCINVEST-N-auto-fix-<category>` created
+- Branch `fix/INVES-N-auto-fix-<category>` created
 - Minimal patch applied to identified files
 - PR opened with:
   - Original error (code + stack trace)

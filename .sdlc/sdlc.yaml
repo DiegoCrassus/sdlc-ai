@@ -17,8 +17,8 @@ contract:
       role: decision-tree
     L1:
       paths:
-        - docs/sdlc/master-workflow.md
-        - docs/sdlc/change-lifecycle.md
+        - .sdlc/process/master-workflow.md
+        - .sdlc/process/change-lifecycle.md
       role: process-authority
     L2:
       path: .sdlc/sdlc.yaml
@@ -35,11 +35,9 @@ contract:
     workboard: .sdlc/dsl/plane_granularity.py
     doctor: .sdlc/dsl/doctor.py
   rules_ref:
-    - .cursor/rules/000-project-governance.mdc
-    - .cursor/rules/001-sdlc-anti-bypass.mdc
-    - .cursor/rules/002-sdlc-orchestrator-principal.mdc
-    - .cursor/rules/003-orchestrator-delegation-only.mdc
-    - .cursor/rules/010-ai-native-sdlc.mdc
+    - .cursor/rules/orchestrator.mdc
+    - .cursor/rules/020-code-quality.mdc
+    - .cursor/rules/030-docs-and-handoff.mdc
     - .cursor/rules/040-doctor-gates.mdc
     - .cursor/rules/sdlc-core.mdc
   index: .sdlc/README.md
@@ -53,6 +51,9 @@ contract:
     gates:
       readme: gates/README.md
       data: gates/paths.yaml
+    gateways:
+      readme: gateways/README.md
+      data: gateways/policy.yaml
     workboard:
       readme: workboard/README.md
       data: workboard/granularity.yaml
@@ -71,12 +72,15 @@ contract:
     doctor:
       readme: doctor/README.md
       data: doctor/checks.yaml
-    meta:
-      readme: meta/README.md
-      data: meta/tools.yaml
-    settings:
-      readme: settings/README.md
-      data: settings/config.yaml
+    scripts:
+      readme: scripts/README.md
+    templates:
+      readme: templates/README.md
+    process:
+      readme: process/README.md
+      data:
+        - process/master-workflow.md
+        - process/change-lifecycle.md
 
 core:
   schema: sdlc-core/v1
@@ -119,12 +123,13 @@ core:
     sdlc_index: .sdlc/sdlc.yaml
     sdlc_readme: .sdlc/README.md
     memory: .sdlc/memory
-    docs_sdlc: docs/sdlc
+    sdlc_process: .sdlc/process
+    sdlc_gateways: .sdlc/gateways
     rules: .cursor/rules
     app: app
   conventions:
     feature_branch: feature/{card}-{slug}
     epic_tag: '[AI][EPIC]'
   governance_refs:
-    - docs/sdlc/master-workflow.md
-    - docs/sdlc/change-lifecycle.md
+    - .sdlc/process/master-workflow.md
+    - .sdlc/process/change-lifecycle.md

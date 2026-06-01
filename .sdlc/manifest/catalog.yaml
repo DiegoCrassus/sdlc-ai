@@ -1,4 +1,4 @@
-version: '2.0'
+version: '5.2'
 description: SDLC agent manifest — catalog of agents, skills, MCPs, commands, and
   conventions.
 project:
@@ -7,14 +7,14 @@ project:
   plane_workspace: investments-sdlc
   plane_project: investiments
   plane_cards_prefix: INVES
-  sdlc_version: '2.0'
+  sdlc_version: '5.2'
   default_branch: develop
 reading_order:
 - file: AGENTS.md
   note: L0 manifest — required first; decision tree + delegation matrix
-- file: docs/sdlc/master-workflow.md
+- file: .sdlc/process/master-workflow.md
   note: Approved P0/P1 full process
-- file: docs/sdlc/change-lifecycle.md
+- file: .sdlc/process/change-lifecycle.md
   note: Gitflow + Plane — authority for branch and merge
 - file: .sdlc/README.md
   note: SDLC module map
@@ -125,9 +125,6 @@ agents:
     is_background: false
     role: Rollback procedures
 skills:
-- id: sdlc-orchestrator
-  path: .cursor/skills/sdlc-orchestrator/SKILL.md
-  when: Task coordination
 - id: subagent-delegation
   path: .cursor/skills/subagent-delegation/SKILL.md
   when: Orchestrator → Task matrix
@@ -159,24 +156,28 @@ mcps:
   skill: github-sdlc
   description: PRs, CI status, merge
 commands:
-- id: sdlc-plan
-  path: .cursor/commands/sdlc-plan.md
-  purpose: Plan [AI][TYPE] card
-- id: sdlc-implement
-  path: .cursor/commands/sdlc-implement.md
-  purpose: Implementation task
+- id: sdlc-run
+  path: .cursor/commands/sdlc-run.md
+  purpose: Run the orchestrated SDLC loop
 - id: sdlc-review
   path: .cursor/commands/sdlc-review.md
   purpose: PR review
 - id: sdlc-doctor
   path: .cursor/commands/sdlc-doctor.md
   purpose: Doctor validation
-- id: sdlc-audit
-  path: .cursor/commands/sdlc-audit.md
-  purpose: Full autonomy audit
-- id: sdlc-handoff
-  path: .cursor/commands/sdlc-handoff.md
-  purpose: Stage transition handoff
+hooks:
+- id: sdlc-gate
+  path: .cursor/hooks/sdlc_gate_hook.py
+  event: preToolUse
+  purpose: Block protected writes when the session gate is closed or wrong
+- id: sdlc-pre-gateway
+  path: .cursor/hooks/sdlc_pre_gateway.py
+  event: beforeShellExecution | subagentStart
+  purpose: Block unsafe bypass commands and wrong routed subagents
+- id: sdlc-post-gateway
+  path: .cursor/hooks/sdlc_post_gateway.py
+  event: subagentStop
+  purpose: Validate handoff and route back when evidence is incomplete
 conventions:
   task_names: '[AI][EPIC|BACKEND|FRONTEND|INFRA|SHARED] Short imperative title'
   branch_pattern: 'feature/INVES-N-<slug>  (also: bugfix/, sdlc/, hotfix/)'

@@ -1,6 +1,6 @@
 # Skill: Plane Formatting & Evidence
 
-> **Authority:** `docs/sdlc/change-lifecycle.md` · `.sdlc/scripts/plane_html.py`
+> **Authority:** `.sdlc/process/change-lifecycle.md` · `.sdlc/scripts/plane_html.py`
 
 ## Problem
 
@@ -48,21 +48,21 @@ Structured JSON → rich comment via `plane_evidence.build_completion_evidence`.
 5. **Artifacts** — PR, branch, commit, docs
 6. **Context for Future Work** — what downstream tasks must know
 
-Template: `.sdlc/templates/plane/evidence-INVES-20.json` (copy per card).
+Template: `.sdlc/templates/plane/evidence-template.json` (copy/fill per card).
 
 ### Post evidence
 
 ```bash
 python3 .sdlc/scripts/plane_card.py post-evidence \
   --card INVES-20 \
-  --file .sdlc/templates/plane/evidence-INVES-20.json
+  --file .sdlc/templates/plane/evidence-template.json
 ```
 
 On **finish-change** / **auto_merge_pr**:
 
 ```bash
 python3 .sdlc/scripts/auto_merge_pr.py --pr 32 --card INVES-20 \
-  --plane-comment --evidence-file .sdlc/templates/plane/evidence-INVES-20.json
+  --plane-comment --evidence-file .sdlc/templates/plane/evidence-template.json
 ```
 
 If `--evidence-file` omitted, auto_merge looks for `.sdlc/templates/plane/evidence-{CARD}.json`.

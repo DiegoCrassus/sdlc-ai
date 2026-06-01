@@ -21,11 +21,7 @@ DOCTOR_CHECKS = ".sdlc/doctor/checks.yaml"
 def _load_doctor_checks(root: str) -> dict[str, Any]:
     path = os.path.join(root, DOCTOR_CHECKS)
     if not os.path.isfile(path):
-        legacy = os.path.join(root, ".sdlc", "doctor.yaml")
-        if os.path.isfile(legacy):
-            path = legacy
-        else:
-            raise FileNotFoundError(f"Doctor config missing: {DOCTOR_CHECKS}")
+        raise FileNotFoundError(f"Doctor config missing: {DOCTOR_CHECKS}")
     with open(path, "r", encoding="utf-8") as fh:
         config = yaml.safe_load(fh) or {}
     return config.get("checks", config.get("doctor", {}).get("checks", config))
@@ -41,6 +37,12 @@ def _check_file(root: str, rel_path: str) -> Finding:
     if os.path.isfile(os.path.join(root, rel_path)):
         return ("PASS", f"Required file exists: {rel_path}")
     return ("FAIL", f"Missing file: {rel_path}")
+
+
+def _check_absent(root: str, rel_path: str) -> Finding:
+    if not os.path.exists(os.path.join(root, rel_path)):
+        return ("PASS", f"Legacy path absent: {rel_path}")
+    return ("FAIL", f"Legacy path must not exist in v5 layout: {rel_path}")
 
 
 def _check_file_nonempty(root: str, rel_path: str) -> Finding:
@@ -64,6 +66,28 @@ def _check_yaml(root: str, rel_path: str) -> Finding:
         return ("PASS", f"YAML valid: {rel_path}")
     except yaml.YAMLError as exc:
         return ("FAIL", f"YAML parse error in {rel_path}: {exc}")
+
+
+def _check_file_contains(root: str, rel_path: str, marker: str) -> Finding:
+    full = os.path.join(root, rel_path)
+    if not os.path.isfile(full):
+        return ("FAIL", f"Missing file for marker check: {rel_path}")
+    with open(full, "r", encoding="utf-8") as fh:
+        content = fh.read()
+    if marker in content:
+        return ("PASS", f"Required marker found in {rel_path}: {marker}")
+    return ("FAIL", f"Missing required marker in {rel_path}: {marker}")
+
+
+def _check_file_not_contains(root: str, rel_path: str, marker: str) -> Finding:
+    full = os.path.join(root, rel_path)
+    if not os.path.isfile(full):
+        return ("PASS", f"File absent for forbidden marker check: {rel_path}")
+    with open(full, "r", encoding="utf-8") as fh:
+        content = fh.read()
+    if marker not in content:
+        return ("PASS", f"Forbidden marker absent in {rel_path}: {marker}")
+    return ("FAIL", f"Forbidden marker found in {rel_path}: {marker}")
 
 
 def _check_makefile_target(root: str, target: str) -> Finding:
@@ -98,6 +122,9 @@ def run_doctor(root: str) -> List[Finding]:
     for item in checks.get("files", {}).get("items", []):
         findings.append(_check_file(root, item))
 
+    for item in checks.get("forbidden_paths", {}).get("items", []):
+        findings.append(_check_absent(root, item))
+
     cursor = checks.get("cursor", {})
     for section in ("commands", "rules", "skills", "agents", "hooks"):
         for item in cursor.get(section, []):
@@ -108,6 +135,18 @@ def run_doctor(root: str) -> List[Finding]:
 
     for item in checks.get("yaml_validity", {}).get("files", []):
         findings.append(_check_yaml(root, item))
+
+    for item in checks.get("content_markers", {}).get("items", []):
+        path = item.get("path")
+        for marker in item.get("contains", []):
+            if path and marker:
+                findings.append(_check_file_contains(root, path, marker))
+
+    for item in checks.get("forbidden_content", {}).get("items", []):
+        path = item.get("path")
+        for marker in item.get("not_contains", []):
+            if path and marker:
+                findings.append(_check_file_not_contains(root, path, marker))
 
     for target in checks.get("makefile", {}).get("targets", []):
         findings.append(_check_makefile_target(root, target))

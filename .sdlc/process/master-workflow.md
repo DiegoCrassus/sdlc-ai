@@ -11,9 +11,9 @@
 | Layer | File | Audience | Content |
 |-------|------|----------|---------|
 | L0 — Entry | `AGENTS.md` (root) | Agent (alwaysApply) | One-page decision tree + entry commands |
-| L1 — Handbook | `.sdlc/HANDBOOK.md` | Agent + human | Subagents, skills, MCP catalog |
-| L1 — Process | `docs/sdlc/master-workflow.md` | Agent + human | This document — full flow |
-| L2 — Machine | `.sdlc/workflows.yaml` + `.sdlc/gate-paths.yaml` | Scripts/hooks/CLI | States, gates, paths, transitions |
+| L1 — Index | `.sdlc/README.md` + `.sdlc/manifest/catalog.yaml` | Agent + human | Modular SDLC map, agents, skills, MCP catalog |
+| L1 — Process | `.sdlc/process/master-workflow.md` | Agent + human | This document — full flow |
+| L2 — Machine | `.sdlc/sdlc.yaml` + module YAMLs under `.sdlc/<module>/` | Scripts/hooks/CLI | States, gates, paths, transitions |
 
 ---
 
@@ -35,7 +35,7 @@
 User sends message
     → Orchestrator Principal (chat agent)
     → Task(Intent Analyst)  [always, except continuation with gate already open]
-    → YAML handoff + session-gate.json (+ Plane if product work)
+    → Markdown handoff + session-gate.json (+ Plane if product work)
 ```
 
 ### Urgency policy
@@ -50,23 +50,21 @@ User sends message
 
 ## Step 1 — Intent Analyst
 
-**File:** `.cursor/subagents/intent-analyst.md`  
+**File:** `.cursor/agents/intent-analyst.md`  
 **Skill:** `.cursor/skills/intent-classification/SKILL.md`
 
 ### Responsibility
 
 Interpret any input and return to Orchestrator:
 
-```yaml
-intent: GREENFIELD | FEATURE | BUGFIX | HOTFIX | SDLC_META | DOCS_ONLY | INFRA | READONLY
-confidence: 0.0–1.0
-greenfield_signals: []      # user_words | empty_app | both
-scope_hint: string
-requires_plane: true|false
-requires_branch: true|false
-next_agent: planner | architect | implementer | sdlc-auditor | none
-rationale: string
-```
+Markdown handoff in `.sdlc/memory/orchestrator-handoff.md`:
+
+| Section | Required fields |
+|---------|-----------------|
+| Routing | **Next agent**, **Stage complete**, **Previous agent** |
+| Classification | **Intent**, **Confidence**, **Requires Plane**, **Requires branch** |
+| Session | **Card**, **Branch**, **Stage** when known |
+| Scope | Human-readable rationale and boundaries |
 
 ### Routing
 
@@ -84,13 +82,13 @@ rationale: string
 
 ### Evidence (product intent)
 
-- YAML handoff → `.sdlc/memory/orchestrator-handoff.md` (latest)
+- Markdown handoff → `.sdlc/memory/orchestrator-handoff.md` (latest)
 - `session-gate.json` → `{ intent, card, stage, gate_status }`
 - Plane → HTML classification comment on card (when `requires_plane=true`)
 
 ### Evidence (READONLY)
 
-- Minimal YAML handoff + `session-gate.json`
+- Minimal Markdown handoff + `session-gate.json`
 - **No Plane card**
 
 ---
@@ -127,7 +125,7 @@ Before Plan/Arch, read-only script/hook:
 
 Minimums: GREENFIELD ≥3 children · FEATURE ≥2 children
 
-Config: `.sdlc/plane-granularity.yaml`  
+Config: `.sdlc/workboard/granularity.yaml`  
 Validation: `plane_card.py validate-all --card INVES-N`
 
 ### Plan creation gate
@@ -187,7 +185,7 @@ QA FAIL → Task(AutoFixer) → re-Task(QA)
 
 | File | Function |
 |------|----------|
-| `.sdlc/gate-paths.yaml` | Configurable protected paths |
+| `.sdlc/gates/paths.yaml` | Configurable protected paths |
 | `.sdlc/memory/session-gate.json` | Cache: `{ card, branch, stage, gate, opened_at }` |
 | `.cursor/hooks/sdlc_gate_hook.py` | Cursor pre-write hook |
 | `.sdlc/scripts/sdlc_gate.py` | open / close / status / validate |
@@ -196,16 +194,16 @@ QA FAIL → Task(AutoFixer) → re-Task(QA)
 
 | Stage | Allowed paths (example) |
 |-------|-------------------------|
-| `planning` | `.sdlc/`, `.cursor/`, `docs/sdlc/` |
+| `planning` | `.sdlc/`, `.cursor/` |
 | `architecture` | + Plane comments; no `app/` |
 | `implementation` | `app/backend/`, `app/frontend/`, `app/shared/`, `pyproject.toml` |
-| `sdlc_meta` | `.sdlc/`, `.cursor/`, `docs/sdlc/`, `.github/` |
+| `sdlc_meta` | `.sdlc/`, `.cursor/`, `.github/` |
 
 Gate opens via: `python .sdlc/dsl/cli.py workflow start --card INVES-N`
 
 ### Enforcement
 
-- **Cursor pre-write hook** — blocks Write tool if path ∈ `gate-paths.yaml` and gate closed
+- **Cursor pre-write hook** — blocks Write tool if path ∈ `gates/paths.yaml` and gate closed
 - **On block:** Orchestrator **auto-corrects once** (runs missing step, e.g. `workflow start`) before reporting
 
 ---
@@ -255,7 +253,7 @@ When Orchestrator or Doctor detects:
 
 - Missing referenced skill (e.g. `plane-task-creation`)
 - Missing referenced script (e.g. `sdlc_gate.py`)
-- Missing referenced rule (e.g. `001-sdlc-anti-bypass.mdc`)
+- Missing referenced rule (e.g. `orchestrator.mdc`)
 - Unregistered hook
 
 **Autonomous action:**
@@ -320,6 +318,4 @@ Obs DB events (compliance rate) — optional; Plane timeline first.
 
 ## References
 
-- Gap analysis: `docs/sdlc/sdlc-workflow-gap-analysis.md`
-- Workflow authority: `docs/sdlc/change-lifecycle.md`
-- Papers: `docs/references/` (V-Bounce, ACM manifests, AWO, Spec Kit Agents, Claude Code, ALTK)
+- Workflow authority: `.sdlc/process/change-lifecycle.md`

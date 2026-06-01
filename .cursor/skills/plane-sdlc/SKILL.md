@@ -1,6 +1,6 @@
 # Skill: Plane SDLC (MCP)
 
-> **Workflow authority:** `docs/sdlc/change-lifecycle.md`
+> **Workflow authority:** `.sdlc/process/change-lifecycle.md`
 
 ## Purpose
 
@@ -47,7 +47,7 @@ python3 .sdlc/scripts/plane_state.py in-progress --card INVES-N --branch feature
 
 ## Procedure — evidence and Done
 
-1. Fill `.sdlc/templates/plane/evidence-INVES-N.json` (Implementer/Reviewer)
+1. Fill `.sdlc/templates/plane/evidence-template.json` with the active `INVES-N` evidence (Implementer/Reviewer)
 2. Post formatted evidence — **not** a one-liner comment
 3. **Done** after merge + CI via `auto_merge_pr.py --plane-comment --evidence-file …`
 

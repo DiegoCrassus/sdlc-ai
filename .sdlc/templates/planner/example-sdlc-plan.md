@@ -1,4 +1,4 @@
-# Example — Planner Activation via @sdlc-plan
+# Example — Planner Activation via @sdlc-run
 
 > Reference document to validate the planning flow, format, and conventions.
 > Language: English. Code: English. Task names follow the `[AI][TYPE] Short title` convention.
@@ -8,7 +8,7 @@
 ## 1. User Input in Cursor Chat
 
 ```
-@sdlc-plan
+@sdlc-run
 
 I want to create a REST endpoint on the backend that allows creating
 work items in Plane via an internal API. The Cursor agent will call
@@ -23,7 +23,7 @@ stage labels, setting the correct project, validating stage transitions).
 
 ```
 [hook: pre-task]
-  Reading: .sdlc/sdlc.yaml                → project sdlc-ai, workspace rpg
+  Reading: .sdlc/sdlc.yaml                → project sdlc-ai, workspace investments-sdlc
   Reading: .sdlc/memory/architecture.md   → Python backend, SQLite local, Supabase prod, framework TBD
   Reading: .sdlc/memory/business-rules.md → 10-stage SDLC, mandatory validation, no fake results
   Stage identified: Requirements (new ticket intake)
@@ -64,7 +64,7 @@ This feature introduces an internal `POST /api/v1/work-items` endpoint in the ba
 - `POST /api/v1/work-items` endpoint that accepts a domain-level payload
 - Maps SDLC stage (`ticket`, `requirements`, `architecture`, etc.) to the corresponding Plane label
 - Calls the Plane REST API with the enriched payload
-- Returns `{ "id": "...", "url": "...", "identifier": "SDLCINVEST-N" }` on success
+- Returns `{ "id": "...", "url": "...", "identifier": "INVES-N" }` on success
 - Logs all Plane API failures with full context (no silent swallowing)
 
 ---
@@ -85,7 +85,7 @@ This feature introduces an internal `POST /api/v1/work-items` endpoint in the ba
 |------------|-----------|-----------------|
 | FastAPI will be the backend framework | medium | blocks Architecture gate — must confirm before implementation |
 | `PLANE_API_KEY` will be available as an env var on the server | high | low — already in `.env`, deployment checklist will verify |
-| Target Plane project is always `SDLCINVEST` for now | high | low — can be made configurable later |
+| Target Plane project is `investiments` for now | high | low — can be made configurable later |
 | No idempotency requirement for this MVP | high | low — accepted risk, documented |
 | Pydantic v2 will be used for request/response models | medium | low — consistent with Python stack |
 
@@ -131,7 +131,7 @@ docs/infrastructure/local-development.md  ← update: backend setup instructions
 ### Acceptance Criteria
 
 1. `POST /api/v1/work-items` with a valid payload returns `201` with `{ "id", "url", "identifier" }`
-2. The created work item is visible in Plane under project `SDLCINVEST` with the correct SDLC stage label
+2. The created work item is visible in Plane under project `investiments` with the correct SDLC stage label
 3. Invalid payload (empty title, unknown stage) returns `422` with a field-level error message — no generic error
 4. Missing `PLANE_API_KEY` returns `503 Service Unavailable` with `"Plane integration not configured"` — no stack trace in response body
 5. A Plane API failure (timeout, 5xx) returns `502 Bad Gateway` with a safe message and logs the full error server-side
@@ -158,15 +158,15 @@ docs/infrastructure/local-development.md  ← update: backend setup instructions
 ### Task Breakdown
 
 ```
-[ ] SDLCINVEST-N · [AI][SDLC]    Confirm backend framework — write ADR-004
-[ ] SDLCINVEST-N · [AI][BACKEND] Create app/backend/ structure and update pyproject.toml
-[ ] SDLCINVEST-N · [AI][BACKEND] Implement PlaneClient (HTTP wrapper with retry + logging)
-[ ] SDLCINVEST-N · [AI][BACKEND] Implement WorkItemCreate / WorkItemCreated Pydantic models
-[ ] SDLCINVEST-N · [AI][BACKEND] Implement POST /api/v1/work-items handler
-[ ] SDLCINVEST-N · [AI][BACKEND] Write unit tests (mocked PlaneClient)
-[ ] SDLCINVEST-N · [AI][BACKEND] Write integration test (@pytest.mark.integration)
-[ ] SDLCINVEST-N · [AI][DOCS]    Update architecture/overview.md and local-development.md
-[ ] SDLCINVEST-N · [AI][SDLC]    Run make sdlc-doctor — confirm exit 0
+[ ] INVES-N · [AI][SDLC]    Confirm backend framework — write ADR-004
+[ ] INVES-N · [AI][BACKEND] Create app/backend/ structure and update pyproject.toml
+[ ] INVES-N · [AI][BACKEND] Implement PlaneClient (HTTP wrapper with retry + logging)
+[ ] INVES-N · [AI][BACKEND] Implement WorkItemCreate / WorkItemCreated Pydantic models
+[ ] INVES-N · [AI][BACKEND] Implement POST /api/v1/work-items handler
+[ ] INVES-N · [AI][BACKEND] Write unit tests (mocked PlaneClient)
+[ ] INVES-N · [AI][BACKEND] Write integration test (@pytest.mark.integration)
+[ ] INVES-N · [AI][DOCS]    Update architecture/overview.md and local-development.md
+[ ] INVES-N · [AI][SDLC]    Run make sdlc-doctor — confirm exit 0
 ```
 
 ---
@@ -188,7 +188,7 @@ docs/infrastructure/local-development.md  ← update: backend setup instructions
 
 ```
 [hook: post-task]
-  Files changed: EXAMPLE-SDLC-PLAN.md (this document)
+  Files changed: .sdlc/templates/planner/example-sdlc-plan.md (this document)
   Docs to update after implementation:
     - docs/architecture/overview.md
     - docs/infrastructure/local-development.md

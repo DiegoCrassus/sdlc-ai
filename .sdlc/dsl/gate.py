@@ -61,12 +61,9 @@ def repo_root(start: Path | None = None) -> Path:
 
 
 def gate_config_path(root: Path | None = None) -> Path:
-    """Modular gate data (v5); legacy fallback to gate-paths.yaml."""
+    """Return the canonical v5 gate config path."""
     base = (root or repo_root()) / ".sdlc"
-    modular = base / "gates" / "paths.yaml"
-    if modular.is_file():
-        return modular
-    return base / "gate-paths.yaml"
+    return base / "gates" / "paths.yaml"
 
 
 def session_gate_path(root: Path | None = None) -> Path:
@@ -81,9 +78,7 @@ def load_gate_config(root: Path | None = None) -> dict[str, Any]:
         raise FileNotFoundError(f"Missing gate config: {path}")
     with path.open(encoding="utf-8") as f:
         data = yaml.safe_load(f) or {}
-    if path.name == "paths.yaml":
-        return data.get("gate_paths") or {}
-    return data.get("gate_paths") or data
+    return data.get("gate_paths") or {}
 
 
 def load_session_gate(root: Path | None = None) -> SessionGate:

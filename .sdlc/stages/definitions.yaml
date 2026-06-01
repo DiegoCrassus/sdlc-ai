@@ -184,7 +184,7 @@ stages:
     script: .sdlc/scripts/discovery_hook.py
     reads:
     - docs/architecture
-    - docs/sdlc/change-lifecycle.md
+    - .sdlc/process/change-lifecycle.md
     output: .sdlc/memory/discovery-context.json
   validation_hook:
     checks:
@@ -217,7 +217,7 @@ stages:
     script: .sdlc/scripts/discovery_hook.py
     reads:
     - docs/infrastructure/deployment.md
-    - .sdlc/integrations.yaml
+    - .sdlc/integrations/services.yaml
     output: .sdlc/memory/discovery-context.json
   validation_hook:
     checks:

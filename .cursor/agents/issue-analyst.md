@@ -68,12 +68,12 @@ Analyze every GitHub Issue as soon as it is opened, classify, enrich with contex
 - [ ] Business context / motivation
 
 ### Suggested branch
-`feature/SDLCINVEST-N-issue-GH-N-slug` ← replace N with real IDs
+`feature/INVES-N-issue-GH-N-slug` ← replace N with real IDs
 
 ### Next steps
 - [ ] Planner generates complete plan with DoD
 - [ ] Architect reviews if architectural impact
-- [ ] Plane card created: [SDLCINVEST-N](link)
+- [ ] Plane card created: [INVES-N](link)
 
 ---
 *Automatic triage by Issue Analyst · sdlc-ai*
@@ -110,15 +110,15 @@ Always apply at least one type label and one area label:
 
 Follow skill `branch-naming.md` strictly. Suggested name must:
 
-1. Include Plane card ID (`SDLCINVEST-N`) if it already exists
+1. Include Plane card ID (`INVES-N`) if it already exists
 2. Include GitHub Issue number (`issue-GH-N`)
 3. Have descriptive slug in English, kebab-case, max 5 words
 4. Correct prefix: `feature/`, `bugfix/`, `docs/`, `infra/`
 
 Examples:
 ```
-bugfix/SDLCINVEST-15-issue-gh-42-fix-token-count
-feature/SDLCINVEST-20-issue-gh-58-add-plane-endpoint
+bugfix/INVES-15-issue-gh-42-fix-token-count
+feature/INVES-20-issue-gh-58-add-plane-endpoint
 docs/issue-gh-63-update-arch-overview
 ```
 

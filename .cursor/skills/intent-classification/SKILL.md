@@ -1,6 +1,6 @@
 # Skill: Intent Classification
 
-> **Authority:** `docs/sdlc/master-workflow.md`
+> **Authority:** `.sdlc/process/master-workflow.md`
 
 ## Purpose
 
@@ -24,7 +24,7 @@ Classify user input before any SDLC action. Output drives Orchestrator routing.
 4. Discovery hook (GREENFIELD / FEATURE in product repo):
    - Glob `docs/product/*`, `docs/architecture/*-api.md`
    - List as `legacy_docs[]` in handoff
-5. Write YAML to `.sdlc/memory/orchestrator-handoff.md`.
+5. Write **Markdown** handoff to `.sdlc/memory/orchestrator-handoff.md` (template: `.sdlc/memory/README.md` — no YAML fences).
 6. Update `session-gate.json` → `intent` field only (do not open gate).
 
 ## Urgency policy

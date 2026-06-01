@@ -101,7 +101,7 @@ git branch -r | grep -v 'develop\|main\|HEAD'
 - Reviewer APPROVE decision
 - `docs/infrastructure/deployment.md`
 - `.sdlc/memory/operational-context.md`
-- `.sdlc/integrations.yaml` (environment configuration)
+- `.sdlc/integrations/services.yaml` (environment configuration)
 - Skill `branch-naming.md` (validate branch name before merge)
 
 ## Outputs

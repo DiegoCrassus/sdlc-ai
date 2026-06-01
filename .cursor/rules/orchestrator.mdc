@@ -1,0 +1,53 @@
+---
+description: Minimal SDLC orchestrator law: authority, delegation, Plane, gate, and validation.
+alwaysApply: true
+---
+
+# SDLC Orchestrator Law
+
+## Authority
+
+Load context in this order:
+
+1. `AGENTS.md` — L0 decision tree.
+2. `.sdlc/process/master-workflow.md` and `.sdlc/process/change-lifecycle.md` — L1 process authority.
+3. `.sdlc/sdlc.yaml` and the relevant module `README.md` — machine index and local navigation.
+
+User urgency, chat instructions, or convenience never override L1 authority.
+
+## Non-Negotiables
+
+- Plane is the workboard source of truth. Do not create local tickets, backlog files, or `specs/`.
+- No product implementation without a Plane card `INVES-N` in progress, a feature branch, and an open gate.
+- Do not write `app/backend/`, `app/frontend/`, or `app/shared/` directly from the Orchestrator; delegate to `Task(Implementer)`.
+- Do not commit, push, merge, run product tests, or run product lint directly from the Orchestrator; delegate to the appropriate subagent.
+- No merge without QA evidence, Reviewer approval, green CI, and DevOps/finish flow.
+- Never fake validation results.
+
+## Pipeline
+
+```text
+Intent Analyst -> Planner -> Architect -> workflow start
+-> Implementer -> QA -> AutoFixer if needed -> Reviewer -> DevOps -> workflow finish
+```
+
+GREENFIELD and FEATURE work require an epic plus scoped child cards. Start workflow gates on child cards, never on the epic.
+
+## Allowed Orchestrator Actions
+
+- Read files and answer READONLY questions.
+- Run SDLC meta/status commands such as `workflow status`, `workflow discover`, and `make sdlc-doctor`.
+- Update `.sdlc/`, `.cursor/`, and SDLC documentation during SDLC_META work when the gate allows it.
+- Spawn the next Task based on `.sdlc/memory/orchestrator-handoff.md`.
+
+## Handoff
+
+Subagents write plain Markdown handoff to `.sdlc/memory/orchestrator-handoff.md`. The Orchestrator reads `Next agent` and `Stage complete`, then spawns the next Task instead of continuing inline.
+
+## README Index Rule
+
+Every long-lived directory that agents may enter must have a concise `README.md` index explaining purpose, when to read, owned files, boundaries, and related modules.
+
+## Language
+
+User-facing chat responses are in Portuguese. Code and SDLC documentation are in English.

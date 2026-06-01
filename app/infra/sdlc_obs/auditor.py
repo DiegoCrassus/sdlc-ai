@@ -148,7 +148,7 @@ def check_structural(report: AuditReport) -> None:
         ".cursor/rules",
         ".cursor/commands",
         ".cursor/skills",
-        ".cursor/subagents",
+        ".cursor/agents",
         ".cursor/hooks",
         ".sdlc",
         ".sdlc/dsl",
@@ -156,7 +156,7 @@ def check_structural(report: AuditReport) -> None:
         "docs/architecture",
         "docs/infrastructure",
         "docs/operations",
-        "docs/sdlc",
+        ".sdlc/process",
         "app/frontend",
         "app/backend",
         "app/infra",
@@ -174,9 +174,9 @@ def check_structural(report: AuditReport) -> None:
         )
 
 
-def check_subagents(report: AuditReport) -> None:
-    """Verify all required subagents exist and have the right sections."""
-    required_subagents = {
+def check_agents(report: AuditReport) -> None:
+    """Verify all required Cursor agents exist and have the right sections."""
+    required_agents = {
         "planner.md": ["Role", "Responsabilit"],  # Responsibilities or Responsabilidades
         "architect.md": ["Role"],
         "implementer.md": ["Role"],
@@ -186,7 +186,7 @@ def check_subagents(report: AuditReport) -> None:
         "doctor.md": ["Role"],
         "observer.md": ["Role", "Responsibilit"],  # Responsibilities or Responsabilidades
         "issue-analyst.md": ["Role", "Responsabilidades", "GitHub MCP"],
-        # new subagents from simulation proposals
+        # new agents from simulation proposals
         "migration-runner.md": ["Role"],
         "contract-validator.md": ["Role"],
         "auto-fixer.md": ["Role"],
@@ -194,29 +194,29 @@ def check_subagents(report: AuditReport) -> None:
         "security-scanner.md": ["Role"],
     }
 
-    for fname, sections in required_subagents.items():
-        path = f".cursor/subagents/{fname}"
+    for fname, sections in required_agents.items():
+        path = f".cursor/agents/{fname}"
         if not _file_exists(path):
             report.add(
-                "Subagentes",
+                "Agentes",
                 fname,
                 "FAIL",
-                f"Subagente {fname} não existe",
-                f"Crie `.cursor/subagents/{fname}`",
+                f"Agente {fname} não existe",
+                f"Crie `.cursor/agents/{fname}`",
             )
             continue
 
         missing_sections = [s for s in sections if not _file_has_section(path, s)]
         if missing_sections:
             report.add(
-                "Subagentes",
+                "Agentes",
                 fname,
                 "WARN",
                 f"Seções ausentes: {missing_sections}",
                 f"Adicione as seções {missing_sections} em {fname}",
             )
         else:
-            report.add("Subagentes", fname, "PASS", f"Todas as seções presentes")
+            report.add("Agentes", fname, "PASS", f"Todas as seções presentes")
 
 
 def check_skills(report: AuditReport) -> None:
@@ -230,7 +230,7 @@ def check_skills(report: AuditReport) -> None:
         "observability.md": ["Purpose"],
         "documentation.md": ["Purpose"],
         "task-creation.md": ["Purpose", "DoD", "[AI]"],
-        "branch-naming.md": ["feature/", "SDLCINVEST", "issue-gh"],
+        "branch-naming.md": ["feature/", "INVES", "issue-gh"],
         # new skills from simulation proposals
         "container-validation.md": ["Purpose", "Procedure"],
         "e2e-testing.md": ["Purpose", "Procedure"],
@@ -311,7 +311,7 @@ def check_pipeline(report: AuditReport) -> None:
         "" if _file_exists(branch_skill) else "Crie .cursor/skills/branch-naming.md",
     )
 
-    devops = ".cursor/subagents/devops.md"
+    devops = ".cursor/agents/devops.md"
     has_delete = _file_has_section(devops, "delete_branch_on_merge")
     report.add(
         "Pipeline",
@@ -330,13 +330,13 @@ def check_pipeline(report: AuditReport) -> None:
         "" if _file_exists(auto_merge) else "Crie .cursor/skills/auto-merge-policy.md",
     )
 
-    security = ".cursor/subagents/security-scanner.md"
+    security = ".cursor/agents/security-scanner.md"
     report.add(
         "Pipeline",
         "Security Scanner",
         "PASS" if _file_exists(security) else "FAIL",
         "" if _file_exists(security) else "SecurityScanner ausente — PRs sem análise de segurança",
-        "" if _file_exists(security) else "Crie .cursor/subagents/security-scanner.md",
+        "" if _file_exists(security) else "Crie .cursor/agents/security-scanner.md",
     )
 
 
@@ -394,16 +394,16 @@ def check_gaps_from_simulation(report: AuditReport) -> None:
         (
             "Gaps da Simulação",
             "Validação de Contrato API",
-            ".cursor/subagents/contract-validator.md",
+            ".cursor/agents/contract-validator.md",
             "Gap G2: Drift OpenAPI↔TypeScript sem detecção automática",
-            "Crie .cursor/subagents/contract-validator.md",
+            "Crie .cursor/agents/contract-validator.md",
         ),
         (
             "Gaps da Simulação",
             "Migration Runner",
-            ".cursor/subagents/migration-runner.md",
+            ".cursor/agents/migration-runner.md",
             "Gap G3: Migrations sem validação automática de reversibilidade",
-            "Crie .cursor/subagents/migration-runner.md",
+            "Crie .cursor/agents/migration-runner.md",
         ),
         (
             "Gaps da Simulação",
@@ -415,9 +415,9 @@ def check_gaps_from_simulation(report: AuditReport) -> None:
         (
             "Gaps da Simulação",
             "SAST + Dependency scan",
-            ".cursor/subagents/security-scanner.md",
+            ".cursor/agents/security-scanner.md",
             "Gap G5: Zero análise de segurança automática",
-            "Crie .cursor/subagents/security-scanner.md",
+            "Crie .cursor/agents/security-scanner.md",
         ),
         (
             "Gaps da Simulação",
@@ -429,16 +429,16 @@ def check_gaps_from_simulation(report: AuditReport) -> None:
         (
             "Gaps da Simulação",
             "Auto-Fixer para CI failures",
-            ".cursor/subagents/auto-fixer.md",
+            ".cursor/agents/auto-fixer.md",
             "Gap G7: Falhas de CI requerem intervenção manual do Implementer",
-            "Crie .cursor/subagents/auto-fixer.md",
+            "Crie .cursor/agents/auto-fixer.md",
         ),
         (
             "Gaps da Simulação",
             "Rollback automático",
-            ".cursor/subagents/rollback-agent.md",
+            ".cursor/agents/rollback-agent.md",
             "Gap G8: Sem rollback automático após degradação de métricas",
-            "Crie .cursor/subagents/rollback-agent.md",
+            "Crie .cursor/agents/rollback-agent.md",
         ),
         (
             "Gaps da Simulação",
@@ -758,7 +758,7 @@ def run_audit() -> AuditReport:
 
     steps = [
         ("Estrutura", check_structural),
-        ("Subagentes", check_subagents),
+        ("Agentes", check_agents),
         ("Skills", check_skills),
         ("MCP", check_mcp),
         ("Pipeline & GitHub", check_pipeline),

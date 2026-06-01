@@ -1,45 +1,60 @@
 # Orchestrator Handoff (latest)
 
-```yaml
-implementer_handoff:
-  agent: implementer
-  card: INVES-34
-  epic: INVES-32
-  intent: FEATURE
-  title: "[AI][FRONTEND] Forecast page routing and chart"
-  branch: feature/INVES-34-forecast-dashboard
-  commits:
-    - e414c96
-  scope:
-    - react-router-dom v7 with BrowserRouter in main.tsx
-    - Routes: / (DashboardPage), /forecast (ForecastPage)
-    - AppLayout with nav links Dashboard | Forecast
-    - ForecastPage: watchlist select, AssetSearch, horizon 7/30/90
-    - ForecastChart: ComposedChart historical Area + dashed projected Line + confidence bands + ReferenceLine at last historical point
-    - IndicatorsPanel: RSI, MACD, SMA, Bollinger from projection response
-    - Disclaimer from API; dashboard link to /forecast?symbol=
-  files_changed:
-    - app/frontend/package.json
-    - app/frontend/package-lock.json
-    - app/frontend/src/main.tsx
-    - app/frontend/src/App.tsx
-    - app/frontend/src/components/layout/AppLayout.tsx
-    - app/frontend/src/components/ForecastChart.tsx
-    - app/frontend/src/components/IndicatorsPanel.tsx
-    - app/frontend/src/pages/ForecastPage.tsx
-    - app/frontend/src/pages/DashboardPage.tsx
-  verification:
-    npm_run_build: pass
-    frontend_tests: none (no test script in package.json)
-    backend_projections_pytest: skipped (ModuleNotFoundError: marketpulse — env not installed on implementer host)
-  next_agent: qa
-  next_action: Validate acceptance criteria per INVES-34 MVP scope; run QA checklist
-  acceptance_criteria:
-    - AC1: react-router-dom v7 routes / and /forecast
-    - AC2: Shared layout navigation between screens
-    - AC3: ForecastPage asset selector (watchlist + search), horizon 7/30/90
-    - AC4: ForecastChart ComposedChart with historical, projection, bands, ReferenceLine
-    - AC5: IndicatorsPanel shows RSI, MACD, SMA, Bollinger
-    - AC6: Disclaimer text from API
-    - AC7: Link from DashboardPage to Forecast page
-```
+## Routing
+
+| Field | Value |
+|-------|-------|
+| **Next agent** | implementer |
+| **Stage complete** | no |
+| **Previous agent** | orchestrator |
+
+## Classification
+
+| Field | Value |
+|-------|-------|
+| **Intent** | SDLC_META |
+| **Confidence** | 1.0 |
+| **Requires Plane** | yes |
+| **Requires branch** | yes |
+
+## Session
+
+| Field | Value |
+|-------|-------|
+| **Card** | INVES-40 |
+| **Epic** | — |
+| **Branch** | feature/INVES-40-sdlc-v5-restore |
+| **Stage** | sdlc_meta |
+| **Gate** | open |
+
+## Scope
+
+Complete SDLC v5.2 modular layout restore and merge to `develop`. Enriched module README indexes, migrated handoff format from YAML fences to Markdown tables, retired the one-shot migration script, removed legacy fallbacks from DSL loaders, taught the Doctor to enforce the current modular structure, completed a conservative cleanup viability pass, and moved SDLC-owned process/guides/references/templates into `.sdlc/`.
+
+## Acceptance criteria
+
+- `.sdlc` uses v5 modular tree (`manifest/catalog.yaml`, not flat `manifest.yaml`)
+- Module READMEs give agents enough context to locate data files and related modules
+- `orchestrator-handoff.md` uses Markdown sections only (no YAML code fence)
+- Retired migration script cannot rewrite `.sdlc` module READMEs or recreate legacy flat YAMLs
+- Doctor fails if legacy flat `.sdlc/*.yaml` files reappear
+- `.sdlc/README.md` classifies each folder by runtime/agent/machine-data status and recommendation
+- `.sdlc/memory/README.md` separates runtime local, runtime generated, active handoff, and versioned operational context
+- `.sdlc/process/README.md` owns compact process authority formerly spread across SDLC docs
+- `.sdlc/templates/planner/example-sdlc-plan.md` replaces the root planner example
+- Doctor forbids removed SDLC guide/reference/tracking paths from reappearing
+- `make sdlc-doctor` passes with 0 failures
+- `develop` receives v5 layout via PR merge of INVES-40
+
+## Blockers
+
+- none
+
+## Notes
+
+- Handoff format spec: `.sdlc/memory/README.md`
+- Latest validation: `make sdlc-doctor` → 270 PASS, 3 WARN, 0 FAIL
+- SDLC DSL tests: `python3 -m pytest .sdlc/dsl/test_gate.py .sdlc/dsl/test_granularity.py -q` → 9 passed
+- Lints: no IDE diagnostics on changed Python files
+- Obsolete path search only finds expected forbidden-path/docs README references
+- Product pipeline must not write to `.sdlc/` except session gate (gitignored)

@@ -27,13 +27,13 @@ Previous delivery (Plane **INVES-19..24**, PRs #32–#36) remains **history on P
 2. Prompt greenfield: *Build a product called Investment Radar …* (or reference new Plane epic).
 3. Expect: **Planner** → Plane cards → **Architect** → `start-change` per sub-task → implement.
 4. Plane descriptions: use **TipTap** via `.cursor/skills/plane-formatting/SKILL.md`.
-5. Done evidence: `.sdlc/templates/plane/evidence-INVES-N.json` pattern.
+5. Done evidence: `.sdlc/templates/plane/evidence-template.json` filled for the active card.
 
 ## Reference docs (from prior cycle — still valid)
 
 - [investment-radar-api.md](../architecture/investment-radar-api.md) — API contract reference
 - [investment-radar-runbook.md](../product/investment-radar-runbook.md) — target runbook after rebuild
-- [change-lifecycle.md](../sdlc/change-lifecycle.md) — workflow law
+- [change-lifecycle.md](../../.sdlc/process/change-lifecycle.md) — workflow law
 
 ## Plane (historical)
 
@@ -44,4 +44,4 @@ Previous delivery (Plane **INVES-19..24**, PRs #32–#36) remains **history on P
 
 ## Workflow
 
-[docs/sdlc/change-lifecycle.md](../sdlc/change-lifecycle.md) · workspace `investments-sdlc` · project `investiments`
+[.sdlc/process/change-lifecycle.md](../../.sdlc/process/change-lifecycle.md) · workspace `investments-sdlc` · project `investiments`

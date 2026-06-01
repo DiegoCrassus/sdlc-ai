@@ -1,6 +1,6 @@
 ---
 name: doctor
-description: "Run make sdlc-doctor to validate repository structure, YAML consistency, and SDLC compliance against .sdlc/doctor.yaml. Reports PASS/WARN/FAIL — does not fix. Use after any structural change (add/remove dirs, YAML files, .cursor config, Makefile)."
+description: "Run make sdlc-doctor to validate repository structure, YAML consistency, and SDLC compliance against .sdlc/doctor/checks.yaml. Reports PASS/WARN/FAIL — does not fix. Use after any structural change (add/remove dirs, YAML files, .cursor config, Makefile)."
 model: fast
 readonly: true
 ---
@@ -25,7 +25,7 @@ Validate repository structure, YAML consistency, and SDLC compliance.
 ## Inputs
 
 - Repository root
-- `.sdlc/doctor.yaml` (check definitions)
+- `.sdlc/doctor/checks.yaml` (check definitions)
 - Environment variables (for integration status)
 
 ## Outputs

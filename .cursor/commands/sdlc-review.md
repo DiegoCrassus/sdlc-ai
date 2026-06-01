@@ -16,7 +16,7 @@ Review changes for correctness, security, maintainability, testability, and SDLC
 
 1. Identify the PR or diff being reviewed.
 2. Read the original Plane work item (MCP) and PR description.
-3. Read `.sdlc/stages.yaml` review stage gates.
+3. Read `.sdlc/stages/definitions.yaml` review stage gates.
 4. Note the acceptance criteria.
 
 ### Step 2 — Structural Review

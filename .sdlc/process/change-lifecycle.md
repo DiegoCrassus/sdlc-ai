@@ -3,9 +3,11 @@
 > **Authority:** this document prevails over ad hoc chat instructions, urgency requests, or shortcuts.
 > Skills (`.cursor/skills/`) and rules (`.cursor/rules/`) **reference** this file; they do not contradict it.
 
-Machine-readable complements: `.sdlc/workflows.yaml`, `.sdlc/lifecycle.yaml`, `.sdlc/stages.yaml`, `.sdlc/gate-paths.yaml`.
+Machine-readable complements: `.sdlc/sdlc.yaml` plus modular data under `.sdlc/<module>/`:
+`.sdlc/workflows/transitions.yaml`, `.sdlc/stages/lifecycle.yaml`,
+`.sdlc/stages/definitions.yaml`, `.sdlc/gates/paths.yaml`.
 
-**Full process (APPROVED):** [`docs/sdlc/master-workflow.md`](master-workflow.md)  
+**Full process (APPROVED):** [`.sdlc/process/master-workflow.md`](master-workflow.md)  
 **Agent entry point:** [`AGENTS.md`](../../AGENTS.md) (repo root)
 
 ---
@@ -81,7 +83,7 @@ See `.cursor/skills/finish-change/SKILL.md` and `auto-merge-policy.md`.
 | `infra/` | CI, Docker, observability |
 | `sdlc/` | `.sdlc/`, `.cursor/`, governance |
 
-Format: `feature/INVES-N-<slug>` — see `.cursor/skills/branch-naming.md`.
+Format: `feature/INVES-N-<slug>`.
 
 ---
 
@@ -99,16 +101,16 @@ Format: `feature/INVES-N-<slug>` — see `.cursor/skills/branch-naming.md`.
 
 ## SDLC stages (summary)
 
-See diagram in `docs/sdlc/workflows.md`. Transitions require evidence in `.sdlc/stages.yaml`.
+See `.sdlc/workflows/README.md` and `.sdlc/workflows/transitions.yaml`. Transitions require evidence in `.sdlc/stages/definitions.yaml`.
 
 | Stage | Agent | Primary skill |
 |-------|-------|---------------|
 | Ticket | Planner | `task-creation.md` |
-| Requirements | Planner | `requirements-refinement.md` |
-| Architecture | Architect | `architecture-analysis.md` |
-| Implementation | Implementer | `implementation.md` + **start-change** |
-| Validation | QA | `qa-validation.md` |
-| PR & Review | Reviewer / DevOps | `code-review.md` + **finish-change** |
+| Requirements | Planner | `pipeline/agents.yaml` + Plane card criteria |
+| Architecture | Architect | `pipeline/agents.yaml` + architecture handoff |
+| Implementation | Implementer | `pipeline/agents.yaml` + **start-change** |
+| Validation | QA | `pipeline/agents.yaml` + QA evidence |
+| PR & Review | Reviewer / DevOps | `pipeline/agents.yaml` + **finish-change** |
 | Deployment | DevOps | — |
 | Observability | Observer | `observability.md` |
 
@@ -141,5 +143,4 @@ Product implementation **restarts only** after:
 
 - `.cursor/skills/start-change/SKILL.md` — checklist before coding
 - `.cursor/skills/finish-change/SKILL.md` — checklist before merge
-- `.cursor/skills/branch-naming.md` — branch convention
-- `docs/sdlc/gates.md` — quality gates
+- `.sdlc/gates/README.md` and `.sdlc/gates/paths.yaml` — write gates

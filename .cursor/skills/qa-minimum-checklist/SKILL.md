@@ -1,6 +1,6 @@
 # Skill: QA Minimum Checklist
 
-> **Authority:** `docs/sdlc/master-workflow.md` · subagent `qa.md`
+> **Authority:** `.sdlc/process/master-workflow.md` · subagent `qa.md`
 
 ## Purpose
 
@@ -23,20 +23,34 @@ QA subagent decides scope but **must** run this minimum checklist before APPROVE
 | 6 | Plan validation | `validate-all --card INVES-N` if Plane desc changed |
 | 7 | AC mapping | Each AC from child card verified individually |
 
-## Handoff YAML
+## Handoff Markdown
 
-```yaml
-agent: qa
-card: INVES-N
-tests_passed: true|false
-doctor_exit: 0
-pytest_summary: "N passed"
-ruff_summary: "clean|N fixes needed"
-build_summary: "ok|skipped|fail"
-acceptance_criteria:
-  - id: AC-1
-    passed: true
-next_agent: reviewer  # or auto-fixer if fail
+```markdown
+## Routing
+
+| Field | Value |
+|-------|-------|
+| **Next agent** | reviewer |
+| **Stage complete** | yes |
+| **Previous agent** | qa |
+
+## Session
+
+| Field | Value |
+|-------|-------|
+| **Card** | INVES-N |
+
+## Validation
+
+- **Tests passed:** yes
+- **Doctor exit:** 0
+- **Pytest:** N passed
+- **Ruff:** clean
+- **Build:** skipped
+
+## Acceptance criteria
+
+- AC-1: pass
 ```
 
 ## On failure

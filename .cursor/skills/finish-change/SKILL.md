@@ -1,6 +1,6 @@
 # Skill: Finish Change
 
-> **Workflow authority:** `docs/sdlc/change-lifecycle.md`
+> **Workflow authority:** `.sdlc/process/change-lifecycle.md`
 
 ## Purpose
 
@@ -9,7 +9,7 @@ Finish a work unit: validate, open PR, **autonomous merge** into `develop`, evid
 ## When to use
 
 - Implementation complete and local tests passing
-- After **QA** and **Reviewer** (Task subagents) — see `.cursor/skills/sdlc-orchestrator/SKILL.md`
+- After **QA** and **Reviewer** (Task subagents) — see `.cursor/skills/subagent-delegation/SKILL.md`
 
 ## Procedure
 
@@ -74,14 +74,14 @@ Fill evidence JSON (see `.cursor/skills/plane-formatting/SKILL.md`):
 
 ```bash
 python3 .sdlc/scripts/auto_merge_pr.py --pr <N> --card INVES-N --plane-comment \
-  --evidence-file .sdlc/templates/plane/evidence-INVES-N.json
+  --evidence-file .sdlc/templates/plane/evidence-template.json
 ```
 
 Or manually:
 
 ```bash
 python3 .sdlc/scripts/plane_state.py done --card INVES-N \
-  --evidence-file .sdlc/templates/plane/evidence-INVES-N.json
+  --evidence-file .sdlc/templates/plane/evidence-template.json
 ```
 
 **Required evidence:** Problems Solved, Technical Delivery, Validation, Context for Future.

@@ -9,14 +9,10 @@ gate_paths:
       allowed_prefixes:
       - .sdlc/
       - .cursor/
-      - docs/sdlc/
-      - docs/sdlc
     architecture:
       allowed_prefixes:
       - .sdlc/
       - .cursor/
-      - docs/sdlc/
-      - docs/sdlc
     implementation:
       allowed_prefixes:
       - app/backend/
@@ -28,8 +24,6 @@ gate_paths:
       allowed_prefixes:
       - .sdlc/
       - .cursor/
-      - docs/sdlc/
-      - docs/sdlc
       - .github/
       - Makefile
       - AGENTS.md

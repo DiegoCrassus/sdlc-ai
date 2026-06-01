@@ -23,7 +23,7 @@ Confirm the project name, version, and referenced files are accessible.
 Determine which stage this task belongs to:
 - ticket | requirements | architecture | implementation | validation | review | deployment | observability | incident | autofix
 
-Load the corresponding stage definition from `.sdlc/stages.yaml`.
+Load the corresponding stage definition from `.sdlc/stages/definitions.yaml`.
 
 ### 3. Load Memory Context
 
@@ -57,7 +57,7 @@ Before acting, state explicitly:
 
 ### 6. Check Governance Rules
 
-Read `.sdlc/rules.yaml` and confirm:
+Read `.sdlc/rules/governance.yaml` and confirm:
 - No broad rewrites are planned
 - Assumptions are documented
 - Docs will be updated if required

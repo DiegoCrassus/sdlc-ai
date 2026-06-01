@@ -1,6 +1,6 @@
 # docs — Human-Readable Project Documentation
 
-This directory contains all human-readable documentation for the `sdlc-ai` project.
+This directory contains human-readable product, architecture, infrastructure, operations, roadmap, and handoff documentation for the `sdlc-ai` project.
 
 ## Structure
 
@@ -11,7 +11,7 @@ This directory contains all human-readable documentation for the `sdlc-ai` proje
 | `handoff/`       | State summaries and stage transition records     |
 | `roadmap/`       | Planned work and milestones                      |
 | `operations/`    | Observability, incidents, and maintenance        |
-| `sdlc/`          | AI-Native SDLC model explanation                 |
+| `product/`       | Product runbooks and legacy discovery material   |
 
 ## Conventions
 
@@ -20,3 +20,5 @@ This directory contains all human-readable documentation for the `sdlc-ai` proje
 - Update docs in the same commit as the code change they describe.
 - Handoff summaries go in `handoff/current-state.md`.
 - ADRs (Architecture Decision Records) go in `architecture/decisions.md`.
+- SDLC process, guides, references, and templates live under `.sdlc/`, not `docs/`.
+- Do not create `docs/sdlc/`, `docs/helper/`, or `docs/references/`; Doctor treats those as structural drift.

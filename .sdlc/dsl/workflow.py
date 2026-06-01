@@ -41,7 +41,7 @@ READONLY_WORDS = (
     "?",
 )
 
-SDLC_META_PREFIXES = (".sdlc/", ".cursor/", "docs/sdlc/", ".github/workflows/")
+SDLC_META_PREFIXES = (".sdlc/", ".cursor/", ".github/workflows/")
 
 
 def _app_is_placeholder() -> bool:
@@ -120,20 +120,67 @@ def classify_intent(text: str = "") -> dict[str, Any]:
     }
 
 
+def _yes_no(value: Any) -> str:
+    if isinstance(value, bool):
+        return "yes" if value else "no"
+    return str(value)
+
+
 def write_handoff(classification: dict[str, Any]) -> Path:
+    """Write orchestrator handoff as Markdown (see .sdlc/memory/README.md)."""
     path = ROOT / ".sdlc" / "memory" / "orchestrator-handoff.md"
     path.parent.mkdir(parents=True, exist_ok=True)
-    lines = ["# Orchestrator Handoff (latest)", "", "```yaml"]
-    for key, val in classification.items():
-        if isinstance(val, list):
-            lines.append(f"{key}: {json.dumps(val)}")
-        elif isinstance(val, bool):
-            lines.append(f"{key}: {'true' if val else 'false'}")
-        else:
-            lines.append(f"{key}: {val}")
-    lines.append("```")
-    lines.append("")
-    path.write_text("\n".join(lines), encoding="utf-8")
+
+    intent = classification.get("intent", "")
+    confidence = classification.get("confidence", "")
+    next_agent = classification.get("next_agent", "")
+    scope_hint = classification.get("scope_hint", "")
+    rationale = classification.get("rationale", "")
+    signals = classification.get("greenfield_signals") or []
+    signals_text = ", ".join(signals) if signals else "none"
+
+    body = f"""# Orchestrator Handoff (latest)
+
+## Routing
+
+| Field | Value |
+|-------|-------|
+| **Next agent** | {next_agent} |
+| **Stage complete** | yes |
+| **Previous agent** | workflow-classify |
+
+## Classification
+
+| Field | Value |
+|-------|-------|
+| **Intent** | {intent} |
+| **Confidence** | {confidence} |
+| **Requires Plane** | {_yes_no(classification.get("requires_plane", False))} |
+| **Requires branch** | {_yes_no(classification.get("requires_branch", False))} |
+| **Greenfield signals** | {signals_text} |
+
+## Session
+
+| Field | Value |
+|-------|-------|
+| **Card** | — |
+| **Epic** | — |
+| **Branch** | — |
+| **Stage** | — |
+
+## Scope
+
+{scope_hint or "—"}
+
+## Rationale
+
+{rationale or "—"}
+
+## Blockers
+
+- none
+"""
+    path.write_text(body, encoding="utf-8")
     return path
 
 
