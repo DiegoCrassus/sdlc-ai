@@ -6,7 +6,6 @@ from collections.abc import AsyncIterator
 
 import pytest
 from httpx import ASGITransport, AsyncClient
-
 from marketpulse.config import Settings, get_settings
 from marketpulse.db.session import dispose_engine, init_db
 from marketpulse.main import app

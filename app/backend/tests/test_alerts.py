@@ -10,7 +10,6 @@ from typing import Any
 import jsonschema
 import pytest
 from httpx import AsyncClient
-
 from marketpulse.deps import get_market_provider_dep
 from marketpulse.domain.enums import AlertDirection, AssetClass, DataSource
 from marketpulse.domain.models import Quote, SourceMeta

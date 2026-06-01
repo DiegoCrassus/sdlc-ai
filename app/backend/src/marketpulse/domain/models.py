@@ -4,9 +4,14 @@ from __future__ import annotations
 
 from datetime import datetime
 
+from marketpulse.domain.enums import (
+    AlertDirection,
+    AssetClass,
+    DataSource,
+    Interval,
+    TrendDirection,
+)
 from pydantic import BaseModel, Field
-
-from marketpulse.domain.enums import AlertDirection, AssetClass, DataSource, Interval, TrendDirection
 
 
 class SourceMeta(BaseModel):
