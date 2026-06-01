@@ -12,6 +12,8 @@ Shared utilities, types, and constants used by both frontend and backend.
 
 **Implemented (INVES-42):** Price alert JSON Schema + TypeScript types for watchlist alert CRUD API (ADR-011).
 
+**Implemented (INVES-48):** Watchlist allocation target/status JSON Schema + TypeScript types.
+
 ## Structure
 
 ```
@@ -19,11 +21,13 @@ app/shared/
 ├── contracts/
 │   ├── forecast.schema.json   ← Canonical AssetProjection JSON Schema (ADR-009)
 │   ├── auth.schema.json       ← User, Identify*, AuthMeResponse, SessionError (ADR-010)
-│   └── alerts.schema.json     ← PriceAlert, CreateAlertRequest, AlertListResponse (ADR-011)
+│   ├── alerts.schema.json     ← PriceAlert, CreateAlertRequest, AlertListResponse (ADR-011)
+│   └── allocation.schema.json ← Watchlist allocation target/status contract
 ├── types/
 │   ├── forecast.ts            ← TypeScript mirror for frontend (@shared alias)
 │   ├── auth.ts                ← TypeScript mirror + session cookie constants
-│   └── alerts.ts              ← TypeScript mirror + ALERTS_API_PATHS
+│   ├── alerts.ts              ← TypeScript mirror + ALERTS_API_PATHS
+│   └── allocation.ts          ← TypeScript mirror + WATCHLIST_API_PATHS
 └── README.md
 ```
 
@@ -53,6 +57,19 @@ Session: **HttpOnly cookie** `mp_session` — not Bearer. Frontend uses `credent
 | `AlertError` | 400 / 404 error envelope |
 
 Paths: `ALERTS_API_PATHS.list`, `ALERTS_API_PATHS.detail(alertId)`.
+
+## Watchlist allocation contract (INVES-48)
+
+| Type | Use |
+|------|-----|
+| `AllocationStatus` | `"under_allocated"`, `"balanced"`, or `"over_allocated"` summary status |
+| `WatchlistItem` | Existing watchlist row plus optional/nullable `target_percent` |
+| `WatchlistAllocationSummary` | Overall `{ target_percent_total, status }` |
+| `WatchlistResponse` | GET `/api/v1/watchlist` success JSON `{ items, allocation_summary }` |
+| `UpdateWatchlistAllocationRequest` | PATCH body `{ target_percent: number | null }`; `null` clears the target |
+| `UpdateWatchlistAllocationResponse` | PATCH success JSON `{ item, allocation_summary }` |
+
+Paths: `WATCHLIST_API_PATHS.list`, `WATCHLIST_API_PATHS.itemAllocation(symbol)`.
 
 ## What Belongs Here
 
@@ -85,4 +102,5 @@ Vite alias `@shared` → `app/shared` (see `app/frontend/vite.config.ts`). Re-ex
 ```ts
 import type { User, IdentifyRequest } from "@shared/types/auth";
 import type { PriceAlert, CreateAlertRequest } from "@shared/types/alerts";
+import type { WatchlistResponse, UpdateWatchlistAllocationRequest } from "@shared/types/allocation";
 ```
