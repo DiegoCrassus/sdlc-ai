@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 from datetime import datetime
+from decimal import Decimal, InvalidOperation
+from typing import Literal
 
 from marketpulse.domain.enums import (
     AlertDirection,
@@ -11,7 +13,7 @@ from marketpulse.domain.enums import (
     Interval,
     TrendDirection,
 )
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class SourceMeta(BaseModel):
@@ -140,10 +142,47 @@ class WatchlistItem(BaseModel):
     asset_class: AssetClass
     price: float
     change_percent: float
+    target_percent: float | None = None
+
+
+class WatchlistAllocationSummary(BaseModel):
+    target_percent_total: float
+    status: Literal["under_allocated", "balanced", "over_allocated"]
 
 
 class Watchlist(BaseModel):
     items: list[WatchlistItem]
+    allocation_summary: WatchlistAllocationSummary
+
+
+class UpdateWatchlistAllocationRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    target_percent: Decimal | None
+
+    @field_validator("target_percent", mode="before")
+    @classmethod
+    def validate_target_percent(cls, value: object) -> Decimal | None:
+        if value is None:
+            return None
+        if isinstance(value, bool) or not isinstance(value, int | float | Decimal):
+            raise ValueError("target_percent must be a decimal percent")
+        try:
+            decimal_value = Decimal(str(value))
+        except (InvalidOperation, ValueError) as exc:
+            raise ValueError("target_percent must be a decimal percent") from exc
+        if not decimal_value.is_finite():
+            raise ValueError("target_percent must be finite")
+        if decimal_value <= 0 or decimal_value > 100:
+            raise ValueError("target_percent must be > 0 and <= 100")
+        if decimal_value.as_tuple().exponent < -2:
+            raise ValueError("target_percent must have at most two decimal places")
+        return decimal_value
+
+
+class UpdateWatchlistAllocationResponse(BaseModel):
+    item: WatchlistItem
+    allocation_summary: WatchlistAllocationSummary
 
 
 class HealthResponse(BaseModel):
