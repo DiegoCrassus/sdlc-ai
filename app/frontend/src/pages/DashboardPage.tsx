@@ -7,6 +7,7 @@ import { PriceChart } from "../components/PriceChart";
 import { ProjectionPanel } from "../components/ProjectionPanel";
 import { TickerTape } from "../components/TickerTape";
 import { WatchlistTable } from "../components/WatchlistTable";
+import { useAlerts } from "../hooks/useAlerts";
 import {
   useMarketOverview,
   useOhlcv,
@@ -22,6 +23,7 @@ export function DashboardPage() {
   const overviewQuery = useMarketOverview();
   const tickerQuery = useTickerQuotes(TICKER_SYMBOLS);
   const watchlistQuery = useWatchlist();
+  const alertsQuery = useAlerts();
   const ohlcvQuery = useOhlcv(selectedSymbol);
   const projectionQuery = useProjection(selectedSymbol, 7);
 
@@ -68,6 +70,12 @@ export function DashboardPage() {
           selectedSymbol={selectedSymbol}
           onSelect={setSelectedSymbol}
           isLoading={watchlistQuery.isLoading}
+          alerts={alertsQuery.alerts}
+          onCreateAlert={async (payload) => {
+            await alertsQuery.createAlert(payload);
+          }}
+          isCreatingAlert={alertsQuery.isCreating}
+          createAlertError={alertsQuery.createError}
         />
       </main>
     </>
