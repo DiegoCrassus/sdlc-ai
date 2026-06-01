@@ -1,6 +1,6 @@
 # Skill: Plane Task Creation
 
-> **Authority:** `docs/sdlc/master-workflow.md` · `.sdlc/plane-granularity.yaml`
+> **Authority:** `.sdlc/process/master-workflow.md` · `.sdlc/workboard/granularity.yaml`
 
 ## Purpose
 

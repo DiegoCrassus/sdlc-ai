@@ -55,4 +55,4 @@ When a deployable service exists, the procedure will follow this pattern:
 ## CI/CD Pipeline
 
 Not yet configured. Will use GitHub Actions when backend/frontend services are defined.
-See `.sdlc/integrations.yaml` — `cicd` entry.
+See `.sdlc/integrations/services.yaml` for integration roles and environment variables.

@@ -6,7 +6,7 @@ No human approval required when all gates pass (see auto-merge-policy.md).
 Usage:
   python3 .sdlc/scripts/auto_merge_pr.py --pr 32
   python3 .sdlc/scripts/auto_merge_pr.py --branch feature/INVES-20-market-data
-  python3 .sdlc/scripts/auto_merge_pr.py --pr 32 --card INVES-20 --plane-comment --evidence-file .sdlc/templates/plane/evidence-INVES-20.json
+  python3 .sdlc/scripts/auto_merge_pr.py --pr 32 --card INVES-20 --plane-comment --evidence-file .sdlc/templates/plane/evidence-template.json
 """
 
 from __future__ import annotations

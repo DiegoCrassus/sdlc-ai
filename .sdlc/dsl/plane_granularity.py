@@ -16,11 +16,12 @@ INVES_RE = re.compile(r"INVES-(\d+)", re.IGNORECASE)
 
 
 def load_granularity_config(root: Path) -> dict[str, Any]:
-    path = root / ".sdlc" / "plane-granularity.yaml"
+    path = root / ".sdlc" / "workboard" / "granularity.yaml"
     if yaml is None or not path.is_file():
         return {}
     with path.open(encoding="utf-8") as f:
-        return yaml.safe_load(f) or {}
+        data = yaml.safe_load(f) or {}
+    return data.get("workboard_granularity") or data
 
 
 def strip_html(html: str) -> str:
@@ -33,8 +34,22 @@ def detect_intent_from_handoff(root: Path) -> str:
     if not handoff.is_file():
         return "FEATURE"
     content = handoff.read_text(encoding="utf-8").lower()
-    for key in ("greenfield", "feature", "bugfix", "hotfix", "sdlc_meta", "docs_only", "infra"):
+    intents = (
+        "greenfield",
+        "feature",
+        "bugfix",
+        "hotfix",
+        "sdlc_meta",
+        "docs_only",
+        "infra",
+        "readonly",
+    )
+    for key in intents:
+        # Legacy YAML-in-markdown: intent: feature
         if f"intent: {key}" in content or f"intent:{key}" in content:
+            return key.upper()
+        # Markdown table: | **intent** | feature |
+        if re.search(rf"\|\s*\*\*intent\*\*\s*\|\s*{re.escape(key)}\s*\|", content):
             return key.upper()
     return "FEATURE"
 

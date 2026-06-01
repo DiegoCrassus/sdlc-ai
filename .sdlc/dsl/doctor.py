@@ -1,9 +1,11 @@
-"""Repository-level Doctor checks driven by .sdlc/doctor.yaml."""
+"""Repository-level Doctor checks driven by .sdlc/doctor/checks.yaml."""
+
+from __future__ import annotations
 
 import os
 import sys
 from pathlib import Path
-from typing import List, Tuple
+from typing import Any
 
 try:
     import yaml
@@ -11,14 +13,19 @@ except ImportError:
     print("ERROR: PyYAML is not installed. Run: pip install PyYAML", file=sys.stderr)
     sys.exit(1)
 
-Finding = Tuple[str, str]  # (level, message)  level: PASS | FAIL | WARN
+Finding = tuple[str, str]
 
-DOCTOR_YAML = ".sdlc/doctor.yaml"
+DOCTOR_CHECKS = ".sdlc/doctor/checks.yaml"
 
 
-# ─────────────────────────────────────────────
-# Low-level check helpers
-# ─────────────────────────────────────────────
+def _load_doctor_checks(root: str) -> dict[str, Any]:
+    path = os.path.join(root, DOCTOR_CHECKS)
+    if not os.path.isfile(path):
+        raise FileNotFoundError(f"Doctor config missing: {DOCTOR_CHECKS}")
+    with open(path, encoding="utf-8") as fh:
+        config = yaml.safe_load(fh) or {}
+    return config.get("checks", config.get("doctor", {}).get("checks", config))
+
 
 def _check_dir(root: str, rel_path: str) -> Finding:
     if os.path.isdir(os.path.join(root, rel_path)):
@@ -30,6 +37,12 @@ def _check_file(root: str, rel_path: str) -> Finding:
     if os.path.isfile(os.path.join(root, rel_path)):
         return ("PASS", f"Required file exists: {rel_path}")
     return ("FAIL", f"Missing file: {rel_path}")
+
+
+def _check_absent(root: str, rel_path: str) -> Finding:
+    if not os.path.exists(os.path.join(root, rel_path)):
+        return ("PASS", f"Legacy path absent: {rel_path}")
+    return ("FAIL", f"Legacy path must not exist in v5 layout: {rel_path}")
 
 
 def _check_file_nonempty(root: str, rel_path: str) -> Finding:
@@ -46,7 +59,7 @@ def _check_yaml(root: str, rel_path: str) -> Finding:
     if not os.path.isfile(full):
         return ("FAIL", f"YAML file missing: {rel_path}")
     try:
-        with open(full, "r", encoding="utf-8") as fh:
+        with open(full, encoding="utf-8") as fh:
             data = yaml.safe_load(fh)
         if data is None:
             return ("FAIL", f"YAML file is empty: {rel_path}")
@@ -55,76 +68,108 @@ def _check_yaml(root: str, rel_path: str) -> Finding:
         return ("FAIL", f"YAML parse error in {rel_path}: {exc}")
 
 
+def _check_file_contains(root: str, rel_path: str, marker: str) -> Finding:
+    full = os.path.join(root, rel_path)
+    if not os.path.isfile(full):
+        return ("FAIL", f"Missing file for marker check: {rel_path}")
+    with open(full, encoding="utf-8") as fh:
+        content = fh.read()
+    if marker in content:
+        return ("PASS", f"Required marker found in {rel_path}: {marker}")
+    return ("FAIL", f"Missing required marker in {rel_path}: {marker}")
+
+
+def _check_file_not_contains(root: str, rel_path: str, marker: str) -> Finding:
+    full = os.path.join(root, rel_path)
+    if not os.path.isfile(full):
+        return ("PASS", f"File absent for forbidden marker check: {rel_path}")
+    with open(full, encoding="utf-8") as fh:
+        content = fh.read()
+    if marker not in content:
+        return ("PASS", f"Forbidden marker absent in {rel_path}: {marker}")
+    return ("FAIL", f"Forbidden marker found in {rel_path}: {marker}")
+
+
 def _check_makefile_target(root: str, target: str) -> Finding:
     makefile = os.path.join(root, "Makefile")
     if not os.path.isfile(makefile):
         return ("FAIL", f"Makefile missing — cannot check target: {target}")
-    with open(makefile, "r", encoding="utf-8") as fh:
+    with open(makefile, encoding="utf-8") as fh:
         content = fh.read()
     if f"{target}:" in content:
         return ("PASS", f"Makefile target exists: {target}")
     return ("FAIL", f"Missing Makefile target: {target}")
 
 
-def _check_integration_env(integration_id: str, env_var: str) -> Finding:
+def _check_integration_env(role: str, env_var: str) -> Finding:
     if os.environ.get(env_var):
-        return ("PASS", f"Integration configured: {integration_id} ({env_var})")
-    return ("WARN", f"Integration not configured: {integration_id} ({env_var} not set)")
+        return ("PASS", f"Integration configured: {role} ({env_var})")
+    return ("WARN", f"Integration not configured: {role} ({env_var} not set)")
 
 
-# ─────────────────────────────────────────────
-# Main runner — reads checks from doctor.yaml
-# ─────────────────────────────────────────────
+def run_doctor(root: str) -> list[Finding]:
+    findings: list[Finding] = []
 
-def run_doctor(root: str) -> List[Finding]:
-    """Run all Doctor checks driven by .sdlc/doctor.yaml and return findings."""
-    findings: List[Finding] = []
-
-    doctor_path = os.path.join(root, DOCTOR_YAML)
-    if not os.path.isfile(doctor_path):
-        findings.append(("FAIL", f"Doctor config missing: {DOCTOR_YAML}"))
+    try:
+        checks = _load_doctor_checks(root)
+    except FileNotFoundError as exc:
+        findings.append(("FAIL", str(exc)))
         return findings
 
-    with open(doctor_path, "r", encoding="utf-8") as fh:
-        config = yaml.safe_load(fh)
-
-    checks = config.get("checks", {})
-
-    # --- Directories ---
     for item in checks.get("directories", {}).get("items", []):
         findings.append(_check_dir(root, item))
 
-    # --- Required files ---
     for item in checks.get("files", {}).get("items", []):
         findings.append(_check_file(root, item))
 
-    # --- Cursor structure (commands, rules, skills, agents, hooks) ---
+    for item in checks.get("forbidden_paths", {}).get("items", []):
+        findings.append(_check_absent(root, item))
+
     cursor = checks.get("cursor", {})
     for section in ("commands", "rules", "skills", "agents", "hooks"):
         for item in cursor.get(section, []):
             findings.append(_check_file(root, item))
 
-    # --- Docs (non-empty) ---
     for item in checks.get("docs", {}).get("items", []):
         findings.append(_check_file_nonempty(root, item))
 
-    # --- YAML validity ---
     for item in checks.get("yaml_validity", {}).get("files", []):
         findings.append(_check_yaml(root, item))
 
-    # --- Makefile targets ---
+    for item in checks.get("content_markers", {}).get("items", []):
+        path = item.get("path")
+        for marker in item.get("contains", []):
+            if path and marker:
+                findings.append(_check_file_contains(root, path, marker))
+
+    for item in checks.get("forbidden_content", {}).get("items", []):
+        path = item.get("path")
+        for marker in item.get("not_contains", []):
+            if path and marker:
+                findings.append(_check_file_not_contains(root, path, marker))
+
     for target in checks.get("makefile", {}).get("targets", []):
         findings.append(_check_makefile_target(root, target))
 
-    # --- Workflow enforcement files (non-empty) ---
     for item in checks.get("workflow_files", {}).get("items", []):
         findings.append(_check_file_nonempty(root, item))
 
-    # --- Integration env vars (warnings only) ---
-    for entry in checks.get("integrations", {}).get("items", []):
-        findings.append(_check_integration_env(entry["id"], entry["env"]))
+    try:
+        sys.path.insert(0, os.path.join(root, ".sdlc", "dsl"))
+        from core_config import env_map  # noqa: WPS433
 
-    # --- Python DSL importable ---
+        logical_env = env_map(root)
+    except Exception:
+        logical_env = {}
+
+    for entry in checks.get("integrations", {}).get("items", []):
+        role = entry.get("role") or entry.get("id", "integration")
+        env_var = entry.get("env") or entry.get("config_env") or ""
+        if entry.get("env_logical") and logical_env:
+            env_var = logical_env.get(entry["env_logical"], env_var)
+        if env_var:
+            findings.append(_check_integration_env(role, env_var))
+
     dsl_entry = checks.get("python_dsl", {}).get("importable")
     if dsl_entry:
         findings.append(_check_file(root, dsl_entry))
@@ -132,12 +177,7 @@ def run_doctor(root: str) -> List[Finding]:
     return findings
 
 
-# ─────────────────────────────────────────────
-# Report printer
-# ─────────────────────────────────────────────
-
-def print_report(findings: List[Finding]) -> int:
-    """Print the Doctor report and return exit code (0=pass, 1=fail)."""
+def print_report(findings: list[Finding], root: str | None = None) -> int:
     pass_count = warn_count = fail_count = 0
 
     for level, message in findings:
@@ -155,5 +195,16 @@ def print_report(findings: List[Finding]) -> int:
 
     print()
     print(f"Doctor summary: {pass_count} passed, {warn_count} warnings, {fail_count} failed")
+
+    repo = Path(root or os.getcwd())
+    try:
+        from doctor_health_canvas import write_health_canvas  # noqa: WPS433
+
+        canvas_path = write_health_canvas(findings, repo)
+        score = round(pass_count / max(len(findings), 1) * 100)
+        print(f"[CANVAS] Health report: {canvas_path} (score {score}%)")
+        print("[INFO] Summary: .sdlc/memory/doctor-health.json")
+    except Exception as exc:
+        print(f"[WARN] Could not write health canvas: {exc}")
 
     return 0 if fail_count == 0 else 1

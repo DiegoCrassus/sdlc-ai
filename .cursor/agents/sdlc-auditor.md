@@ -1,6 +1,6 @@
 ---
 name: sdlc-auditor
-description: "Run a full autonomous SDLC audit via /sdlc-audit. Evaluates pipeline autonomy score, identifies critical gaps (FAIL/WARN), generates a canvas report, and creates GitHub Issues for high-priority FAILs. Use on-demand or after significant structural changes."
+description: "Run a full autonomous SDLC audit via make sdlc-audit. Evaluates pipeline autonomy score, identifies critical gaps (FAIL/WARN), generates a canvas report, and creates GitHub Issues for high-priority FAILs. Use on-demand or after significant structural changes."
 model: inherit
 readonly: false
 ---
@@ -13,7 +13,7 @@ Run a complete, 100% autonomous SDLC audit — verifying structure, subagents, s
 
 ## When it activates
 
-- When requested via `@sdlc-auditor` or `/sdlc-audit` command
+- When requested explicitly or via `make sdlc-audit`
 - After any significant structural project change (new subagent, skill, workflow)
 - During periodic autonomous maintenance cycles (suggested: biweekly)
 - Before a retrospective or planning meeting

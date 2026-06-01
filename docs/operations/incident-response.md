@@ -29,7 +29,7 @@ Record: initial observation in `.sdlc/memory/incidents.md`.
 ### 3. Communicate
 
 For critical/high severity:
-- Notify team immediately (Slack or email — see `.sdlc/integrations.yaml`)
+- Notify team immediately (Slack or email — see `.sdlc/integrations/services.yaml`)
 - Set status page if applicable
 
 ### 4. Mitigate

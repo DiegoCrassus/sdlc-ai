@@ -8,7 +8,7 @@
 
 ## Workflow
 
-**Source of truth:** `docs/sdlc/change-lifecycle.md`
+**Source of truth:** `.sdlc/process/change-lifecycle.md`
 
 ## Environments
 

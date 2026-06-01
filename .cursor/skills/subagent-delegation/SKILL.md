@@ -1,6 +1,6 @@
-# Skill: Subagent Delegation (Orchestrator)
+# Skill: Subagent Delegation
 
-> **Authority:** `docs/sdlc/master-workflow.md` · `003-orchestrator-delegation-only.mdc`
+> **Authority:** `.sdlc/process/master-workflow.md` · `.cursor/rules/orchestrator.mdc`
 
 ## Purpose
 
@@ -26,13 +26,23 @@ The Orchestrator **only coordinates**. Every action that mutates code, git, CI, 
 | Merge when CI green | `devops` + `workflow finish` | Task only |
 | Plane state / comments | `planner` or Orchestrator shell via scripts | Scripts OK |
 
+## Plane granularity
+
+| Intent | Plane structure |
+|--------|-----------------|
+| GREENFIELD | 1 epic + >=3 child cards |
+| FEATURE | 1 epic + >=2 child cards |
+| BUGFIX/HOTFIX | 1 focused card OK |
+
+Validate with `python3 .sdlc/scripts/plane_card.py validate-all --card INVES-N` before `workflow start`.
+
 ## Orchestrator allowed without Task
 
 - `python3 .sdlc/dsl/cli.py workflow …` meta-tools
 - `python3 .sdlc/scripts/plane_state.py …`
 - Read files, `workflow status`, `discovery_hook.py`
 - READONLY answers to user
-- Spawning the **next** Task after handoff YAML received
+- Spawning the **next** Task after handoff Markdown received
 
 ## Orchestrator forbidden (never do directly)
 
@@ -45,7 +55,7 @@ The Orchestrator **only coordinates**. Every action that mutates code, git, CI, 
 ## Session loop (mandatory)
 
 ```
-1. Task(Intent Analyst) → handoff YAML
+1. Task(Intent Analyst) → handoff Markdown
 2. Task(Planner) → epic INVES-N + child cards INVES-N+1… (validate-all)
 3. python3 .sdlc/dsl/cli.py workflow discover
 4. Task(Architect) → notes on epic Plane
@@ -62,19 +72,15 @@ The Orchestrator **only coordinates**. Every action that mutates code, git, CI, 
 
 ## Handoff contract
 
-Each subagent returns YAML in `.sdlc/memory/orchestrator-handoff.md`:
+Each subagent overwrites `.sdlc/memory/orchestrator-handoff.md` using **Markdown sections** (see `.sdlc/memory/README.md`). Minimum:
 
-```yaml
-agent: implementer
-card: INVES-26
-stage_complete: true|false
-next_agent: qa
-commits: ["abc1234"]
-branch: feature/INVES-26-backend-api
-blockers: []
-```
+| Section | Key fields |
+|---------|------------|
+| **Routing** | **Next agent**, **Stage complete**, **Previous agent** |
+| **Session** | **Card**, **Branch**, **Stage** |
+| **Classification** | **Intent** (when applicable) |
 
-Orchestrator reads handoff → spawns `next_agent` → does **not** continue work inline.
+Orchestrator reads **Next agent** → spawns that subagent → does **not** continue work inline.
 
 ## Autonomy (no human)
 
@@ -85,3 +91,13 @@ Orchestrator reads handoff → spawns `next_agent` → does **not** continue wor
 - Merge via `auto_merge_pr.py` when APPROVE + CI green
 
 Human only when: AutoFixer exhausted, ESCALATE, or external blocker (Plane/API down).
+
+## Task prompt skeleton
+
+```text
+Read .cursor/agents/<agent>.md and the relevant skills.
+Card: INVES-N (child card, not epic unless this is planning/architecture).
+Branch: feature/INVES-N-<slug>
+Return Markdown handoff to .sdlc/memory/orchestrator-handoff.md.
+Do not ask the human to commit, push, or merge.
+```

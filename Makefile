@@ -29,7 +29,7 @@ help:
 	@echo "  sdlc-meta-commit  Meta-tool: lint + commit + push (CARD=INVES-N MSG='...')"
 	@echo "  sdlc-meta-qa      Meta-tool: tests + doctor + QA evidence (CARD=INVES-N)"
 	@echo ""
-	@echo "Workflow: docs/sdlc/change-lifecycle.md"
+	@echo "Workflow: .sdlc/process/change-lifecycle.md"
 
 PYTHON ?= $(shell command -v python3 2>/dev/null || command -v python 2>/dev/null)
 

@@ -1,6 +1,6 @@
 ---
 description: Documentation sync and handoff rules. Applied when architecture, infra, or interfaces change.
-globs: ["docs/**", "app/**"]
+globs: ["docs/**", "app/**", ".sdlc/process/**"]
 ---
 
 # Documentation and Handoff
@@ -23,7 +23,7 @@ Update docs in the same work unit when:
 | `docs/handoff/`            | State summaries and transition records   |
 | `docs/roadmap/`            | Planned work and timeline                |
 | `docs/operations/`         | Observability, incidents, maintenance    |
-| `docs/sdlc/`               | SDLC model explanation                   |
+| `.sdlc/process/`           | SDLC process authority                   |
 
 ## Docs Quality
 

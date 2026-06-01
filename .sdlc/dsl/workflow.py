@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import re
 import subprocess
 import sys
 from pathlib import Path
@@ -41,7 +40,7 @@ READONLY_WORDS = (
     "?",
 )
 
-SDLC_META_PREFIXES = (".sdlc/", ".cursor/", "docs/sdlc/", ".github/workflows/")
+SDLC_META_PREFIXES = (".sdlc/", ".cursor/", ".github/workflows/")
 
 
 def _app_is_placeholder() -> bool:
@@ -120,20 +119,67 @@ def classify_intent(text: str = "") -> dict[str, Any]:
     }
 
 
+def _yes_no(value: Any) -> str:
+    if isinstance(value, bool):
+        return "yes" if value else "no"
+    return str(value)
+
+
 def write_handoff(classification: dict[str, Any]) -> Path:
+    """Write orchestrator handoff as Markdown (see .sdlc/memory/README.md)."""
     path = ROOT / ".sdlc" / "memory" / "orchestrator-handoff.md"
     path.parent.mkdir(parents=True, exist_ok=True)
-    lines = ["# Orchestrator Handoff (latest)", "", "```yaml"]
-    for key, val in classification.items():
-        if isinstance(val, list):
-            lines.append(f"{key}: {json.dumps(val)}")
-        elif isinstance(val, bool):
-            lines.append(f"{key}: {'true' if val else 'false'}")
-        else:
-            lines.append(f"{key}: {val}")
-    lines.append("```")
-    lines.append("")
-    path.write_text("\n".join(lines), encoding="utf-8")
+
+    intent = classification.get("intent", "")
+    confidence = classification.get("confidence", "")
+    next_agent = classification.get("next_agent", "")
+    scope_hint = classification.get("scope_hint", "")
+    rationale = classification.get("rationale", "")
+    signals = classification.get("greenfield_signals") or []
+    signals_text = ", ".join(signals) if signals else "none"
+
+    body = f"""# Orchestrator Handoff (latest)
+
+## Routing
+
+| Field | Value |
+|-------|-------|
+| **Next agent** | {next_agent} |
+| **Stage complete** | yes |
+| **Previous agent** | workflow-classify |
+
+## Classification
+
+| Field | Value |
+|-------|-------|
+| **Intent** | {intent} |
+| **Confidence** | {confidence} |
+| **Requires Plane** | {_yes_no(classification.get("requires_plane", False))} |
+| **Requires branch** | {_yes_no(classification.get("requires_branch", False))} |
+| **Greenfield signals** | {signals_text} |
+
+## Session
+
+| Field | Value |
+|-------|-------|
+| **Card** | — |
+| **Epic** | — |
+| **Branch** | — |
+| **Stage** | — |
+
+## Scope
+
+{scope_hint or "—"}
+
+## Rationale
+
+{rationale or "—"}
+
+## Blockers
+
+- none
+"""
+    path.write_text(body, encoding="utf-8")
     return path
 
 
@@ -191,7 +237,6 @@ def cmd_start(args: argparse.Namespace) -> int:
 
     # Block workflow start on epic — use child implementable card
     try:
-        import httpx
 
         sys.path.insert(0, str(ROOT / ".sdlc" / "scripts"))
         from plane_card import _api, find_issue_uuid, get_issue, parse_card  # noqa: E402
@@ -290,7 +335,7 @@ def cmd_finish(args: argparse.Namespace) -> int:
         close_gate()
         return proc.returncode
     close_gate()
-    print("OK: gate closed" + (f" — merge skipped (no --pr)" if not args.pr else ""))
+    print("OK: gate closed" + (" — merge skipped (no --pr)" if not args.pr else ""))
     return 0
 
 
@@ -314,7 +359,7 @@ def run_workflow(argv: list[str]) -> int:
     p = sub.add_parser("plan")
     p.add_argument("--card", required=True)
 
-    d = sub.add_parser("discover", help="Run discovery hook (legacy docs, app state)")
+    sub.add_parser("discover", help="Run discovery hook (legacy docs, app state)")
 
     a = sub.add_parser("arch")
     a.add_argument("--card", default="")

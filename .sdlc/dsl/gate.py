@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import json
-import os
 from dataclasses import asdict, dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
@@ -61,7 +60,9 @@ def repo_root(start: Path | None = None) -> Path:
 
 
 def gate_config_path(root: Path | None = None) -> Path:
-    return (root or repo_root()) / ".sdlc" / "gate-paths.yaml"
+    """Return the canonical v5 gate config path."""
+    base = (root or repo_root()) / ".sdlc"
+    return base / "gates" / "paths.yaml"
 
 
 def session_gate_path(root: Path | None = None) -> Path:
@@ -76,7 +77,7 @@ def load_gate_config(root: Path | None = None) -> dict[str, Any]:
         raise FileNotFoundError(f"Missing gate config: {path}")
     with path.open(encoding="utf-8") as f:
         data = yaml.safe_load(f) or {}
-    return data
+    return data.get("gate_paths") or {}
 
 
 def load_session_gate(root: Path | None = None) -> SessionGate:

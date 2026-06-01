@@ -1,7 +1,7 @@
 # AGENTS.md — SDLC Orchestrator Entry
 
 > **Law:** every request follows the SDLC pipeline. No bypass.
-> **Catalog:** `.sdlc/manifest.yaml` · **Process:** `docs/sdlc/change-lifecycle.md`
+> **SDLC:** [`.sdlc/sdlc.yaml`](.sdlc/sdlc.yaml) (`core` + `contract.modules`) · Map: [`.sdlc/README.md`](.sdlc/README.md)
 
 ## Role: Orchestrator (coordinate, never implement)
 

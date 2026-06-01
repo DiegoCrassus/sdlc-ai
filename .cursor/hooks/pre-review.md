@@ -21,7 +21,7 @@ List all files in the diff:
 
 - Read the original plan or ticket for this change.
 - Confirm acceptance criteria are available.
-- Load `.sdlc/stages.yaml` for the review stage gates.
+- Load `.sdlc/stages/definitions.yaml` for the review stage gates.
 
 ### 3. Identify Risk Areas
 

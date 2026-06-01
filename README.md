@@ -40,9 +40,9 @@ for the full list of targets and configurable variables.
 
 The `app/` tree was reset to allow a **full greenfield SDLC run** in a new agent session, which produced the MarketPulse app now under `app/backend/` and `app/frontend/`.
 
-**Human guide (full context):** [SDLC-GUIDE.md](SDLC-GUIDE.md)  
-**Deep dive (papers P0/P1 + behavior):** [SDLC-DEEP-DIVE.md](SDLC-DEEP-DIVE.md)  
-**Initialization spec:** [SDLC-basic.txt](SDLC-basic.txt)
+**SDLC process authority:** [.sdlc/process/master-workflow.md](.sdlc/process/master-workflow.md)
+**Change lifecycle authority:** [.sdlc/process/change-lifecycle.md](.sdlc/process/change-lifecycle.md)
+**SDLC module index:** [.sdlc/README.md](.sdlc/README.md)
 
 Start with: *Build a product called Investment Radar …* — see [docs/handoff/current-state.md](docs/handoff/current-state.md).
 
@@ -76,21 +76,19 @@ Exit code `0` = all required checks pass. Exit code `1` = failures found.
    - `.sdlc/memory/business-rules.md`
 
 3. **Use the SDLC commands** in Cursor chat:
-   - `@sdlc-plan` — Plan a new ticket
-   - `@sdlc-implement` — Implement a planned task
+   - `@sdlc-run` — Run the orchestrated SDLC pipeline
    - `@sdlc-review` — Review a PR or diff
-   - `@sdlc-handoff` — Generate a handoff summary
    - `@sdlc-doctor` — Run the Doctor
 
 ## Basic Workflow
 
 ```
-1. Plan      → sdlc-plan: convert ticket into structured plan
-2. Architect → sdlc-plan / architect subagent: define technical approach
-3. Implement → sdlc-implement: produce focused, tested code changes
-4. Validate  → qa subagent: verify acceptance criteria with real evidence
-5. Review    → sdlc-review: check correctness, security, maintainability
-6. Handoff   → sdlc-handoff: generate stage transition summary
+1. Run       → sdlc-run: start or resume the orchestrated pipeline
+2. Plan      → planner subagent: create Plane epic and child cards
+3. Architect → architect subagent: define technical approach
+4. Implement → implementer subagent: produce focused code changes
+5. Validate  → qa subagent: verify acceptance criteria with real evidence
+6. Review    → reviewer/devops subagents: approve, PR, merge, and finish
 ```
 
 ## Key Conventions
@@ -104,10 +102,9 @@ Exit code `0` = all required checks pass. Exit code `1` = failures found.
 ## Documentation
 
 - [Architecture Overview](docs/architecture/overview.md)
-- [AI-Native SDLC Guide](docs/sdlc/ai-native-sdlc.md)
-- [SDLC Workflows](docs/sdlc/workflows.md)
-- [Validation Gates](docs/sdlc/gates.md)
-- [Doctor Guide](docs/sdlc/doctor.md)
+- [SDLC Master Workflow](.sdlc/process/master-workflow.md)
+- [Change Lifecycle](.sdlc/process/change-lifecycle.md)
+- [SDLC Module Index](.sdlc/README.md)
 - [Current State](docs/handoff/current-state.md)
 
 ## License

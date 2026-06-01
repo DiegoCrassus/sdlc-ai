@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import json
 import sys
 from pathlib import Path
 
@@ -18,8 +17,6 @@ from gate import (  # noqa: E402
     is_protected,
     load_gate_config,
     open_gate,
-    save_session_gate,
-    SessionGate,
 )
 
 
@@ -65,5 +62,5 @@ def test_gate_open_blocks_wrong_stage(clean_gate):
 
 def test_sdlc_meta_allows_cursor(clean_gate):
     open_gate(card="INVES-99", branch="sdlc/meta", stage="sdlc_meta")
-    ok, msg = check_write(".cursor/rules/001-sdlc-anti-bypass.mdc")
+    ok, msg = check_write(".cursor/rules/orchestrator.mdc")
     assert ok, msg

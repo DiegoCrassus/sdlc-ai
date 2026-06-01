@@ -1,6 +1,6 @@
 # Skill: Start Change
 
-> **Workflow authority:** `docs/sdlc/change-lifecycle.md`
+> **Workflow authority:** `.sdlc/process/change-lifecycle.md`
 
 ## Purpose
 

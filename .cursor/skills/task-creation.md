@@ -8,7 +8,7 @@ Produce a complete, structured task plan from a raw idea or ticket request. Ever
 
 - At the Ticket or Requirements stage
 - When a user or agent provides a raw idea, request, or bug report
-- When `@sdlc-plan` is invoked in Cursor chat
+- When planning is delegated by `@sdlc-run` or the Orchestrator
 - When creating sub-tasks from an approved architecture plan
 
 ---
@@ -198,4 +198,4 @@ Before delivering the plan, verify:
 
 ## Reference Example
 
-See `EXAMPLE-SDLC-PLAN.md` at the repository root for a complete, annotated example of this skill applied to a real feature.
+See `.sdlc/templates/planner/example-sdlc-plan.md` for a complete, annotated example of this skill applied to a real feature.
