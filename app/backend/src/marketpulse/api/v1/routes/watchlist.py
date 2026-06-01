@@ -2,20 +2,21 @@
 
 from __future__ import annotations
 
+from typing import Annotated
+
 from fastapi import APIRouter, Depends, HTTPException
 
 from marketpulse.deps import get_market_provider_dep
 from marketpulse.domain.models import Watchlist, WatchlistItem
+from marketpulse.domain.watchlist import DEFAULT_WATCHLIST
 from marketpulse.providers.base import MarketDataProvider
-
-DEFAULT_WATCHLIST = ("AAPL", "MSFT", "NVDA", "BTC", "ETH", "SOL", "EUR/USD")
 
 router = APIRouter(prefix="/watchlist", tags=["watchlist"])
 
 
 @router.get("", response_model=Watchlist)
 async def get_watchlist(
-    provider: MarketDataProvider = Depends(get_market_provider_dep),
+    provider: Annotated[MarketDataProvider, Depends(get_market_provider_dep)],
 ) -> Watchlist:
     items: list[WatchlistItem] = []
     for symbol in DEFAULT_WATCHLIST:
