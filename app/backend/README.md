@@ -7,6 +7,7 @@ Python FastAPI service for the **MarketPulse** financial and crypto dashboard.
 - Python 3.11+
 - FastAPI + Uvicorn
 - Pydantic v2 + pydantic-settings
+- SQLAlchemy 2.0 async + aiosqlite (price alerts)
 - Provider pattern: `mock` (default) | `twelve_data` (stub)
 
 ## Setup
@@ -49,6 +50,9 @@ python -m pytest app/backend/tests/ -v
 | GET | `/api/v1/markets/search?q=bit` | Symbol search |
 | GET | `/api/v1/projections/{symbol}` | Linear trend projection |
 | GET | `/api/v1/watchlist` | Default watchlist |
+| POST | `/api/v1/alerts` | Create price alert (watchlist symbol) |
+| GET | `/api/v1/alerts` | List alerts (evaluates pending triggers) |
+| DELETE | `/api/v1/alerts/{alert_id}` | Delete alert |
 
 ## Layout
 

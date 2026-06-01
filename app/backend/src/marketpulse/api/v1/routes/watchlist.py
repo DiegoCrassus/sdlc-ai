@@ -6,9 +6,8 @@ from fastapi import APIRouter, Depends, HTTPException
 
 from marketpulse.deps import get_market_provider_dep
 from marketpulse.domain.models import Watchlist, WatchlistItem
+from marketpulse.domain.watchlist import DEFAULT_WATCHLIST
 from marketpulse.providers.base import MarketDataProvider
-
-DEFAULT_WATCHLIST = ("AAPL", "MSFT", "NVDA", "BTC", "ETH", "SOL", "EUR/USD")
 
 router = APIRouter(prefix="/watchlist", tags=["watchlist"])
 
