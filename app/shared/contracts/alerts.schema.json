@@ -1,0 +1,123 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sdlc-ai.local/schemas/alerts/contract.json",
+  "title": "AlertsContract",
+  "description": "Canonical JSON Schema for price alert endpoints POST/GET/DELETE /api/v1/alerts (ADR-011). Watchlist-scoped symbols; one-shot triggered_at latch until DELETE.",
+  "$defs": {
+    "AlertDirection": {
+      "type": "string",
+      "enum": ["above", "below"],
+      "description": "Trigger when live price is at or above (above) or at or below (below) target_price."
+    },
+    "PriceAlert": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "symbol",
+        "direction",
+        "target_price",
+        "triggered_at",
+        "created_at"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Server-generated UUID v4."
+        },
+        "symbol": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Watchlist ticker (e.g. BTC, AAPL)."
+        },
+        "direction": {
+          "$ref": "#/$defs/AlertDirection"
+        },
+        "target_price": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Threshold price; inclusive comparison at evaluation time."
+        },
+        "triggered_at": {
+          "type": ["string", "null"],
+          "format": "date-time",
+          "description": "ISO 8601 UTC when first triggered; null while pending. Persistent until DELETE."
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 UTC; server-set on create."
+        }
+      }
+    },
+    "CreateAlertRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["symbol", "direction", "target_price"],
+      "properties": {
+        "symbol": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Must be a symbol on the user's watchlist (validated server-side)."
+        },
+        "direction": {
+          "$ref": "#/$defs/AlertDirection"
+        },
+        "target_price": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      },
+      "description": "POST /api/v1/alerts request body."
+    },
+    "AlertListResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["items"],
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/PriceAlert"
+          }
+        }
+      },
+      "description": "GET /api/v1/alerts success (200). Pending alerts are evaluated before response."
+    },
+    "AlertErrorCode": {
+      "type": "string",
+      "enum": ["VALIDATION_ERROR", "NOT_FOUND"],
+      "description": "VALIDATION_ERROR: invalid body or symbol not on watchlist (400). NOT_FOUND: unknown alert_id on DELETE (404)."
+    },
+    "ApiErrorBody": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "message"],
+      "properties": {
+        "code": {
+          "$ref": "#/$defs/AlertErrorCode"
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1
+        },
+        "details": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    },
+    "AlertError": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["error"],
+      "properties": {
+        "error": {
+          "$ref": "#/$defs/ApiErrorBody"
+        }
+      },
+      "description": "Error envelope for alert failures (400/404). Aligns with ADR-008 error shape."
+    }
+  }
+}

@@ -10,16 +10,20 @@ Shared utilities, types, and constants used by both frontend and backend.
 
 **Implemented (INVES-37):** Auth identity JSON Schema + TypeScript types for email-only session API (ADR-010).
 
+**Implemented (INVES-42):** Price alert JSON Schema + TypeScript types for watchlist alert CRUD API (ADR-011).
+
 ## Structure
 
 ```
 app/shared/
 ├── contracts/
 │   ├── forecast.schema.json   ← Canonical AssetProjection JSON Schema (ADR-009)
-│   └── auth.schema.json       ← User, Identify*, AuthMeResponse, SessionError (ADR-010)
+│   ├── auth.schema.json       ← User, Identify*, AuthMeResponse, SessionError (ADR-010)
+│   └── alerts.schema.json     ← PriceAlert, CreateAlertRequest, AlertListResponse (ADR-011)
 ├── types/
 │   ├── forecast.ts            ← TypeScript mirror for frontend (@shared alias)
-│   └── auth.ts                ← TypeScript mirror + session cookie constants
+│   ├── auth.ts                ← TypeScript mirror + session cookie constants
+│   └── alerts.ts              ← TypeScript mirror + ALERTS_API_PATHS
 └── README.md
 ```
 
@@ -38,6 +42,17 @@ See `contracts/forecast.schema.json` and `types/forecast.ts` for projection type
 | `SessionError` | 401 / 422 error envelope |
 
 Session: **HttpOnly cookie** `mp_session` — not Bearer. Frontend uses `credentials: "include"`.
+
+## Alerts contract (INVES-42)
+
+| Type | Use |
+|------|-----|
+| `PriceAlert` | `{ id, symbol, direction, target_price, triggered_at, created_at }` |
+| `CreateAlertRequest` | POST `/api/v1/alerts` body |
+| `AlertListResponse` | GET `/api/v1/alerts` success JSON `{ items: PriceAlert[] }` |
+| `AlertError` | 400 / 404 error envelope |
+
+Paths: `ALERTS_API_PATHS.list`, `ALERTS_API_PATHS.detail(alertId)`.
 
 ## What Belongs Here
 
@@ -69,4 +84,5 @@ Vite alias `@shared` → `app/shared` (see `app/frontend/vite.config.ts`). Re-ex
 
 ```ts
 import type { User, IdentifyRequest } from "@shared/types/auth";
+import type { PriceAlert, CreateAlertRequest } from "@shared/types/alerts";
 ```
