@@ -4,7 +4,8 @@ from __future__ import annotations
 
 import re
 from pathlib import Path
-from typing import Any, Pattern
+from re import Pattern
+from typing import Any
 
 try:
     import yaml

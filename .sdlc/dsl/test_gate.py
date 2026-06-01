@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import json
 import sys
 from pathlib import Path
 
@@ -18,8 +17,6 @@ from gate import (  # noqa: E402
     is_protected,
     load_gate_config,
     open_gate,
-    save_session_gate,
-    SessionGate,
 )
 
 

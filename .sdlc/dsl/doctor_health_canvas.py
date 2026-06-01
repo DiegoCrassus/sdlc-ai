@@ -5,9 +5,8 @@ from __future__ import annotations
 import json
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import List, Tuple
 
-Finding = Tuple[str, str]
+Finding = tuple[str, str]
 
 
 def _categorize(message: str) -> str:
@@ -30,8 +29,8 @@ def _categorize(message: str) -> str:
     return "other"
 
 
-def health_score(findings: List[Finding]) -> int:
-    pass_n = sum(1 for l, _ in findings if l == "PASS")
+def health_score(findings: list[Finding]) -> int:
+    pass_n = sum(1 for level, _ in findings if level == "PASS")
     total = len(findings) or 1
     return round(pass_n / total * 100)
 
@@ -49,7 +48,7 @@ def find_canvas_dir(repo_root: Path) -> Path:
     return out
 
 
-def generate_health_canvas(findings: List[Finding]) -> str:
+def generate_health_canvas(findings: list[Finding]) -> str:
     ts = datetime.now(UTC).isoformat(timespec="seconds")
     counts = {"PASS": 0, "WARN": 0, "FAIL": 0}
     rows = []
@@ -172,7 +171,7 @@ def generate_health_canvas(findings: List[Finding]) -> str:
 
 
 def write_health_canvas(
-    findings: List[Finding],
+    findings: list[Finding],
     repo_root: Path,
     *,
     memory_copy: bool = True,
@@ -187,11 +186,11 @@ def write_health_canvas(
         summary = {
             "timestamp": datetime.now(UTC).isoformat(),
             "health_score": health_score(findings),
-            "pass": sum(1 for l, _ in findings if l == "PASS"),
-            "warn": sum(1 for l, _ in findings if l == "WARN"),
-            "fail": sum(1 for l, _ in findings if l == "FAIL"),
+            "pass": sum(1 for level, _ in findings if level == "PASS"),
+            "warn": sum(1 for level, _ in findings if level == "WARN"),
+            "fail": sum(1 for level, _ in findings if level == "FAIL"),
             "canvas_path": str(out),
-            "exit_ok": sum(1 for l, _ in findings if l == "FAIL") == 0,
+            "exit_ok": sum(1 for level, _ in findings if level == "FAIL") == 0,
         }
         (mem / "doctor-health.json").write_text(
             json.dumps(summary, indent=2) + "\n", encoding="utf-8"

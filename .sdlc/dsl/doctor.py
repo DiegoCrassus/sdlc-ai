@@ -5,7 +5,7 @@ from __future__ import annotations
 import os
 import sys
 from pathlib import Path
-from typing import Any, List, Tuple
+from typing import Any
 
 try:
     import yaml
@@ -13,7 +13,7 @@ except ImportError:
     print("ERROR: PyYAML is not installed. Run: pip install PyYAML", file=sys.stderr)
     sys.exit(1)
 
-Finding = Tuple[str, str]
+Finding = tuple[str, str]
 
 DOCTOR_CHECKS = ".sdlc/doctor/checks.yaml"
 
@@ -22,7 +22,7 @@ def _load_doctor_checks(root: str) -> dict[str, Any]:
     path = os.path.join(root, DOCTOR_CHECKS)
     if not os.path.isfile(path):
         raise FileNotFoundError(f"Doctor config missing: {DOCTOR_CHECKS}")
-    with open(path, "r", encoding="utf-8") as fh:
+    with open(path, encoding="utf-8") as fh:
         config = yaml.safe_load(fh) or {}
     return config.get("checks", config.get("doctor", {}).get("checks", config))
 
@@ -59,7 +59,7 @@ def _check_yaml(root: str, rel_path: str) -> Finding:
     if not os.path.isfile(full):
         return ("FAIL", f"YAML file missing: {rel_path}")
     try:
-        with open(full, "r", encoding="utf-8") as fh:
+        with open(full, encoding="utf-8") as fh:
             data = yaml.safe_load(fh)
         if data is None:
             return ("FAIL", f"YAML file is empty: {rel_path}")
@@ -72,7 +72,7 @@ def _check_file_contains(root: str, rel_path: str, marker: str) -> Finding:
     full = os.path.join(root, rel_path)
     if not os.path.isfile(full):
         return ("FAIL", f"Missing file for marker check: {rel_path}")
-    with open(full, "r", encoding="utf-8") as fh:
+    with open(full, encoding="utf-8") as fh:
         content = fh.read()
     if marker in content:
         return ("PASS", f"Required marker found in {rel_path}: {marker}")
@@ -83,7 +83,7 @@ def _check_file_not_contains(root: str, rel_path: str, marker: str) -> Finding:
     full = os.path.join(root, rel_path)
     if not os.path.isfile(full):
         return ("PASS", f"File absent for forbidden marker check: {rel_path}")
-    with open(full, "r", encoding="utf-8") as fh:
+    with open(full, encoding="utf-8") as fh:
         content = fh.read()
     if marker not in content:
         return ("PASS", f"Forbidden marker absent in {rel_path}: {marker}")
@@ -94,7 +94,7 @@ def _check_makefile_target(root: str, target: str) -> Finding:
     makefile = os.path.join(root, "Makefile")
     if not os.path.isfile(makefile):
         return ("FAIL", f"Makefile missing — cannot check target: {target}")
-    with open(makefile, "r", encoding="utf-8") as fh:
+    with open(makefile, encoding="utf-8") as fh:
         content = fh.read()
     if f"{target}:" in content:
         return ("PASS", f"Makefile target exists: {target}")
@@ -107,8 +107,8 @@ def _check_integration_env(role: str, env_var: str) -> Finding:
     return ("WARN", f"Integration not configured: {role} ({env_var} not set)")
 
 
-def run_doctor(root: str) -> List[Finding]:
-    findings: List[Finding] = []
+def run_doctor(root: str) -> list[Finding]:
+    findings: list[Finding] = []
 
     try:
         checks = _load_doctor_checks(root)
@@ -177,7 +177,7 @@ def run_doctor(root: str) -> List[Finding]:
     return findings
 
 
-def print_report(findings: List[Finding], root: str | None = None) -> int:
+def print_report(findings: list[Finding], root: str | None = None) -> int:
     pass_count = warn_count = fail_count = 0
 
     for level, message in findings:

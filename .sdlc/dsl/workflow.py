@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import re
 import subprocess
 import sys
 from pathlib import Path
@@ -238,7 +237,6 @@ def cmd_start(args: argparse.Namespace) -> int:
 
     # Block workflow start on epic — use child implementable card
     try:
-        import httpx
 
         sys.path.insert(0, str(ROOT / ".sdlc" / "scripts"))
         from plane_card import _api, find_issue_uuid, get_issue, parse_card  # noqa: E402
@@ -337,7 +335,7 @@ def cmd_finish(args: argparse.Namespace) -> int:
         close_gate()
         return proc.returncode
     close_gate()
-    print("OK: gate closed" + (f" — merge skipped (no --pr)" if not args.pr else ""))
+    print("OK: gate closed" + (" — merge skipped (no --pr)" if not args.pr else ""))
     return 0
 
 
@@ -361,7 +359,7 @@ def run_workflow(argv: list[str]) -> int:
     p = sub.add_parser("plan")
     p.add_argument("--card", required=True)
 
-    d = sub.add_parser("discover", help="Run discovery hook (legacy docs, app state)")
+    sub.add_parser("discover", help="Run discovery hook (legacy docs, app state)")
 
     a = sub.add_parser("arch")
     a.add_argument("--card", default="")

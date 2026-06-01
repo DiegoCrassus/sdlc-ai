@@ -13,8 +13,6 @@ Outputs:
 from __future__ import annotations
 
 import json
-import os
-import re
 import subprocess
 import sys
 from dataclasses import dataclass, field
@@ -216,7 +214,7 @@ def check_agents(report: AuditReport) -> None:
                 f"Adicione as seções {missing_sections} em {fname}",
             )
         else:
-            report.add("Agentes", fname, "PASS", f"Todas as seções presentes")
+            report.add("Agentes", fname, "PASS", "Todas as seções presentes")
 
 
 def check_skills(report: AuditReport) -> None:
@@ -770,8 +768,7 @@ def run_audit() -> AuditReport:
     for name, fn in steps:
         print(f"  ▸ {name}...", end=" ", flush=True)
         fn(report)
-        c = report.counts
-        print(f"✓")
+        print("✓")
 
     return report
 

@@ -5,7 +5,7 @@ from __future__ import annotations
 import os
 import sys
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 try:
     import yaml
@@ -25,7 +25,7 @@ from .models import (
 )
 
 SDLC_MANIFEST = "sdlc.yaml"
-_cache: Dict[str, Dict[str, Any]] = {}
+_cache: dict[str, dict[str, Any]] = {}
 
 try:
     from . import core_config
@@ -45,12 +45,12 @@ def _sdlc_path(root: str) -> str:
     return str(_sdlc_dir(root) / SDLC_MANIFEST)
 
 
-def _load_yaml(path: str) -> Dict[str, Any]:
+def _load_yaml(path: str) -> dict[str, Any]:
     p = Path(path)
     if not p.exists():
         raise LoadError(f"File not found: {path}")
     try:
-        with open(p, "r", encoding="utf-8") as f:
+        with open(p, encoding="utf-8") as f:
             data = yaml.safe_load(f)
         if data is None:
             raise LoadError(f"Empty YAML file: {path}")
@@ -61,8 +61,8 @@ def _load_yaml(path: str) -> Dict[str, Any]:
         raise LoadError(f"YAML parse error in {path}: {e}") from e
 
 
-def _merge_modules(root: str, index: Dict[str, Any]) -> Dict[str, Any]:
-    merged: Dict[str, Any] = dict(index)
+def _merge_modules(root: str, index: dict[str, Any]) -> dict[str, Any]:
+    merged: dict[str, Any] = dict(index)
     modules = (index.get("contract") or {}).get("modules") or {}
     sdlc_dir = _sdlc_dir(root)
 
@@ -80,7 +80,7 @@ def _merge_modules(root: str, index: Dict[str, Any]) -> Dict[str, Any]:
     return merged
 
 
-def load_merged_manifest(root: str) -> Dict[str, Any]:
+def load_merged_manifest(root: str) -> dict[str, Any]:
     if root in _cache:
         return _cache[root]
     index = _load_yaml(_sdlc_path(root))
@@ -89,7 +89,7 @@ def load_merged_manifest(root: str) -> Dict[str, Any]:
     return merged
 
 
-def load_lifecycle(root: str) -> List[LifecycleStage]:
+def load_lifecycle(root: str) -> list[LifecycleStage]:
     data = _load_yaml(os.path.join(root, ".sdlc", "stages", "lifecycle.yaml"))
     stages = []
     for s in data.get("stages", []):
@@ -104,7 +104,7 @@ def load_lifecycle(root: str) -> List[LifecycleStage]:
     return stages
 
 
-def load_stages(root: str) -> List[StageDefinition]:
+def load_stages(root: str) -> list[StageDefinition]:
     data = _load_yaml(os.path.join(root, ".sdlc", "stages", "definitions.yaml"))
     defs = []
     for s in data.get("stages", []):
@@ -122,7 +122,7 @@ def load_stages(root: str) -> List[StageDefinition]:
     return defs
 
 
-def load_workflows(root: str) -> List[Workflow]:
+def load_workflows(root: str) -> list[Workflow]:
     data = _load_yaml(os.path.join(root, ".sdlc", "workflows", "transitions.yaml"))
     workflows = []
     for w in data.get("workflows", []):
@@ -142,7 +142,7 @@ def load_workflows(root: str) -> List[Workflow]:
     return workflows
 
 
-def load_agents(root: str) -> List[Agent]:
+def load_agents(root: str) -> list[Agent]:
     data = _load_yaml(os.path.join(root, ".sdlc", "pipeline", "agents.yaml"))
     agents = []
     for a in data.get("pipeline", []):
@@ -159,8 +159,8 @@ def load_agents(root: str) -> List[Agent]:
     return agents
 
 
-def load_skills(root: str) -> List[Skill]:
-    skills: List[Skill] = []
+def load_skills(root: str) -> list[Skill]:
+    skills: list[Skill] = []
     pipeline = _load_yaml(os.path.join(root, ".sdlc", "pipeline", "agents.yaml"))
     for a in pipeline.get("pipeline", []):
         sk = a.get("skill")
@@ -193,7 +193,7 @@ def load_skills(root: str) -> List[Skill]:
     return skills
 
 
-def load_rules(root: str) -> List[Rule]:
+def load_rules(root: str) -> list[Rule]:
     data = _load_yaml(os.path.join(root, ".sdlc", "rules", "governance.yaml"))
     rules = []
     for r in data.get("rules", []):
@@ -209,7 +209,7 @@ def load_rules(root: str) -> List[Rule]:
     return rules
 
 
-def load_integrations(root: str) -> List[Integration]:
+def load_integrations(root: str) -> list[Integration]:
     data = _load_yaml(os.path.join(root, ".sdlc", "integrations", "services.yaml"))
     integrations = []
     env_logical = {}
