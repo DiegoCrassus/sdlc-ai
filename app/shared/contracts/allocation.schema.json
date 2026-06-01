@@ -1,0 +1,117 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sdlc-ai.local/schemas/watchlist/allocation-contract.json",
+  "title": "WatchlistAllocationContract",
+  "description": "Canonical JSON Schema for watchlist allocation target endpoints under /api/v1/watchlist. Public API expresses target_percent as decimal percent with up to two fractional digits; null clears the target.",
+  "$defs": {
+    "AssetClass": {
+      "type": "string",
+      "enum": ["stock", "crypto", "index", "forex", "commodity"]
+    },
+    "AllocationStatus": {
+      "type": "string",
+      "enum": ["under_allocated", "balanced", "over_allocated"],
+      "description": "Overall allocation status. balanced means total persisted target basis points equal 10000; under/over are warnings, not blockers."
+    },
+    "TargetPercent": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "maximum": 100,
+      "multipleOf": 0.01,
+      "description": "Public decimal percentage with up to two fractional digits. Backend persists the value as integer basis points."
+    },
+    "WatchlistItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["symbol", "name", "asset_class", "price", "change_percent"],
+      "properties": {
+        "symbol": {
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "asset_class": {
+          "$ref": "#/$defs/AssetClass"
+        },
+        "price": {
+          "type": "number"
+        },
+        "change_percent": {
+          "type": "number"
+        },
+        "target_percent": {
+          "anyOf": [
+            { "$ref": "#/$defs/TargetPercent" },
+            { "type": "null" }
+          ],
+          "description": "Optional saved allocation target. null or absence means no target is set for this watchlist item."
+        }
+      }
+    },
+    "WatchlistAllocationSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["target_percent_total", "status"],
+      "properties": {
+        "target_percent_total": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Sum of saved item targets expressed as public decimal percent."
+        },
+        "status": {
+          "$ref": "#/$defs/AllocationStatus"
+        }
+      },
+      "description": "Overall watchlist allocation summary. Status is computed canonically by the backend from integer basis points."
+    },
+    "WatchlistResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["items", "allocation_summary"],
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/WatchlistItem"
+          }
+        },
+        "allocation_summary": {
+          "$ref": "#/$defs/WatchlistAllocationSummary"
+        }
+      },
+      "description": "GET /api/v1/watchlist success body with current watchlist fields plus allocation metadata."
+    },
+    "UpdateWatchlistAllocationRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["target_percent"],
+      "properties": {
+        "target_percent": {
+          "anyOf": [
+            { "$ref": "#/$defs/TargetPercent" },
+            { "type": "null" }
+          ],
+          "description": "Set a target when numeric; null clears the target while keeping the asset in the watchlist."
+        }
+      },
+      "description": "PATCH /api/v1/watchlist/items/{symbol}/allocation request body."
+    },
+    "UpdateWatchlistAllocationResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["item", "allocation_summary"],
+      "properties": {
+        "item": {
+          "$ref": "#/$defs/WatchlistItem"
+        },
+        "allocation_summary": {
+          "$ref": "#/$defs/WatchlistAllocationSummary"
+        }
+      },
+      "description": "PATCH /api/v1/watchlist/items/{symbol}/allocation success body."
+    }
+  }
+}
