@@ -10,15 +10,14 @@
 
 ## Session
 
-```yaml
-card: INVES-47
-epic: INVES-45
-branch: feature/INVES-47-watchlist-allocation-ui
-stage: implementation
-gate_status: open
-commits:
-  - d08a010
-```
+| Field | Value |
+|-------|-------|
+| Card | INVES-47 |
+| Epic | INVES-45 |
+| Branch | feature/INVES-47-watchlist-allocation-ui |
+| Stage | implementation |
+| Gate status | open |
+| Commits | d08a010 |
 
 ## Summary
 
