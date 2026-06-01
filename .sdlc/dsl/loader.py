@@ -70,12 +70,16 @@ def _merge_modules(root: str, index: dict[str, Any]) -> dict[str, Any]:
         data_rel = mod_cfg.get("data")
         if not data_rel:
             continue
-        chunk_path = sdlc_dir / data_rel
-        if not chunk_path.is_file():
-            continue
-        chunk = _load_yaml(str(chunk_path))
-        for key, value in chunk.items():
-            merged[key] = value
+        data_paths = data_rel if isinstance(data_rel, list) else [data_rel]
+        for rel_path in data_paths:
+            if not isinstance(rel_path, str):
+                continue
+            chunk_path = sdlc_dir / rel_path
+            if not chunk_path.is_file() or chunk_path.suffix not in {".yaml", ".yml"}:
+                continue
+            chunk = _load_yaml(str(chunk_path))
+            for key, value in chunk.items():
+                merged[key] = value
 
     return merged
 

@@ -7,7 +7,7 @@ Machine-readable complements: `.sdlc/sdlc.yaml` plus modular data under `.sdlc/<
 `.sdlc/workflows/transitions.yaml`, `.sdlc/stages/lifecycle.yaml`,
 `.sdlc/stages/definitions.yaml`, `.sdlc/gates/paths.yaml`.
 
-**Full process (APPROVED):** [`.sdlc/process/master-workflow.md`](master-workflow.md)  
+**Full process (APPROVED):** [`.sdlc/process/master-workflow.md`](master-workflow.md)
 **Agent entry point:** [`AGENTS.md`](../../AGENTS.md) (repo root)
 
 ---

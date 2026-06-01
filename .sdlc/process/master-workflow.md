@@ -50,7 +50,7 @@ User sends message
 
 ## Step 1 — Intent Analyst
 
-**File:** `.cursor/agents/intent-analyst.md`  
+**File:** `.cursor/agents/intent-analyst.md`
 **Skill:** `.cursor/skills/intent-classification/SKILL.md`
 
 ### Responsibility
@@ -125,12 +125,12 @@ Before Plan/Arch, read-only script/hook:
 
 Minimums: GREENFIELD ≥3 children · FEATURE ≥2 children
 
-Config: `.sdlc/workboard/granularity.yaml`  
+Config: `.sdlc/workboard/granularity.yaml`
 Validation: `plane_card.py validate-all --card INVES-N`
 
 ### Plan creation gate
 
-**Skill:** `.cursor/skills/plane-task-creation/SKILL.md`  
+**Skill:** `.cursor/skills/plane-task-creation/SKILL.md`
 **Script:** `python .sdlc/scripts/plane_card.py validate-plan --card INVES-N`
 
 Incomplete plan **blocks** Ticket → Requirements transition:

@@ -226,3 +226,7 @@ def test_post_gateway_blocks_unresolved_blockers(capsys, monkeypatch) -> None:
     payload = json.loads(capsys.readouterr().out)
     assert "Return to `implementer`" in payload["followup_message"]
     assert "unresolved blockers" in payload["followup_message"]
+
+
+def test_post_gateway_treats_active_qa_none_wording_as_clear() -> None:
+    assert post_gateway.blockers_are_clear("- None for QA; implementation is ready")

@@ -23,7 +23,14 @@ def blockers_are_clear(blockers: str) -> bool:
     meaningful = [line for line in lines if line]
     if not meaningful:
         return True
-    return all(line in {"none", "no", "n/a", "na", "—", "-"} for line in meaningful)
+    clear_values = {"none", "no", "n/a", "na", "—", "-"}
+    return all(
+        line in clear_values
+        or line.startswith("none for ")
+        or line.startswith("no blockers")
+        or line.startswith("no blocker")
+        for line in meaningful
+    )
 
 
 def followup(agent: str, reason: str, details: list[str]) -> None:

@@ -40,8 +40,8 @@ for the full list of targets and configurable variables.
 
 The `app/` tree was reset to allow a **full greenfield SDLC run** in a new agent session, which produced the MarketPulse app now under `app/backend/` and `app/frontend/`.
 
-**SDLC process authority:** [.sdlc/process/master-workflow.md](.sdlc/process/master-workflow.md)  
-**Change lifecycle authority:** [.sdlc/process/change-lifecycle.md](.sdlc/process/change-lifecycle.md)  
+**SDLC process authority:** [.sdlc/process/master-workflow.md](.sdlc/process/master-workflow.md)
+**Change lifecycle authority:** [.sdlc/process/change-lifecycle.md](.sdlc/process/change-lifecycle.md)
 **SDLC module index:** [.sdlc/README.md](.sdlc/README.md)
 
 Start with: *Build a product called Investment Radar …* — see [docs/handoff/current-state.md](docs/handoff/current-state.md).
