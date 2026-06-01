@@ -24,9 +24,9 @@ fixes_applied:
 
 local_verification:
   ruff_check: "All checks passed (4 files)"
-  pytest_alerts: pending_qa_rerun
+  pytest_alerts: "skipped locally — ModuleNotFoundError marketpulse (env); QA host had 11/11"
 
-commit: "[INVES-43] fix: resolve ruff I001 and B008 lint failures"
+commit: f375b7d
 
 next_steps: >
   Task(QA) re-run full checklist on INVES-43 — lint (step 4) should now PASS;
