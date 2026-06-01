@@ -1,4 +1,6 @@
-export type AssetClass = "stock" | "crypto" | "index" | "forex" | "commodity";
+import type { AssetClass as SharedAssetClass } from "@shared/types/allocation";
+
+export type AssetClass = SharedAssetClass;
 
 export interface Quote {
   asset_id: string;
@@ -62,18 +64,11 @@ export type {
   TechnicalIndicators,
   TrendDirection,
 } from "@shared/types/forecast";
-
-export interface WatchlistItem {
-  symbol: string;
-  name: string;
-  asset_class: AssetClass;
-  price: number;
-  change_percent: number;
-}
-
-export interface Watchlist {
-  items: WatchlistItem[];
-}
+export type {
+  WatchlistAllocationSummary,
+  WatchlistItem,
+  WatchlistResponse as Watchlist,
+} from "@shared/types/allocation";
 
 export interface SearchHit {
   asset_id: string;
