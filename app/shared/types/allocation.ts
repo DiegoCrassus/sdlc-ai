@@ -48,5 +48,5 @@ export interface UpdateWatchlistAllocationResponse {
 
 export const WATCHLIST_API_PATHS = {
   list: "/api/v1/watchlist",
-  itemAllocation: (symbol: string) => `/api/v1/watchlist/items/${symbol}/allocation`,
+  itemAllocation: (symbol: string) => `/api/v1/watchlist/items/${encodeURIComponent(symbol)}/allocation`,
 } as const;
