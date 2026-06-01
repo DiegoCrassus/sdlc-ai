@@ -12,8 +12,8 @@ from sqlalchemy.ext.asyncio import (
 )
 
 from marketpulse.config import Settings, get_settings
+from marketpulse.db import models as _models  # noqa: F401 — register metadata
 from marketpulse.db.base import Base
-from marketpulse.db.models import PriceAlertRow  # noqa: F401 — register metadata
 
 _engine: AsyncEngine | None = None
 _session_factory: async_sessionmaker[AsyncSession] | None = None
