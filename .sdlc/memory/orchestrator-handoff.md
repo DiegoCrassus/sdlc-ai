@@ -23,7 +23,7 @@
 |-------|-------|
 | **Card** | INVES-40 |
 | **Epic** | — |
-| **Branch** | feature/INVES-40-sdlc-v5-restore |
+| **Branch** | feature/INVES-40-sdlc-final-structure |
 | **Stage** | sdlc_meta |
 | **Gate** | open |
 | **Commits** | [3487fa2, 062578f] |
@@ -48,7 +48,7 @@ Complete SDLC v5.2 modular layout restore and merge to `develop`. AutoFixer appl
 - PASS: `make sdlc-validate` passes. Evidence: exit 0; `[PASS] All schema consistency checks passed.`
 - PASS: `python3 .sdlc/dsl/cli.py list-stages` shows 10 stages. Evidence: exit 0; `SDLC Lifecycle — 10 stages`.
 - PASS: Work is on feature branch for `INVES-40`. Evidence: `git branch --show-current` → `feature/INVES-40-sdlc-v5-restore`; latest commit `3487fa2 [INVES-40] Add gateway handoff tests.`
-- PENDING DOWNSTREAM: `develop` receives v5 layout via PR merge of INVES-40. Evidence: QA cannot merge; next pipeline stages are Reviewer and DevOps. Branch is `feature/INVES-40-sdlc-v5-restore`.
+- PENDING DOWNSTREAM: `develop` receives v5 layout via PR merge of INVES-40. Evidence: QA cannot merge; next pipeline stages are Reviewer and DevOps. Branch is `feature/INVES-40-sdlc-final-structure`.
 - PASS: Gateway/handoff logic has dedicated tests for parsing, handoff validation, route enforcement, and post-subagent blocking behavior. Evidence: `.cursor/hooks/test_sdlc_gateway.py`; `python3 -m pytest .cursor/hooks/test_sdlc_gateway.py -q` → 9 passed.
 - PASS: QA-reported Ruff failure is fixed. Evidence: commit `062578f` removed the unused `pytest` import from `.sdlc/dsl/test_granularity.py`; `python3 -m ruff check .sdlc/dsl/test_granularity.py` → exit 0; `All checks passed!`.
 
