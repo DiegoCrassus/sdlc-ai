@@ -17,6 +17,8 @@ SDLC Studio is not product code and is unrelated to `app/`. It operates over the
   areas and source-of-truth boundaries.
 - `source-boundaries.md` extends the foundation inventory with stable boundary
   terminology for future Studio modeling work.
+- `graph-ir-contract.md` defines the descriptive, non-executable Graph IR
+  contract for future Studio graph documents.
 - `schemas/` contains descriptive YAML schema documents for future Studio data contracts.
 
 ## Boundaries
