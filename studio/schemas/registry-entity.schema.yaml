@@ -1,0 +1,78 @@
+schema_id: studio.registry_entity
+schema_version: "0.1.0"
+description: Descriptive schema for one referential Studio registry entity.
+type: object
+required:
+  - entity
+properties:
+  entity:
+    type: object
+    required:
+      - id
+      - kind
+      - name
+      - path
+      - source_system
+      - source_module
+      - summary
+      - tags
+    properties:
+      id:
+        type: string
+        description: Stable short identifier used by Studio registry files.
+      kind:
+        type: string
+        enum:
+          - workflow
+          - stage
+          - gate
+          - gateway_policy
+          - workboard_policy
+          - pipeline
+          - process
+          - template
+          - doctor
+          - integration
+          - rule
+          - manifest
+          - script
+          - agent
+          - skill
+          - command
+          - hook
+          - module
+          - memory
+      name:
+        type: string
+      path:
+        type: string
+        description: Real repository path under .sdlc/ or .cursor/.
+        pattern: ^(\.sdlc|\.cursor)/
+      source_system:
+        type: string
+        enum:
+          - sdlc
+          - cursor
+      source_module:
+        type: string
+        description: Owning SDLC or Cursor module name.
+      summary:
+        type: string
+        description: Short referential summary; do not copy authoritative content.
+      tags:
+        type: array
+        items:
+          type: string
+      relationships:
+        type: array
+        items:
+          type: object
+          required:
+            - relation
+            - target
+          properties:
+            relation:
+              type: string
+            target:
+              type: string
+additionalProperties: false
