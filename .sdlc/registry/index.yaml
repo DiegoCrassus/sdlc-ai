@@ -8,6 +8,20 @@ entity_model:
     cursor: .cursor/
   summary_policy: Short referential summaries only; no copied authoritative content.
   relationship_policy: Relationship endpoints use registry entity IDs and source_refs use repository paths.
+relationship_model:
+  schema_ref: studio/schemas/registry-relationship.schema.yaml
+  id_namespace: rel.
+  directionality: from -> relation -> to is the semantic direction; inverse or bidirectional meaning requires an explicit separate relationship.
+  allowed_relation_types:
+    - indexes
+    - uses
+    - governs
+    - validates
+    - references
+    - supports
+    - documents
+  source_ref_policy: source_refs point to real .sdlc/ or .cursor/ repository paths and do not copy source bodies.
+  summary_policy: Short referential summaries only; no copied authoritative content.
 files:
   - path: .sdlc/registry/sdlc-artifacts.yaml
     purpose: Index existing SDLC modules, policies, workflows, templates, scripts, and process artifacts.
@@ -27,7 +41,7 @@ files:
     purpose: Describe lightweight relationships between registered SDLC and Cursor entities.
     contains:
       - relationship IDs
-      - source and target entity IDs
+      - directed from and to entity IDs
       - relation kinds
       - source references
 non_goals:

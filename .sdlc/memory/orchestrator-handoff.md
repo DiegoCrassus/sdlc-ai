@@ -13,81 +13,84 @@
 | Field | Value |
 |-------|-------|
 | **Intent** | FEATURE |
-| **Card** | INVES-56 - [AI][SDLC] Harden registry entity model |
+| **Card** | INVES-57 - [AI][SDLC] Validate registry relationships |
 | **Epic** | INVES-53 - [AI][EPIC] Build SDLC Studio MVP |
-| **Branch** | feature/INVES-56-registry-entity-model-hardening |
-| **Stage** | QA complete |
-| **Implementation commit** | 8945787d0d81307b5812c92f7fd58f7b9b364cdd |
-
-## QA Summary
-
-QA passed for INVES-56. The registry model hardening remains descriptive and referential, registry entries and relationships validate against the requested invariants, and no prohibited out-of-scope paths were changed.
+| **Branch** | feature/INVES-57-registry-relationship-validation |
+| **Stage** | review complete |
+| **QA result** | pass |
 
 ## Reviewer Verdict
 
-APPROVE for `INVES-56`. Reviewer confirmed the changed registry and Studio files remain descriptive and non-executable; `.sdlc/registry/README.md`, `.sdlc/registry/index.yaml`, and `studio/schemas/registry-entity.schema.yaml` reinforce source-of-truth boundaries without becoming a validator, compiler, workflow, or evidence store. The broad `ruff check .sdlc` failure is non-blocking because findings are preexisting and outside the INVES-56 diff.
+APPROVE for `INVES-57`. Reviewer confirmed the diff against `origin/develop` is limited to registry docs/data/schema hardening, relationship invariants validate cleanly, no executable behavior or forbidden paths were added, and QA's broad `ruff` findings are preexisting outside the diff.
 
 ## Branch And Diff Evidence
 
-- `git status --short --branch`: `## feature/INVES-56-registry-entity-model-hardening`; only `.sdlc/memory/orchestrator-handoff.md` is locally modified for this QA handoff.
-- `git diff --name-status develop...HEAD`:
-  - `M .sdlc/registry/README.md`
-  - `M .sdlc/registry/index.yaml`
-  - `M studio/README.md`
-  - `M studio/schemas/registry-entity.schema.yaml`
-  - `A studio/source-boundaries.md`
-- `git diff --stat develop...HEAD`: 5 files changed, 201 insertions, 7 deletions.
-- `git diff --check develop...HEAD`: PASS.
-
-## Acceptance Criteria
-
-- AC-1 PASS: `studio/schemas/registry-entity.schema.yaml` clearly describes a strict referential registry entity model and remains descriptive, non-executable YAML. Evidence: schema description says "Descriptive, non-executable schema"; invariants require `.sdlc/` or `.cursor/` authority, stable `sdlc.*` or `cursor.*` IDs, scoped paths, short referential summaries, registry ID relationship targets, and no content-bearing fields.
-- AC-2 PASS: `.sdlc/registry/README.md` documents hardened model invariants and reiterates `.sdlc/` and `.cursor/` remain authoritative. Evidence: README documents entity invariants, relationship source refs, source boundaries, and maintenance checks.
-- AC-3 PASS: `.sdlc/registry/index.yaml` remains a registry index/non-goals document and does not become a validator, compiler, workflow definition, or evidence store. Evidence: index contains registry metadata, file index, and non-goals; no executable validator/compiler/workflow/evidence top-level sections were added.
-- AC-4 PASS: entries in `.sdlc/registry/sdlc-artifacts.yaml` and `.sdlc/registry/cursor-artifacts.yaml` remain path-based, concise, and conform to hardened model expectations. Evidence: registry consistency script verified 59 artifacts, real paths, allowed prefixes, source-system alignment, ID namespace alignment, unique IDs, and summary length.
-- AC-5 PASS: entries in `.sdlc/registry/relationships.yaml` use existing registry entity IDs for `from` and `to`, include source refs, and avoid embedding authoritative content. Evidence: registry consistency script verified 18 relationships, all endpoints reference known artifact IDs, and all `source_refs` exist under `.sdlc/` or `.cursor/`.
-- AC-6 PASS: no authoritative bodies copied into registry/schema files. Evidence: manual review of changed registry/schema files found only concise descriptions, invariants, paths, non-goals, and references; no lifecycle bodies, gate policies, command bodies, prompts, hook logic, templates, workflow definitions, or evidence bodies were copied.
-- AC-7 PASS: no out-of-scope files or behaviors were added. Evidence: changed paths do not include `app/`, `studio/examples/`, `specs/`, runtime/UI/compiler/validator/CLI/workflow execution behavior, local tickets, backlog, or evidence stores. `studio/README.md` and `studio/source-boundaries.md` are non-executable Studio documentation and reiterate boundaries.
+- `git status --short --branch`: `## feature/INVES-57-registry-relationship-validation...origin/develop [ahead 2]`.
+- `git diff --name-status develop...HEAD`: modified `.sdlc/memory/orchestrator-handoff.md`, `.sdlc/registry/README.md`, `.sdlc/registry/index.yaml`, `.sdlc/registry/relationships.yaml`, `studio/README.md`, `studio/schemas/registry-entity.schema.yaml`; added `studio/schemas/registry-relationship.schema.yaml`, `studio/source-boundaries.md`.
+- `git diff --stat develop...HEAD`: 8 files changed, 377 insertions, 52 deletions before this QA handoff update.
+- No changed paths under `app/`, `studio/examples/`, `specs/`, backend, frontend, runtime, UI, compiler, validator, CLI implementation, local tickets, backlog, or generated output bodies.
 
 ## Validation Evidence
 
-- YAML and registry consistency script: PASS.
-  - `branch: feature/INVES-56-registry-entity-model-hardening`
-  - `changed_files: 5 -> .sdlc/registry/README.md, .sdlc/registry/index.yaml, studio/README.md, studio/schemas/registry-entity.schema.yaml, studio/source-boundaries.md`
-  - `changed_yaml_parsed: 2 -> .sdlc/registry/index.yaml, studio/schemas/registry-entity.schema.yaml`
-  - `yaml_parse_targets: 5 -> .sdlc/registry/index.yaml, studio/schemas/registry-entity.schema.yaml, .sdlc/registry/sdlc-artifacts.yaml, .sdlc/registry/cursor-artifacts.yaml, .sdlc/registry/relationships.yaml`
+- QA loaded `.cursor/agents/qa.md` and `.cursor/skills/qa-minimum-checklist/SKILL.md`.
+- Corrected temporary invariant check: PASS.
+  - `yaml_parse_targets: 6`
   - `artifact_count: 59`
   - `relationship_count: 18`
-  - `unique_artifact_ids: 59`
-  - `out_of_scope_changed_paths: none`
-  - `RESULT: PASS`
-- `python3 .sdlc/scripts/plane_card.py validate-all --card INVES-56`: PASS.
-  - `OK: INVES-56 plan validated`
-  - `OK: INVES-56 granularity validated (0 linked children)`
+  - `unique_relationship_ids: 18`
+  - `endpoint_resolution: pass`
+  - `source_refs: pass`
+  - `summary_policy: pass`
+  - `directionality_docs: pass`
+  - `registry_docs_boundaries: pass`
+  - `schema_non_executable: pass`
+  - `changed_path_scope: pass`
+- `python3 .sdlc/scripts/plane_card.py validate-all --card INVES-57`: PASS.
+  - `OK: INVES-57 plan validated`
+  - `OK: INVES-57 granularity validated (0 linked children)`
 - `make sdlc-doctor`: PASS.
   - `Doctor summary: 220 passed, 3 warnings, 0 failed`
 - `pytest .sdlc/dsl/test_gate.py -q`: PASS.
-  - `5 passed in 0.08s`
+  - `5 passed in 0.06s`
+- `git diff --check`: PASS.
 - `ReadLints` on changed files: PASS.
-  - No linter errors found for `.sdlc/registry/README.md`, `.sdlc/registry/index.yaml`, `studio/README.md`, `studio/schemas/registry-entity.schema.yaml`, and `studio/source-boundaries.md`.
+  - No linter errors found.
+
+## Acceptance Criteria Mapping
+
+- AC-1 PASS: `.sdlc/registry/relationships.yaml` parses as YAML; every relationship has unique stable `rel.*` ID, `from`, `to`, allowed `relation`, non-empty `source_refs`, and short `summary`.
+- AC-2 PASS: Every `from` and `to` endpoint resolves to an artifact ID from `.sdlc/registry/sdlc-artifacts.yaml` or `.sdlc/registry/cursor-artifacts.yaml`; relationship records include no target content or raw body payload fields.
+- AC-3 PASS: Relationship types are constrained to `indexes`, `uses`, `governs`, `validates`, `references`, `supports`, and `documents`.
+- AC-4 PASS: Directionality is documented as `from -> relation -> to`; inverse or bidirectional meaning requires a separate relationship.
+- AC-5 PASS: Every `source_refs` entry is an existing `.sdlc/` or `.cursor/` path and avoids `app/`, `studio/examples/`, `specs/`, generated outputs, local evidence, local tickets, backlog, and external mutable state.
+- AC-6 PASS: Summaries are short and referential; invariant checks found no copied lifecycle bodies, gate policies, command bodies, prompt text, hook logic, templates, workflow definitions, delivery evidence, or generated output bodies in relationship records.
+- AC-7 PASS: `.sdlc/registry/README.md` and `.sdlc/registry/index.yaml` document relationship model, source-of-truth boundaries, and non-goals without becoming validators or workflow definitions.
+- AC-8 PASS: `studio/schemas/registry-entity.schema.yaml` and `studio/schemas/registry-relationship.schema.yaml` remain descriptive and non-executable; no compiler, runtime, CLI, or validator behavior was added.
+- AC-9 PASS: Diff scope remains docs/data/schema-only. No out-of-scope paths or behaviors were introduced for `app`, `studio/examples`, `specs`, local tickets/backlog/evidence, runtime, UI, compiler, validator, CLI, AI composition, backend, frontend, workflow execution, or generated outputs.
+
+## Lint Notes
+
+- `ruff check .sdlc/` was run because SDLC paths changed and returned existing findings in unchanged Python files such as `.sdlc/dsl/models.py`, `.sdlc/dsl/validator.py`, `.sdlc/scripts/plane_card.py`, and `.sdlc/scripts/plane_evidence.py`.
+- `git diff --name-only develop -- <ruff finding files>` returned no files, confirming those ruff findings are outside this branch's changed paths.
+- `ruff check` on the changed YAML/Markdown files is not an applicable Python lint target; it attempted to parse YAML as Python and produced `invalid-syntax` against `.sdlc/registry/index.yaml`.
+- No changed Python files exist in this branch.
 
 ## Skipped Checks
 
-- Product tests skipped: no `app/` changes.
+- Product tests skipped: no `app/` or backend changes.
 - Frontend build skipped: no `app/frontend/` changes.
-- Runtime/UI/compiler/validator/CLI execution checks skipped: this card intentionally adds no execution behavior.
-- Ruff on changed Python paths skipped: no Python files changed in `develop...HEAD`.
-
-## Risks
-
-- `make sdlc-doctor` still reports three non-failing integration warnings: `GITHUB_PERSONAL_ACCESS_TOKEN_CLASSIC`, `PLANE_API_KEY`, and `OPENAI_API_KEY` are not set.
-- A broad, non-required `ruff check .sdlc` was run and failed on pre-existing Python lint issues in unchanged files such as `.sdlc/dsl/models.py`, `.sdlc/dsl/validator.py`, `.sdlc/dsl/test_plane_html.py`, `.sdlc/scripts/discovery_hook.py`, `.sdlc/scripts/plane_card.py`, `.sdlc/scripts/plane_evidence.py`, and `.sdlc/scripts/plane_html.py`. These files are outside the INVES-56 diff and were not modified by this card.
-- The diff against `develop` includes `studio/README.md` and `studio/source-boundaries.md` in addition to the primary INVES-56 registry files. QA reviewed them as non-executable boundary documentation and found no prohibited behavior or evidence storage, but Reviewer should confirm they are acceptable within branch scope.
+- Runtime/UI/compiler/validator/CLI behavior checks skipped as executable checks: this card intentionally adds no executable behavior; absence was validated by diff scope and manual review.
 
 ## Blockers
 
 - None.
 
+## Residual Risks
+
+- `make sdlc-doctor` still reports three non-failing integration warnings: `GITHUB_PERSONAL_ACCESS_TOKEN_CLASSIC`, `PLANE_API_KEY`, and `OPENAI_API_KEY` are not set.
+- Existing repository ruff debt remains in unchanged `.sdlc/` Python files and should not block this docs/data/schema-only card.
+- `studio/source-boundaries.md` references `INVES-55` in its first paragraph while present in the `INVES-57` branch; reviewer should confirm whether that cross-card wording is intentional.
+
 ## Exact Next Action
 
-Delegate DevOps for `INVES-56`. DevOps should create the PR, verify CI, merge to `develop` if checks pass, finish `INVES-56`, update Plane, and delete/remove the remote feature branch after merge.
+Delegate DevOps for PR/merge flow on `feature/INVES-57-registry-relationship-validation`. DevOps must use `origin/develop` as the PR base if local `develop` is stale and delete/remove the remote feature branch after successful merge.
