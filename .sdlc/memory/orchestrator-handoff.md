@@ -7,68 +7,58 @@
 | **Next agent** | devops |
 | **Stage complete** | yes |
 | **Previous agent** | reviewer |
+| **Card** | INVES-54 - [AI][SDLC] Inventory Studio foundation |
+| **Epic** | INVES-53 - [AI][EPIC] Build SDLC Studio MVP |
 
 ## Session
 
 | Field | Value |
 |-------|-------|
-| **Card** | INVES-52 |
-| **Branch** | `feature/INVES-52-sdlc-studio-mvp-roadmap` |
+| **Intent** | FEATURE |
+| **Active card** | INVES-54 |
+| **Branch** | feature/INVES-54-inventory-studio-foundation |
 | **Stage** | review complete |
-| **Intent** | DOCS_ONLY |
+| **Commit under review** | `4ef1ad1` |
 
 ## Reviewer Verdict
 
-APPROVE. Reviewer confirmed the branch diff is limited to `docs/roadmap/sdlc-studio-mvp-roadmap.md`, the roadmap covers the requested SDLC Studio MVP path with required phases and gates, and no `app/`, `studio/examples/`, `specs/`, plan file, ticket/backlog/evidence, or unrelated implementation files are included.
+APPROVE. Reviewer confirmed the diff is documentation-only, limited to `studio/README.md` and `studio/foundation-inventory.md`, keeps `.sdlc/` and `.cursor/` authoritative, does not alter `app/`, and creates no `studio/examples/`, `specs/`, local ticket, backlog, or evidence files.
 
 ## QA Summary
 
-QA re-validation passed after AutoFixer removed out-of-scope working tree changes. The roadmap content still satisfies all acceptance criteria for INVES-52, the branch diff is limited to the roadmap deliverable, and the only working-tree change is this allowed SDLC handoff metadata.
-
-## Files In Scope
-
-| Path | Purpose |
-|------|---------|
-| `docs/roadmap/sdlc-studio-mvp-roadmap.md` | Committed roadmap deliverable for INVES-52. |
-| `.sdlc/memory/orchestrator-handoff.md` | Allowed SDLC handoff metadata for routing to Reviewer. |
-
-## Acceptance Criteria Verification
-
-- AC-1: PASS. `docs/roadmap/sdlc-studio-mvp-roadmap.md` exists under `docs/roadmap/`.
-- AC-2: PASS. Roadmap phase headings appear in order: Foundation Baseline; Registry/Modeling Hardening; Graph Model/IR; Compiler/Validator; CLI Command Center; Visual Orchestration Prototype; AI Composition Prototype; Simulation/Runtime Preview; Publish/Operate Workflows; MVP Readiness.
-- AC-3: PASS. Each phase includes Goal, Deliverables, Inputs, Outputs, Validation/evidence, Risks, Non-goals, and Exit gate sections.
-- AC-4: PASS. Roadmap explicitly references `studio/`, `studio/schemas/`, `.sdlc/registry/`, `.sdlc/`, and `.cursor/` as foundation/source-of-truth context.
-- AC-5: PASS. Roadmap includes `## Consolidated Validation Gates` covering registry/schema checks, compiler/validator checks, CLI checks, preview/simulation checks, docs review, and `make sdlc-doctor`.
-- AC-6: PASS. Roadmap includes `## Explicit Exclusions` stating no `app/` changes, no implementation files, no `studio/examples/`, no `specs/`, no local tickets/backlog/evidence files, no production launch scope, and no distributed runtime/workflow engine scope.
-- AC-7: PASS. `git diff develop...HEAD --name-status` contains only `A docs/roadmap/sdlc-studio-mvp-roadmap.md`; working tree contains only `M .sdlc/memory/orchestrator-handoff.md`.
-- AC-8: PASS. `make sdlc-doctor` exited `0`.
-
-## Diff Evidence
-
-- `git branch --show-current`: `feature/INVES-52-sdlc-studio-mvp-roadmap`
-- `git diff develop...HEAD --name-status`: `A docs/roadmap/sdlc-studio-mvp-roadmap.md`
-- `git diff develop --name-status`: `M .sdlc/memory/orchestrator-handoff.md`; `A docs/roadmap/sdlc-studio-mvp-roadmap.md`
-- `git status --short`: `M .sdlc/memory/orchestrator-handoff.md`
-- `git diff develop...HEAD --name-only -- app/ studio/examples/ specs/`: no output
-- `git status --short -- app/ studio/examples/ specs/`: no output
-- `git diff develop...HEAD --name-only | rg -i '(^|/)(specs|tickets?|backlog|evidence)(/|\.|-|_|$)'`: no output
-- `git status --short | rg -i '(^|/)(specs|tickets?|backlog|evidence)(/|\.|-|_|$)'`: no output
+- PASS: `studio/foundation-inventory.md` exists and inventories `studio/`, `studio/schemas/`, `.sdlc/registry/`, `.sdlc/`, and `.cursor/`.
+- PASS: Inventory uses path references and concise summaries only; no authoritative `.sdlc/`, `.cursor/`, rules, commands, hooks, prompts, templates, or lifecycle bodies are duplicated.
+- PASS: `.sdlc/` and `.cursor/` are labeled authoritative, while Studio inventory, maps, schemas, and future views are labeled derived, non-executable documentation.
+- PASS: Inventory confirms `studio/` is separate from `app/` and no `app/` work is included.
+- PASS: Source-of-truth map covers authoritative artifacts, referential registry files, descriptive Studio schemas, and derived future Studio views.
+- PASS: Baseline terminology covers workflow, stage, gate, agent, command, handoff, registry entity, validation result, source reference, and derived view.
+- PASS: Identified gaps are future Plane-card candidates only; no local tickets, backlog, specs, or evidence files were created.
+- PASS: `studio/README.md` links to `foundation-inventory.md`.
+- PASS: Plane remains the evidence source of truth; no local evidence file was created or edited by this change.
 
 ## Validation Evidence
 
-- Plane card retrieval: `INVES-52` is `[AI][DOCS] Create SDLC Studio MVP roadmap`, state `In Progress`, with 8 acceptance criteria used for this QA mapping.
-- Roadmap content check via `rg`: PASS for ordered phase headings, source-of-truth references, consolidated validation gates, `make sdlc-doctor`, and explicit exclusions.
-- ReadLints: PASS. No linter errors found for `docs/roadmap/sdlc-studio-mvp-roadmap.md` or `.sdlc/memory/orchestrator-handoff.md`.
-- `pytest .sdlc/dsl/test_gate.py -q`: PASS, `5 passed in 0.09s`.
-- `make sdlc-doctor`: PASS, exit `0`; summary `220 passed, 3 warnings, 0 failed`.
-- Doctor warnings reviewed: local integration environment variables are not configured (`GITHUB_PERSONAL_ACCESS_TOKEN_CLASSIC`, `PLANE_API_KEY`, `OPENAI_API_KEY`). These are non-blocking warnings for this docs-only QA run.
+- `git status --short --branch`: branch `feature/INVES-54-inventory-studio-foundation`; post-validation working tree shows only `.sdlc/memory/orchestrator-handoff.md` modified.
+- `git diff --name-status develop...HEAD`: `M studio/README.md`, `A studio/foundation-inventory.md`.
+- `git diff --stat develop...HEAD`: `2 files changed, 134 insertions(+)`.
+- Referenced path existence check: PASS, `45` unique path references from `studio/foundation-inventory.md` exist.
+- Registry YAML parse check: PASS for `.sdlc/registry/cursor-artifacts.yaml`, `.sdlc/registry/index.yaml`, `.sdlc/registry/relationships.yaml`, and `.sdlc/registry/sdlc-artifacts.yaml`.
+- Forbidden path check: PASS, changed paths are only `.sdlc/memory/orchestrator-handoff.md`, `studio/README.md`, and `studio/foundation-inventory.md`; no changes under `app/`, `studio/examples/`, `specs/`, or local backlog/ticket/evidence paths.
+- `python3 .sdlc/scripts/plane_card.py validate-all --card INVES-54`: PASS with `OK: INVES-54 plan validated` and `OK: INVES-54 granularity validated (0 linked children)`.
+- `make sdlc-doctor`: PASS, `Doctor summary: 220 passed, 3 warnings, 0 failed`.
+- `pytest .sdlc/dsl/test_gate.py -q`: PASS, `5 passed in 0.05s`.
+- ReadLints on `studio/foundation-inventory.md`, `studio/README.md`, and `.sdlc/memory/orchestrator-handoff.md`: PASS, no linter errors found.
 
 ## Skipped Checks
 
-- Product backend tests skipped: docs-only change; no `app/backend/` diff.
-- Frontend build skipped: docs-only change; no `app/frontend/` diff.
-- Ruff skipped: no changed Python paths.
-- Commit, push, merge skipped: QA was instructed not to push or merge, and the only current working-tree change is allowed handoff metadata.
+- Product tests skipped: documentation-only Studio Foundation change with no `app/` edits.
+- Frontend build skipped: no `app/frontend/` changes.
+- Ruff skipped: no changed Python files; ReadLints and SDLC gate tests covered the changed documentation and handoff scope.
+
+## Residual Risks
+
+- Doctor warnings remain for missing optional integration environment variables: `GITHUB_PERSONAL_ACCESS_TOKEN_CLASSIC`, `PLANE_API_KEY`, and `OPENAI_API_KEY`. These did not fail Doctor.
+- Review should confirm the inventory's concise summaries remain acceptable as documentation and do not drift into normative process authority.
 
 ## Blockers
 
@@ -76,4 +66,4 @@ QA re-validation passed after AutoFixer removed out-of-scope working tree change
 
 ## Exact Next Action
 
-DevOps should create the PR, verify CI, merge to `develop` if checks pass, move `INVES-52` to Done, and finish the workflow.
+DevOps should create the PR, verify CI, merge to `develop` if checks pass, finish `INVES-54`, and remove/delete the remote feature branch after merge.
