@@ -171,4 +171,3 @@ Validation Result IR does not:
   evidence, PR state, CI state, merge state, or workboard state.
 - Require or expose command arguments, shell invocations, CI log bodies,
   validator internals, runtime state, or external API calls.
-
