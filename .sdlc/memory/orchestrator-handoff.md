@@ -4,49 +4,47 @@
 
 | Field | Value |
 |-------|-------|
-| Next agent | qa |
-| Stage complete | yes |
-| Previous agent | implementer |
+| **Next agent** | devops |
+| **Stage complete** | yes |
+| **Previous agent** | reviewer |
 
 ## Session
 
 | Field | Value |
 |-------|-------|
-| Card | INVES-47 |
-| Epic | INVES-45 |
-| Branch | feature/INVES-47-watchlist-allocation-ui |
-| Stage | implementation |
-| Gate status | open |
-| Commits | d08a010 |
+| **Card** | INVES-49 |
+| **Branch** | feature/INVES-49-docs-workflow-ui-planning |
+| **Stage** | deployment |
+| **Intent** | DOCS_ONLY |
 
-## Summary
+## Reviewer Verdict
 
-- Implemented editable watchlist allocation targets in the frontend table.
-- Added clear/remove target behavior that sends `target_percent: null` without removing the watchlist item.
-- Added allocation summary UI for balanced, under-allocated, and over-allocated states using the shared allocation contract.
-- Added typed PATCH client support for `/api/v1/watchlist/items/{symbol}/allocation` and a React Query mutation that invalidates/refetches the watchlist.
+APPROVE. The branch diff against `develop` is limited to `docs/sdlc-workflow-ui/README.md` and the allowed handoff update. The README remains documentation-only and satisfies the QA-mapped acceptance criteria.
+
+## QA Verdict
+
+PASS. The cleaned branch is based on local `develop`, contains no `app/` paths, generated frontend artifacts, local `specs/`, tickets, backlog files, or executable workflow definitions, and is ready for DevOps.
 
 ## Evidence
 
-- `ReadLints` on changed frontend files: no linter errors found.
-- `git diff --check -- app/frontend/src/api/client.ts app/frontend/src/hooks/useMarketData.ts app/frontend/src/pages/DashboardPage.tsx app/frontend/src/components/WatchlistTable.tsx app/frontend/src/types/market.ts`: passed.
-- `npm run build` in `app/frontend`: passed (`tsc -b && vite build`).
-- Build warning observed: Vite chunk size warning for the production bundle; not introduced as a failing gate.
-- No frontend unit test script exists in `app/frontend/package.json`; build was the available frontend validation.
+- `git merge-base --is-ancestor develop HEAD`: exit `0`.
+- `git diff --name-status develop...HEAD`: only `.sdlc/memory/orchestrator-handoff.md` and `docs/sdlc-workflow-ui/README.md`.
+- `pytest .sdlc/dsl/test_gate.py -q`: `5 passed`.
+- `make sdlc-doctor`: `132 passed, 3 warnings, 0 failed`.
+- Secrets check on branch diff: no matching secret assignment or private key patterns.
 
-## Changed files
+## Acceptance Criteria
 
-- `app/frontend/src/api/client.ts`
-- `app/frontend/src/components/WatchlistTable.tsx`
-- `app/frontend/src/hooks/useMarketData.ts`
-- `app/frontend/src/pages/DashboardPage.tsx`
-- `app/frontend/src/types/market.ts`
+- `docs/sdlc-workflow-ui/README.md` exists and defines planning/tracking material for a future SDLC workflow UI.
+- README covers purpose, scope, block model, annotations, workflow and command catalog, planning/tracking usage, non-goals, open questions, and initial next steps.
+- README explicitly states this is planning-only documentation and does not implement frontend, backend, API, workflow engine, command runner, database, or execution architecture.
+- No files under `app/` and no local ticket/spec/backlog files are included in the branch diff.
+
+## Residual Risks
+
+- The working tree still contains unrelated local changes outside the branch diff. DevOps must avoid staging or pushing them.
+- Doctor warnings remain for missing local integration environment variables: GitHub, Plane, and OpenAI.
 
 ## Blockers
 
-- None.
-
-## Notes
-
-- The shell initially reported `feature/INVES-46-watchlist-allocation-api` as the current branch even though the handoff requested `feature/INVES-47-watchlist-allocation-ui`; created and switched to `feature/INVES-47-watchlist-allocation-ui` locally at commit `d08a010`.
-- Pre-existing unrelated working tree changes remain untouched: `.cursor/hooks/*`, `.sdlc/memory/discovery-context.json`, and generated frontend artifacts.
+- none
