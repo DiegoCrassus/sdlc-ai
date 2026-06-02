@@ -9,7 +9,7 @@ The registry points to existing `.sdlc/` and `.cursor/` artifacts. It is not a n
 - `index.yaml` describes the registry files and non-goals.
 - `sdlc-artifacts.yaml` indexes existing SDLC artifacts.
 - `cursor-artifacts.yaml` indexes existing Cursor artifacts.
-- `relationships.yaml` records lightweight relationships between registered entities.
+- `relationships.yaml` records lightweight directed relationships between registered entities.
 
 ## Entity Invariants
 
@@ -22,7 +22,17 @@ Each registry entity is a pointer to one existing repository artifact:
 - `summary` is short and referential. It explains why the artifact is indexed without copying authoritative content.
 - `tags` classify the entry with lightweight labels.
 
-Relationship records use registry entity IDs in `from` and `to`. `source_refs` must point to real `.sdlc/` or `.cursor/` paths that ground the relationship.
+## Relationship Invariants
+
+Each registry relationship is a pointer between two existing registry entities:
+
+- `id` uses the stable `rel.*` namespace.
+- `from` and `to` are directed endpoint IDs from `sdlc-artifacts.yaml` or `cursor-artifacts.yaml`.
+- `from` -> `relation` -> `to` is the semantic direction. Inverse or bidirectional meaning must be represented by an explicit separate relationship.
+- `relation` is limited to `indexes`, `uses`, `governs`, `validates`, `references`, `supports`, or `documents`.
+- `source_refs` are non-empty, unique, real repository paths under `.sdlc/` or `.cursor/`.
+- `summary` is short and referential. It explains why the relationship is indexed without copying authoritative content.
+- Relationship records must not include content-bearing payload fields such as `body`, `prompt`, `template`, `policy`, `command`, `hook_logic`, `evidence`, `output`, or `generated`.
 
 ## Source Boundaries
 
@@ -32,6 +42,6 @@ The registry must not store rule bodies, lifecycle bodies, gate policies, comman
 
 ## Maintenance
 
-Keep entries short and path-based. When an authoritative artifact changes, update the source file first and adjust registry references only when IDs, paths, or high-level relationships change.
+Keep entries short and path-based. When an authoritative artifact changes, update the source file first and adjust registry references only when IDs, paths, or high-level directed relationships change.
 
 Before handoff, parse changed YAML files and verify that artifact paths, source systems, unique IDs, relationship targets, and relationship source references remain consistent with the invariants above.

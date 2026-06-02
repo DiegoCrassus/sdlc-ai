@@ -9,7 +9,7 @@ x_invariants:
   - Registry IDs stay in the sdlc.* or cursor.* namespace and must align with source_system.
   - Paths stay under .sdlc/ or .cursor/ and must align with source_system.
   - Summaries are short referential descriptions, not copied source content.
-  - Relationship targets are registry entity IDs, not embedded target bodies.
+  - Relationship targets are registry entity IDs, not embedded target bodies; detailed edge records use studio.registry_relationship.
   - Entity records must not include content-bearing fields such as body, prompt, template, policy, command, hook_logic, evidence, or output.
 properties:
   entity:

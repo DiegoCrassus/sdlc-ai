@@ -1,4 +1,18 @@
 registry_version: "0.1.0"
+relationship_model:
+  schema_ref: studio/schemas/registry-relationship.schema.yaml
+  id_namespace: rel.
+  directionality: Each record is read from -> relation -> to; inverse or bidirectional meaning requires a separate relationship.
+  allowed_relation_types:
+    - indexes
+    - uses
+    - governs
+    - validates
+    - references
+    - supports
+    - documents
+  source_ref_policy: Real repository paths under .sdlc/ or .cursor/ only; references ground relationships without copying source bodies.
+  summary_policy: Short referential summaries only; no copied authoritative content or delivery evidence.
 relationships:
   - id: rel.sdlc.manifest.indexes.workflows
     from: sdlc.manifest.index
