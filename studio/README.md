@@ -13,6 +13,8 @@ SDLC Studio is not product code and is unrelated to `app/`. It operates over the
 
 ## Contents
 
+- `foundation-inventory.md` inventories the current Studio Foundation source
+  areas and source-of-truth boundaries.
 - `schemas/` contains descriptive YAML schema documents for future Studio data contracts.
 
 ## Boundaries
