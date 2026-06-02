@@ -1,0 +1,30 @@
+registry_version: "0.1.0"
+description: Referential registry for SDLC Studio Foundation indexes.
+source_of_truth_statement: Existing .sdlc/ and .cursor/ artifacts remain authoritative; registry entries only point to them.
+files:
+  - path: .sdlc/registry/sdlc-artifacts.yaml
+    purpose: Index existing SDLC modules, policies, workflows, templates, scripts, and process artifacts.
+    contains:
+      - sdlc artifacts
+      - source modules
+      - short summaries
+      - tags
+  - path: .sdlc/registry/cursor-artifacts.yaml
+    purpose: Index existing Cursor agents, skills, commands, rules, and hooks.
+    contains:
+      - cursor artifacts
+      - source modules
+      - short summaries
+      - tags
+  - path: .sdlc/registry/relationships.yaml
+    purpose: Describe lightweight relationships between registered SDLC and Cursor entities.
+    contains:
+      - relationship IDs
+      - source and target entity IDs
+      - relation kinds
+      - source references
+non_goals:
+  - Copy authoritative SDLC or Cursor content into registry files.
+  - Define executable workflow behavior, command execution, or runtime semantics.
+  - Replace Plane, GitHub, SDLC CLI commands, rules, skills, hooks, or process documents.
+  - Store local tickets, backlog items, specs, or delivery evidence.

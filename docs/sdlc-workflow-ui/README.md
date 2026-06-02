@@ -6,6 +6,12 @@ This document captures initial planning notes for a future auxiliary SDLC workfl
 
 This is planning-only documentation. It does not define or implement a frontend, backend, API, workflow engine, command runner, database, or execution architecture.
 
+## Relationship To Studio Foundation
+
+`studio/` is the future SDLC Studio Foundation area for descriptive schemas and referential indexes over real `.sdlc/` and `.cursor/` artifacts. Future UI planning can use Studio Foundation as its modeling base, but this document remains a planning note and does not choose or implement UI architecture.
+
+The existing `app/` directory is unrelated to SDLC Studio Foundation. No assumptions in this planning document should be read as product code direction for `app/`.
+
 ## Scope
 
 The future UI concept may help agents and humans visualize how SDLC work moves through stages, gates, commands, handoffs, reviews, and operating practices. It should support planning and communication around workflow design without replacing Plane, GitHub, existing CLI commands, or the current SDLC source-of-truth files.
@@ -62,6 +68,7 @@ This document can help future work by giving teams a shared vocabulary for discu
 - Identify which workflow blocks and annotations need to be represented.
 - Track open questions that should become future Plane work when they are ready.
 - Compare workflow design ideas against the current SDLC lifecycle and governance rules.
+- Evaluate future Studio Foundation graph and registry models without turning them into runtime behavior.
 - Plan diagrams, user journeys, and catalog structure for future architecture review.
 - Clarify how a UI could support workflow understanding without becoming the source of truth.
 

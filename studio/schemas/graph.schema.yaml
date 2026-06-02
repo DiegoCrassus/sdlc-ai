@@ -1,0 +1,127 @@
+schema_id: studio.graph
+schema_version: "0.1.0"
+description: Descriptive schema for a non-executable SDLC Studio graph over existing repository artifacts.
+type: object
+required:
+  - graph
+  - nodes
+  - edges
+properties:
+  graph:
+    type: object
+    required:
+      - id
+      - name
+      - description
+      - version
+      - source_refs
+    properties:
+      id:
+        type: string
+        description: Stable Studio graph identifier.
+      name:
+        type: string
+      description:
+        type: string
+      version:
+        type: string
+      source_refs:
+        type: array
+        description: Existing .sdlc/ or .cursor/ paths used as graph sources.
+        items:
+          type: string
+  nodes:
+    type: array
+    description: Descriptive nodes for workflows, agents, skills, commands, gates, policies, templates, hooks, rules, and modules.
+    items:
+      type: object
+      required:
+        - id
+        - type
+        - label
+        - entity_ref
+        - source_refs
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+          enum:
+            - workflow
+            - stage
+            - agent
+            - skill
+            - command
+            - gate
+            - policy
+            - template
+            - hook
+            - rule
+            - module
+            - validation
+            - artifact
+        label:
+          type: string
+        entity_ref:
+          type: string
+          description: Registry entity ID or stable external reference.
+        source_refs:
+          type: array
+          items:
+            type: string
+        annotations:
+          type: array
+          items:
+            type: object
+            required:
+              - kind
+              - text
+            properties:
+              kind:
+                type: string
+                enum:
+                  - note
+                  - rationale
+                  - risk
+                  - open_question
+                  - evidence_hint
+                  - handoff_context
+              text:
+                type: string
+  edges:
+    type: array
+    description: Descriptive relationships between nodes; edges do not execute commands or workflows.
+    items:
+      type: object
+      required:
+        - id
+        - from
+        - to
+        - relation
+        - source_refs
+      properties:
+        id:
+          type: string
+        from:
+          type: string
+        to:
+          type: string
+        relation:
+          type: string
+          enum:
+            - contains
+            - references
+            - governs
+            - validates
+            - uses
+            - hands_off_to
+            - transitions_to
+            - documents
+            - indexes
+        label:
+          type: string
+        source_refs:
+          type: array
+          items:
+            type: string
+additionalProperties: false
