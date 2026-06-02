@@ -15,6 +15,8 @@ SDLC Studio is not product code and is unrelated to `app/`. It operates over the
 
 - `foundation-inventory.md` inventories the current Studio Foundation source
   areas and source-of-truth boundaries.
+- `source-boundaries.md` extends the foundation inventory with stable boundary
+  terminology for future Studio modeling work.
 - `schemas/` contains descriptive YAML schema documents for future Studio data contracts.
 
 ## Boundaries
