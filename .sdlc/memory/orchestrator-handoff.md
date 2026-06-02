@@ -17,7 +17,7 @@
 | **Epic** | INVES-53 - [AI][EPIC] Build SDLC Studio MVP |
 | **Branch** | feature/INVES-60-compiler-validator-boundaries |
 | **Stage** | review complete |
-| **Commits** | [f2ca375] |
+| **Commits** | [f2ca375, ee8b8fb] |
 
 ## Reviewer Verdict
 
