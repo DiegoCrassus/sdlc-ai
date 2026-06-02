@@ -14,7 +14,7 @@ x_invariants:
   - Nodes and edges are descriptive only and must not execute commands, enforce gates, invoke agents, run workflows, compile graphs, call validators, or store runtime state.
   - Direction is semantic and explicit as from -> relation -> to; inverse or bidirectional meaning requires a separate edge.
   - Annotations are advisory and non-authoritative.
-  - Validation attachments describe validation-result concepts; they do not run checks.
+  - Validation attachments describe Validation Result IR concepts from ../validation-result-ir-contract.md; they do not run checks or store durable evidence.
   - Graph IR is not coupled to UI libraries, canvas coordinates, React components, React Flow, TLDraw, compiler internals, validator logic, backend, frontend, APIs, or databases.
 properties:
   graph:
@@ -60,7 +60,7 @@ properties:
           $ref: "#/definitions/annotation"
       validation_attachments:
         type: array
-        description: Descriptive validation-result attachments for the graph view; attachments do not run checks.
+        description: Descriptive Validation Result IR attachments for the graph view; attachments do not run checks or store durable evidence.
         items:
           $ref: "#/definitions/validation_attachment"
       non_goals:
@@ -152,7 +152,7 @@ properties:
             $ref: "#/definitions/annotation"
         validation_attachments:
           type: array
-          description: Descriptive validation-result attachments for this node; attachments do not run checks.
+          description: Descriptive Validation Result IR attachments for this node; attachments do not run checks or store durable evidence.
           items:
             $ref: "#/definitions/validation_attachment"
       additionalProperties: false
@@ -220,7 +220,7 @@ properties:
             $ref: "#/definitions/annotation"
         validation_attachments:
           type: array
-          description: Descriptive validation-result attachments for this edge; attachments do not run checks.
+          description: Descriptive Validation Result IR attachments for this edge; attachments do not run checks or store durable evidence.
           items:
             $ref: "#/definitions/validation_attachment"
       additionalProperties: false
@@ -279,6 +279,7 @@ definitions:
     additionalProperties: false
   validation_attachment:
     type: object
+    description: Embedded descriptive summary or reference aligned with Validation Result IR; this attachment does not execute validation and is not durable evidence.
     required:
       - target_ref
       - check_type
@@ -287,16 +288,15 @@ definitions:
       - source_refs
     properties:
       target_ref:
-        type: string
-        description: Graph, node, edge, registry entity, or workflow reference being described by this validation attachment.
-        maxLength: 160
+        $ref: "#/definitions/target_ref"
       validation_ref:
         type: string
-        description: Optional reference to an external or future Studio-readable validation result record.
-        maxLength: 160
+        description: Optional reference to a Studio-readable Validation Result IR record.
+        pattern: ^validation\.[a-z0-9][a-z0-9_.-]*$
+        maxLength: 140
       check_type:
         type: string
-        description: Descriptive check type aligned with validation-result.schema.yaml concepts.
+        description: Descriptive check type aligned with Validation Result IR concepts; this field does not implement or invoke the check.
         enum:
           - yaml_parse
           - path_exists
@@ -316,7 +316,8 @@ definitions:
           - not_run
       messages:
         type: array
-        description: Human-readable validation messages.
+        description: Human-readable validation messages; do not copy source bodies, generated output bodies, command output bodies, or durable evidence.
+        minItems: 1
         items:
           type: object
           required:
@@ -331,11 +332,20 @@ definitions:
                 - error
             text:
               type: string
+              description: Concise human-readable text without copied source bodies, generated outputs, command outputs, or durable evidence.
               maxLength: 500
             path:
               type: string
               description: Optional repository path related to the message.
               maxLength: 220
+            line:
+              type: integer
+              description: Optional 1-based source line for human navigation only.
+              minimum: 1
+            column:
+              type: integer
+              description: Optional 1-based source column for human navigation only.
+              minimum: 1
           additionalProperties: false
       source_refs:
         type: array
@@ -348,9 +358,45 @@ definitions:
         type: string
         description: Optional descriptive checker name or authority; not an invocation target.
         maxLength: 120
+      checker_version:
+        type: string
+        description: Optional descriptive checker version label; metadata only.
+        maxLength: 80
+      checker_authority:
+        $ref: "#/definitions/source_ref"
       checked_at:
         type: string
-        description: Optional timestamp copied from a validation result concept.
+        description: Optional descriptive timestamp from a validation result concept; it does not imply freshness or live execution.
         format: date-time
+    additionalProperties: false
+  target_ref:
+    type: object
+    description: Target described by a Validation Result IR concept; targets remain pointers to authoritative sources or derived Studio objects.
+    required:
+      - ref_type
+      - ref
+    properties:
+      ref_type:
+        type: string
+        description: Target reference kind.
+        enum:
+          - graph
+          - node
+          - edge
+          - registry_entity
+          - workflow
+          - stage
+          - path
+          - plane
+          - github
+      ref:
+        type: string
+        description: Stable graph ID, node ID, edge ID, registry ID, workflow/stage identifier, repository path, Plane card ID, or GitHub PR/check reference.
+        minLength: 1
+        maxLength: 220
+      summary:
+        type: string
+        description: Optional concise explanation of the target; do not copy source bodies or evidence.
+        maxLength: 180
     additionalProperties: false
 additionalProperties: false

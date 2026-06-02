@@ -40,8 +40,9 @@ Supporting schemas remain focused on their own descriptive shapes:
   registry entities.
 - `schemas/registry-relationship.schema.yaml` describes directed registry
   relationships.
-- `schemas/validation-result.schema.yaml` describes Studio-readable validation
-  result concepts.
+- `validation-result-ir-contract.md` and
+  `schemas/validation-result.schema.yaml` describe Studio-readable Validation
+  Result IR records.
 
 Graph IR may reference those concepts, but it does not implement validation,
 compile workflows, execute commands, or persist generated graph outputs.
@@ -132,14 +133,16 @@ references.
 
 ## Validation Attachments
 
-Validation attachments describe validation result concepts for display or
-traceability. They may reference the shape of
-`schemas/validation-result.schema.yaml`, including target reference, check
-type, status, messages, source references, checker metadata, and timestamps.
+Validation attachments describe Validation Result IR concepts for display or
+traceability. Their semantics come from `validation-result-ir-contract.md` and
+their schema vocabulary aligns with `schemas/validation-result.schema.yaml`,
+including target reference, check type, status, messages, source references,
+checker metadata, and timestamps.
 
 Validation attachments do not run checks. They do not call doctor, lint, CI,
 policy checks, path checks, custom validators, workflow gates, shell commands,
-or external APIs. They are descriptive attachments only.
+or external APIs. They are descriptive attachments only and must not copy or
+store durable delivery evidence locally.
 
 ## Non-Executable Semantics
 
