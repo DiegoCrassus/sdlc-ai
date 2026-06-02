@@ -4,146 +4,63 @@
 
 | Field | Value |
 |-------|-------|
-| **Next agent** | devops |
+| **Next agent** | qa |
 | **Stage complete** | yes |
-| **Previous agent** | reviewer |
+| **Previous agent** | implementer |
 
 ## Session
 
 | Field | Value |
 |-------|-------|
 | **Intent** | FEATURE |
-| **Card** | INVES-59 - [AI][SDLC] Model validation result IR |
+| **Card** | INVES-60 - [AI][SDLC] Architect compiler validator boundaries |
 | **Epic** | INVES-53 - [AI][EPIC] Build SDLC Studio MVP |
-| **Branch** | feature/INVES-59-model-validation-result-ir |
-| **Stage** | review complete |
-| **Implementation commits** | `10f50e9`, `78bb644` |
-| **Implementer handoff commit** | `07b33fa` |
+| **Branch** | feature/INVES-60-compiler-validator-boundaries |
+| **Stage** | implementation |
+| **Commits** | [f2ca375] |
 
-## Reviewer Verdict
+## Implementation Summary
 
-APPROVE. Reviewer confirmed INVES-59 remains limited to Studio docs/schemas and handoff, with Validation Result IR as descriptive metadata only. No `app/`, `specs/`, local evidence, generated outputs, runtime/UI/compiler/validator/CLI behavior, backend/frontend, or workflow execution behavior was introduced.
+Implemented the docs-only Compiler/Validator boundary architecture for SDLC Studio. The change adds a dedicated English boundary contract and updates Studio README indexes to point to the contract without adding execution semantics.
 
-## QA Result
+## Files Changed
 
-QA PASS. The branch validates the descriptive Validation Result IR schema and
-documentation against the INVES-59 acceptance criteria. No production code,
-runtime behavior, validator execution, generated outputs, local tickets,
-backlog files, specs, or local evidence records were added.
+- `studio/compiler-validator-boundaries.md` - New descriptive, non-executable Compiler/Validator boundary contract.
+- `studio/README.md` - Adds the boundary contract to Studio contents and clarifies validator execution is out of scope.
+- `studio/schemas/README.md` - Points schemas readers to the boundary contract and clarifies descriptive Workflow IR/report semantics.
 
-## Branch And Diff
+No schema YAML files were changed. No `.sdlc/registry/`, `app/`, `studio/examples/`, `specs/`, local backlog, local ticket, local evidence, generated output, runtime, UI, CLI, backend, frontend, service, API, database, scheduler, compiler execution, validator execution, workflow runner, command runner, or AI composition files were changed by the implementation commit.
 
-- `git status --short --branch`: PASS.
-  - `## feature/INVES-59-model-validation-result-ir`
-  - Only `.sdlc/memory/orchestrator-handoff.md` remained modified during QA.
-- `git diff --name-status origin/develop...HEAD`: PASS.
-  - `M .sdlc/memory/orchestrator-handoff.md`
-  - `M studio/README.md`
-  - `M studio/graph-ir-contract.md`
-  - `M studio/schemas/README.md`
-  - `M studio/schemas/graph.schema.yaml`
-  - `M studio/schemas/validation-result.schema.yaml`
-  - `A studio/validation-result-ir-contract.md`
-- `git diff --stat origin/develop...HEAD`: PASS.
-  - `7 files changed, 480 insertions(+), 133 deletions(-)`.
+## Acceptance Criteria Coverage
 
-## Acceptance Criteria Verification
-
-- Stable top-level Validation Result IR record: PASS. `validation-result.schema.yaml`
-  requires `id`, `target_ref`, `check_type`, `status`, `messages`, and
-  `source_refs`.
-- ID semantics: PASS. `id` uses pattern
-  `^validation\.[a-z0-9][a-z0-9_.-]*$`; contract states IDs name descriptive
-  records, not executable checks.
-- `target_ref` semantics: PASS. Schema and contract cover `graph`, `node`,
-  `edge`, `registry_entity`, `workflow`, `stage`, `path`, `plane`, and
-  `github`.
-- Status values: PASS. Schema enum is `pass`, `warn`, `fail`, `not_run`.
-- Message levels: PASS. Schema enum is `info`, `warn`, `error`.
-- Check types: PASS. Schema enum is `yaml_parse`, `path_exists`, `path_scope`,
-  `relationship_target`, `doctor`, `lint`, `policy`, and `custom`; docs state
-  these are descriptive categories only.
-- Message constraints: PASS. Schema and contract allow concise human text plus
-  optional source path, line, and column context, and prohibit copying
-  authoritative source bodies, generated outputs, command outputs, durable
-  evidence, and local evidence records.
-- `source_refs`: PASS. Required with `minItems: 1`, `uniqueItems: true`, and
-  structured as `ref_type`, `ref`, optional `summary`; supports `path`, `plane`,
-  and `github`.
-- Checker metadata: PASS. `checked_by`, `checker_version`,
-  `checker_authority`, and `checked_at` are descriptive metadata only; docs
-  prohibit invocation targets, command bodies, shell invocations, API calls,
-  workflow transition targets, and validator internals.
-- `checked_at`: PASS. Schema uses `format: date-time`; docs state no freshness
-  or live execution guarantee.
-- Dedicated contract doc: PASS. `studio/validation-result-ir-contract.md`
-  documents non-executable semantics, source-of-truth boundaries, Graph IR
-  attachment relationship, and non-goals.
-- Graph IR reference: PASS. `studio/graph-ir-contract.md` and
-  `studio/schemas/graph.schema.yaml` point validation attachments to Validation
-  Result IR semantics while preserving the non-executable boundary.
-- Authority and evidence boundaries: PASS. Docs keep durable delivery evidence
-  in Plane and PR, review, CI, merge, branch, and repository state in GitHub.
-- Forbidden paths and behaviors: PASS. Diff contains no `app/`,
-  `studio/examples/`, `specs/`, local tickets/backlog/evidence paths,
-  generated outputs, runtime, UI, compiler, validator execution, CLI,
-  backend/frontend, workflow execution, or AI composition implementation.
+- Dedicated Studio boundary contract exists in `studio/compiler-validator-boundaries.md` and is written in English.
+- Contract defines compiler inputs, compiler derived outputs, compiler non-outputs, validator inputs, validator outputs, report contracts, failure semantics, future implementation gates, and explicit non-goals.
+- Contract preserves source-of-truth boundaries for `.sdlc/`, `.cursor/`, Plane, GitHub, and `.sdlc/registry/`.
+- Contract states Graph IR, Workflow IR, Validation Result IR, and reports are derived or referential and non-executable.
+- README updates only point to the boundary contract and clarify descriptive semantics; no schema execution semantics were introduced.
 
 ## Validation Evidence
 
-- YAML parse changed schemas: PASS.
-  - `PASS yaml_parse studio/schemas/validation-result.schema.yaml: top-level keys=['schema_id', 'schema_version', 'description', 'x_contract', 'x_invariants']`
-  - `PASS yaml_parse studio/schemas/graph.schema.yaml: top-level keys=['schema_id', 'schema_version', 'description', 'type', 'required']`
-- Schema contract assertions: PASS.
-  - `required=id,target_ref,check_type,status,messages,source_refs`
-  - `check_type=yaml_parse,path_exists,path_scope,relationship_target,doctor,lint,policy,custom`
-  - `status=pass,warn,fail,not_run`
-  - `message_levels=info,warn,error`
-- Markdown links/path refs: PASS.
-  - Checked `studio/validation-result-ir-contract.md`.
-  - Checked `studio/graph-ir-contract.md`.
-  - Checked `studio/schemas/README.md`.
-  - Checked `studio/README.md`.
-- `python3 .sdlc/scripts/plane_card.py validate-all --card INVES-59`: PASS.
-  - `OK: INVES-59 plan validated`
-  - `OK: INVES-59 granularity validated (0 linked children)`
-- `make sdlc-doctor`: PASS.
-  - `Doctor summary: 220 passed, 3 warnings, 0 failed`
-  - Warnings: missing local integration env vars
-    `GITHUB_PERSONAL_ACCESS_TOKEN_CLASSIC`, `PLANE_API_KEY`, and
-    `OPENAI_API_KEY`.
-- `pytest .sdlc/dsl/test_gate.py -q`: PASS.
-  - `5 passed in 0.12s`
-- ReadLints on changed schema/docs/handoff files: PASS.
-  - `No linter errors found.`
-- `git diff --check origin/develop...HEAD`: PASS.
-  - No output.
-- Forbidden path scope script: PASS.
-  - Changed files limited to Studio contract/schema/docs and
-    `.sdlc/memory/orchestrator-handoff.md`.
+- `python3` YAML parse for `studio/schemas/graph.schema.yaml`, `studio/schemas/workflow.schema.yaml`, and `studio/schemas/validation-result.schema.yaml`: PASS.
+- `python3` Markdown link check across `studio/README.md`, `studio/schemas/README.md`, `studio/graph-ir-contract.md`, `studio/validation-result-ir-contract.md`, and `studio/compiler-validator-boundaries.md`: PASS.
+- `python3 .sdlc/scripts/plane_card.py validate-all --card INVES-60`: PASS (`plan validated`, `granularity validated`).
+- `make sdlc-doctor`: PASS with 220 passed, 3 warnings, 0 failed. Warnings were missing optional integration environment variables: `GITHUB_PERSONAL_ACCESS_TOKEN_CLASSIC`, `PLANE_API_KEY`, and `OPENAI_API_KEY`.
+- `git diff --check`: PASS.
+- `ReadLints` on changed docs/schema/handoff paths: PASS, no linter errors found.
 
-## Skipped Checks
+## Skipped Validation
 
-- Product tests skipped: no `app/`, backend, frontend, API, database, runtime,
-  compiler, validator execution, CLI, or product behavior changed.
-- Frontend build skipped: no `app/frontend/` changes.
-- Ruff skipped: no Python source files changed.
-- No Plane comment was posted by QA because validation passed; durable delivery
-  evidence should remain in Plane/GitHub during review and DevOps stages.
-
-## Risks
-
-- Future validator/compiler cards must define execution behavior separately and
-  must not infer executable behavior from this descriptive IR contract.
-- Graph IR consumers must treat validation attachments as display/traceability
-  summaries or references only, not as local durable evidence stores.
-- Doctor warnings reflect missing local integration environment variables but do
-  not fail the Doctor gate.
+Product tests, frontend builds, backend lint, runtime tests, compiler execution tests, and validator execution tests were skipped because this card changed only Studio documentation/index files and introduced no `app/` or executable behavior.
 
 ## Blockers
 
-- None.
+None.
+
+## Residual Risks
+
+- Future compiler or validator implementation cards must keep this contract descriptive and must not infer execution authority from terms such as compiler, validator, report, pass, warn, or fail.
+- The working tree still contains a pre-existing/unrelated `.sdlc/memory/discovery-context.json` modification that was not touched or staged by this implementation.
 
 ## Exact Next Action
 
-Hand off to DevOps for PR/merge flow on `feature/INVES-59-model-validation-result-ir`. DevOps must delete/remove the remote feature branch after successful merge.
+Delegate to QA for `INVES-60` on branch `feature/INVES-60-compiler-validator-boundaries` to verify the docs-only boundary contract against the acceptance criteria and validation evidence above.
