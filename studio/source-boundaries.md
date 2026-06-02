@@ -18,6 +18,10 @@ non-executable. They can model, summarize, or visualize existing sources, but
 they do not define workflows, execute commands, validate gates, drive agents, or
 store delivery evidence.
 
+Any Studio visual graph, AI suggestions, and simulations are derived aids,
+projections, or previews only. They cannot override `.sdlc/`, `.cursor/`,
+Plane, or GitHub source-of-truth artifacts or states.
+
 Plane remains authoritative for work item state, card scope, and durable
 delivery evidence. GitHub remains authoritative for pull request state, review,
 CI, merge state, and repository history.
