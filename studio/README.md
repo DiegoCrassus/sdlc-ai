@@ -22,10 +22,13 @@ SDLC Studio is not product code and is unrelated to `app/`. It operates over the
 - `validation-result-ir-contract.md` defines the descriptive, non-executable
   Validation Result IR contract for future Studio validation records and Graph
   IR validation attachments.
+- `compiler-validator-boundaries.md` defines the descriptive, non-executable
+  Compiler/Validator phase boundary contract for future Studio derivation,
+  validation, and report work.
 - `schemas/` contains descriptive YAML schema documents for future Studio data contracts.
 
 ## Boundaries
 
-Studio Foundation does not implement UI, React Flow, TLDraw, command execution, compiler/runtime behavior, AI composition, LLM integration, persistence, backend services, frontend code, or distributed execution.
+Studio Foundation does not implement UI, React Flow, TLDraw, command execution, compiler/runtime behavior, validator execution, AI composition, LLM integration, persistence, backend services, frontend code, or distributed execution.
 
 Do not add local tickets, backlog files, specs, or evidence records here. Plane remains the workboard source of truth, and delivery evidence belongs on Plane.
