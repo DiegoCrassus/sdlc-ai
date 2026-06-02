@@ -1,6 +1,13 @@
 registry_version: "0.1.0"
 description: Referential registry for SDLC Studio Foundation indexes.
 source_of_truth_statement: Existing .sdlc/ and .cursor/ artifacts remain authoritative; registry entries only point to them.
+entity_model:
+  schema_ref: studio/schemas/registry-entity.schema.yaml
+  id_namespaces:
+    sdlc: .sdlc/
+    cursor: .cursor/
+  summary_policy: Short referential summaries only; no copied authoritative content.
+  relationship_policy: Relationship endpoints use registry entity IDs and source_refs use repository paths.
 files:
   - path: .sdlc/registry/sdlc-artifacts.yaml
     purpose: Index existing SDLC modules, policies, workflows, templates, scripts, and process artifacts.
@@ -28,3 +35,4 @@ non_goals:
   - Define executable workflow behavior, command execution, or runtime semantics.
   - Replace Plane, GitHub, SDLC CLI commands, rules, skills, hooks, or process documents.
   - Store local tickets, backlog items, specs, or delivery evidence.
+  - Store generated Studio outputs or validation evidence.
