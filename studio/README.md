@@ -19,6 +19,9 @@ SDLC Studio is not product code and is unrelated to `app/`. It operates over the
   terminology for future Studio modeling work.
 - `graph-ir-contract.md` defines the descriptive, non-executable Graph IR
   contract for future Studio graph documents.
+- `validation-result-ir-contract.md` defines the descriptive, non-executable
+  Validation Result IR contract for future Studio validation records and Graph
+  IR validation attachments.
 - `schemas/` contains descriptive YAML schema documents for future Studio data contracts.
 
 ## Boundaries
