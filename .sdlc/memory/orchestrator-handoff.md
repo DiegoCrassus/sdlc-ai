@@ -12,27 +12,34 @@
 
 | Field | Value |
 |-------|-------|
-| **Card** | INVES-86 |
-| **Branch** | feature/INVES-86-studio-api-patch-s4 |
+| **Card** | INVES-87 |
+| **Branch** | feature/INVES-87-studio-ui-config-builders-s5 |
 | **Stage** | implementation |
+
+## Scope
+
+Config builders UI (agents, rules/skills, commands) — propose-only via `POST /studio/proposals`.
 
 ## Deliverables
 
-- S4 routes: `POST/GET/DELETE /studio/proposals`, `POST .../validate`, `.../doctor`, `.../gateway-check`
-- No `POST .../apply` (verified in OpenAPI + tests)
-- `gate.check_write_simulated` for gateway-check when session gate closed
-- In-memory proposal store (24h TTL); `.studio/` gitignored
+- `GET /studio/config/files` and `GET /studio/config/file` (read-only browse)
+- `/agents`, `/rules` (tabs: rules + skills), `/commands` builder pages
+- Shared `ConfigBuilderPage`, `configDraft` helpers, `ProposalPanel` dry-run flow
 
-## Test evidence
+## Git
 
-```bash
-STUDIO_REPO_ROOT=$(pwd) PYTHONPATH=app/studio-backend/src:$PWD python3 -m pytest app/studio-backend/tests/ .sdlc/dsl/test_gate.py -v
-# 34 passed
-```
+| Field | Value |
+|-------|-------|
+| **commits** | [1474637] |
+| **branch** | feature/INVES-87-studio-ui-config-builders-s5 |
 
-## Commits
+## Verification (implementer)
 
-- `5d2bf6c5e0f939fcdb0e3cbd2723c29821505682`
+| Check | Result |
+|-------|--------|
+| `pytest app/studio-backend/tests/test_config.py tests/test_proposals.py` | 10 passed |
+| `npm test -- --run` (studio-frontend) | 34 passed |
+| `npm run build` (studio-frontend) | OK |
 
 ## Blockers
 
@@ -40,4 +47,4 @@ None.
 
 ## Exact Next Action
 
-QA validates acceptance criteria against ADR-010 / architecture.md § Propose-only mutation contract.
+QA: validate acceptance criteria against real test evidence; map to Plane card INVES-87.
