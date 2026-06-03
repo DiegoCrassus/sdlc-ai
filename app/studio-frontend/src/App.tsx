@@ -1,19 +1,19 @@
 import { Route, Routes } from "react-router-dom";
 
 import { StudioLayout } from "./components/shell/StudioLayout";
+import { AssistancePage } from "./pages/AssistancePage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { ObservabilityPage } from "./pages/ObservabilityPage";
 import { ConfigBuilderPage } from "./pages/ConfigBuilderPage";
+import { RegistryPage } from "./pages/RegistryPage";
 import { RulesSkillsBuilderPage } from "./pages/RulesSkillsBuilderPage";
+import { SimulationPage } from "./pages/SimulationPage";
 import { StubPage } from "./pages/StubPage";
+import { ValidationPage } from "./pages/ValidationPage";
 import { WorkflowBuilderPage } from "./pages/WorkflowBuilderPage";
 import { WorkflowsPage } from "./pages/WorkflowsPage";
 
 const stubs: { path: string; title: string; phase: string }[] = [
-  { path: "registry", title: "Registry", phase: "S5" },
-  { path: "validation", title: "Validation", phase: "S5" },
-  { path: "simulation", title: "Simulation", phase: "S5" },
-  { path: "assistance", title: "Assistance", phase: "S5" },
   { path: "evidence", title: "Evidence & Delivery", phase: "S6" },
   { path: "settings", title: "Settings", phase: "meta" },
 ];
@@ -47,6 +47,10 @@ export default function App() {
           }
         />
         <Route path="observability" element={<ObservabilityPage />} />
+        <Route path="registry" element={<RegistryPage />} />
+        <Route path="validation" element={<ValidationPage />} />
+        <Route path="simulation" element={<SimulationPage />} />
+        <Route path="assistance" element={<AssistancePage />} />
         {stubs.map((s) => (
           <Route
             key={s.path}

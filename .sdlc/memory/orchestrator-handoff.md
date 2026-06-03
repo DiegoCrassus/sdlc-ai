@@ -12,30 +12,28 @@
 
 | Field | Value |
 |-------|-------|
-| **Card** | INVES-88 |
-| **Branch** | feature/INVES-88-studio-api-registry-s6 |
+| **Card** | INVES-89 |
+| **Branch** | feature/INVES-89-studio-ui-registry-s6 |
 | **Stage** | implementation |
 
 ## Scope
 
-Registry + validation API S5 (registry graph, validation inspect/run, doctor, simulation, assistance, skeleton).
+Registry / validation / simulation / assistance UI (S5 screens F–I) wired to backend APIs from INVES-88.
 
-## Deliverables
+## Delivered
 
-- `GET /studio/registry/graph` — registry graph + broken_refs from compile report
-- `GET /studio/validation/inspect` — inspect-validation projection (query filters)
-- `POST /studio/validation/run` — full validate result
-- `POST /studio/doctor/run` — repo-root doctor subprocess
-- `POST /studio/simulation/preview` — non-executing simulation
-- `POST /studio/assistance/workflow` — advisory assistance
-- `GET /studio/skeleton/tests` — MVP test skeleton list
+- `RegistryPage` — React Flow graph from `GET /studio/registry/graph` with broken-ref highlight panel
+- `ValidationPage` — inspect table + doctor trigger with pass/fail chip
+- `SimulationPage` — scenario picker (default `docs_only`) + step timeline with path_label chips
+- `AssistancePage` — persistent advisory-only banner above fold + suggestions list
+- API client + `types/foundation.ts` + `registryViewModel` unit tests
 
 ## Verification (implementer)
 
-```bash
-STUDIO_REPO_ROOT=$(pwd) PYTHONPATH=app/studio-backend/src:$PWD python3 -m pytest app/studio-backend/tests/ -q
-# 44 passed
-```
+| Check | Result |
+|-------|--------|
+| `npm run test` (studio-frontend) | 38 passed |
+| `npm run build` (studio-frontend) | pass |
 
 ## Blockers
 
@@ -43,4 +41,4 @@ None.
 
 ## Exact Next Action
 
-QA: map acceptance criteria, run pytest + ruff, post evidence on Plane card.
+QA validates AC-1..AC-5 against live API (`make studio-dev`).
