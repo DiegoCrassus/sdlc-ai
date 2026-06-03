@@ -33,19 +33,27 @@ app/studio-frontend/
     └── api/client.ts
 ```
 
-## Run (after INVES-79 scaffold)
+## Run
 
 ```bash
 cd app/studio-frontend && npm install && npm run dev
 ```
 
 UI: http://127.0.0.1:5174  
-API proxy: `/studio` → http://127.0.0.1:8100
+API: Vite proxies `/studio` → `http://127.0.0.1:8100` (override with `VITE_STUDIO_API_URL`).
 
-Combined dev (root Makefile, INVES-78/79):
+Combined dev (API + UI, from repo root):
 
 ```bash
+cd app/studio-frontend && npm install   # once
 make studio-dev
+```
+
+Tests:
+
+```bash
+npm run test          # vitest (client URL helpers)
+npm run smoke         # optional; requires API on :8100
 ```
 
 ## Routes (information architecture)
