@@ -26,6 +26,13 @@ Config builders UI (agents, rules/skills, commands) — propose-only via `POST /
 - `/agents`, `/rules` (tabs: rules + skills), `/commands` builder pages
 - Shared `ConfigBuilderPage`, `configDraft` helpers, `ProposalPanel` dry-run flow
 
+## Git
+
+| Field | Value |
+|-------|-------|
+| **commits** | [1474637] |
+| **branch** | feature/INVES-87-studio-ui-config-builders-s5 |
+
 ## Verification (implementer)
 
 | Check | Result |
