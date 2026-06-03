@@ -6,8 +6,11 @@ import pytest
 from studio.canvas_view_model import build_canvas_view_model
 from studio.compiler_core import compile_studio_sources
 from studio.simulation_preview import (
+    VALID_INTENTS,
     VALID_PATH_LABELS,
     VALID_SCENARIOS,
+    VALID_STEP_KINDS,
+    VALID_TAGS,
     SimulationPreviewInputError,
     build_simulation_preview_from_sources,
     build_simulation_preview_model,
@@ -37,8 +40,13 @@ def test_simulation_preview_is_deterministic_and_schema_shaped() -> None:
     assert scenario_ids == [f"simulation.scenario.{sid}" for sid in VALID_SCENARIOS]
     for scenario in first["scenarios"]:
         assert scenario["id"].removeprefix("simulation.scenario.") in VALID_SCENARIOS
+        assert scenario["description"]
+        assert scenario["outcome"]
+        assert scenario["evidence_expectations"]
+        assert all(tag in VALID_TAGS for tag in scenario["tags"])
         for step in scenario["steps"]:
             assert step["path_label"] in VALID_PATH_LABELS
+            assert step["kind"] in VALID_STEP_KINDS
             assert step["source_refs"]
             assert step["handoff"]["handoff_ref"] == ".sdlc/memory/orchestrator-handoff.md"
     assert len(first["lifecycle_map"]) == first["summary"]["workflow_transitions"]
@@ -48,12 +56,44 @@ def test_simulation_preview_is_deterministic_and_schema_shaped() -> None:
 
 def test_scenario_filter_and_blocked_path_labels() -> None:
     filtered = build_simulation_preview_from_sources(REPO_ROOT, scenario="qa_failure")
-    assert filtered["simulation"]["filters"] == {"scenario": "qa_failure"}
+    assert filtered["simulation"]["filters"]["scenario"] == "qa_failure"
     assert len(filtered["scenarios"]) == 1
     labels = {step["path_label"] for step in filtered["scenarios"][0]["steps"]}
     assert "blocked" in labels
     with pytest.raises(SimulationPreviewInputError, match="invalid scenario: bogus"):
         build_simulation_preview_from_sources(REPO_ROOT, scenario="bogus")
+
+
+def test_intent_path_label_and_step_kind_filters() -> None:
+    docs_only = build_simulation_preview_from_sources(REPO_ROOT, intent="DOCS_ONLY")
+    assert docs_only["simulation"]["filters"]["intent"] == "DOCS_ONLY"
+    assert len(docs_only["scenarios"]) == 1
+    assert docs_only["scenarios"][0]["intent"] in VALID_INTENTS
+
+    blocked_steps = build_simulation_preview_from_sources(REPO_ROOT, path_label="blocked")
+    assert blocked_steps["simulation"]["filters"]["path_label"] == "blocked"
+    assert blocked_steps["summary"]["step_count"] > 0
+    assert all(step["path_label"] == "blocked" for scenario in blocked_steps["scenarios"] for step in scenario["steps"])
+
+    transitions = build_simulation_preview_from_sources(REPO_ROOT, step_kind="transition")
+    assert transitions["simulation"]["filters"]["step_kind"] == "transition"
+    assert all(step["kind"] == "transition" for scenario in transitions["scenarios"] for step in scenario["steps"])
+
+    failure_paths = build_simulation_preview_from_sources(REPO_ROOT, tag="failure_path")
+    assert failure_paths["simulation"]["filters"]["tag"] == "failure_path"
+    assert {item["id"] for item in failure_paths["scenarios"]} == {
+        "simulation.scenario.qa_failure",
+        "simulation.scenario.reviewer_escalation",
+    }
+
+    with pytest.raises(SimulationPreviewInputError, match="invalid intent: BOGUS"):
+        build_simulation_preview_from_sources(REPO_ROOT, intent="BOGUS")
+    with pytest.raises(SimulationPreviewInputError, match="invalid path_label: bogus"):
+        build_simulation_preview_from_sources(REPO_ROOT, path_label="bogus")
+    with pytest.raises(SimulationPreviewInputError, match="invalid step_kind: bogus"):
+        build_simulation_preview_from_sources(REPO_ROOT, step_kind="bogus")
+    with pytest.raises(SimulationPreviewInputError, match="invalid tag: bogus"):
+        build_simulation_preview_from_sources(REPO_ROOT, tag="bogus")
 
 
 def test_validation_fail_marks_transition_blocked_in_qa_scenario() -> None:
