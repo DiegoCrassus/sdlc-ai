@@ -7,7 +7,6 @@ import json
 from typing import Any
 
 from studio.reporting import STATUSES
-
 from studio_service.api.errors import StudioApiError
 
 

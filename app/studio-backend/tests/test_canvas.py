@@ -20,7 +20,6 @@ def test_canvas_full_returns_non_empty_graph(client) -> None:
 
 
 def test_canvas_full_section_filter_reduces_nodes(client) -> None:
-    full = client.get("/studio/canvas/full").json()
     filtered = client.get("/studio/canvas/full", params={"section": "sdlc"}).json()
     assert filtered["filters"]["section"] == "sdlc"
     assert filtered["meta"]["filtered_nodes"] < filtered["meta"]["total_nodes"]
