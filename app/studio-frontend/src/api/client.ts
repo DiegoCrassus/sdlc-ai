@@ -15,6 +15,16 @@ import type {
   DryRunResult,
 } from "../types/proposals";
 import type {
+  DoctorRunResponse,
+  RegistryGraphResponse,
+  SimulationPreviewParams,
+  SimulationPreviewResponse,
+  ValidationInspectParams,
+  ValidationInspectResponse,
+  WorkflowAssistanceParams,
+  WorkflowAssistanceResponse,
+} from "../types/foundation";
+import type {
   DashboardSummary,
   ReadinessResponse,
   SessionGateResponse,
@@ -106,4 +116,34 @@ export const studioApi = {
     request<ConfigFileContentResponse>(
       `/config/file?${new URLSearchParams({ path })}`,
     ),
+  registryGraph: () => request<RegistryGraphResponse>("/registry/graph"),
+  validationInspect: (params?: ValidationInspectParams) => {
+    const qs = new URLSearchParams();
+    if (params?.status) qs.set("status", params.status);
+    if (params?.check_type) qs.set("check_type", params.check_type);
+    if (params?.target_type) qs.set("target_type", params.target_type);
+    if (params?.group_by) qs.set("group_by", params.group_by);
+    const query = qs.toString();
+    return request<ValidationInspectResponse>(
+      `/validation/inspect${query ? `?${query}` : ""}`,
+    );
+  },
+  doctorRun: () =>
+    request<DoctorRunResponse>("/doctor/run", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({}),
+    }),
+  simulationPreview: (params?: SimulationPreviewParams) =>
+    request<SimulationPreviewResponse>("/simulation/preview", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(params ?? {}),
+    }),
+  workflowAssistance: (params?: WorkflowAssistanceParams) =>
+    request<WorkflowAssistanceResponse>("/assistance/workflow", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(params ?? {}),
+    }),
 };
