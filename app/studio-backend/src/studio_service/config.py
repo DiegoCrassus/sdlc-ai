@@ -30,6 +30,7 @@ class Settings(BaseSettings):
     host: str = "127.0.0.1"
     port: int = 8100
     repo_root: Path | None = Field(default=None, description="SDLC repo root")
+    obs_db_path: Path | None = Field(default=None, description="Override sdlc_obs SQLite path")
     cors_origins: str = "http://127.0.0.1:5174"
 
     @property
@@ -39,6 +40,12 @@ class Settings(BaseSettings):
     @property
     def cors_origin_list(self) -> list[str]:
         return [o.strip() for o in self.cors_origins.split(",") if o.strip()]
+
+    @property
+    def resolved_obs_db_path(self) -> Path:
+        if self.obs_db_path:
+            return self.obs_db_path.resolve()
+        return self.resolved_repo_root / "app/infra/sdlc_obs/data/sdlc_obs.db"
 
 
 @lru_cache

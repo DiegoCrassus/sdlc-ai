@@ -17,6 +17,59 @@ except ImportError:  # pragma: no cover - hook fails open when yaml is unavailab
 REPO = Path(__file__).resolve().parents[2]
 POLICY_PATH = REPO / ".sdlc" / "gateways" / "policy.yaml"
 HANDOFF_PATH = REPO / ".sdlc" / "memory" / "orchestrator-handoff.md"
+OBS_STATE_PATH = REPO / ".sdlc_obs_state.json"
+SESSION_GATE_PATH = REPO / ".sdlc" / "memory" / "session-gate.json"
+
+
+def read_session_correlation() -> dict[str, Any]:
+    correlation: dict[str, Any] = {}
+    if SESSION_GATE_PATH.is_file():
+        try:
+            gate = json.loads(SESSION_GATE_PATH.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            gate = {}
+        if isinstance(gate, dict):
+            if card := gate.get("card"):
+                correlation["card"] = str(card)
+            if branch := gate.get("branch"):
+                correlation["branch"] = str(branch)
+    if OBS_STATE_PATH.is_file():
+        try:
+            state = json.loads(OBS_STATE_PATH.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            state = {}
+        if isinstance(state, dict) and state.get("run_id"):
+            correlation["run_id"] = str(state["run_id"])
+    return correlation
+
+
+def emit_studio_event(
+    event_type: str,
+    source: str,
+    payload: dict[str, Any],
+    *,
+    category: str = "gateway",
+) -> None:
+    """Best-effort append to unified obs store; hooks must never fail on ingest errors."""
+
+    try:
+        import sys
+
+        root = str(REPO)
+        if root not in sys.path:
+            sys.path.insert(0, root)
+        from app.infra.sdlc_obs.store import EventStore  # type: ignore
+
+        store = EventStore()
+        store.append_event(
+            event_type=event_type,
+            source=source,
+            payload=payload,
+            correlation=read_session_correlation(),
+            category=category,
+        )
+    except Exception:
+        return
 
 
 def read_payload() -> dict[str, Any]:
@@ -46,7 +99,17 @@ def allow(extra: dict[str, Any] | None = None) -> None:
     sys.exit(0)
 
 
-def deny(user_message: str, agent_message: str) -> None:
+def deny(
+    user_message: str,
+    agent_message: str,
+    *,
+    event_type: str | None = None,
+    event_payload: dict[str, Any] | None = None,
+) -> None:
+    if event_type:
+        payload = dict(event_payload or {})
+        payload.setdefault("reason", agent_message)
+        emit_studio_event(event_type, "sdlc_pre_gateway", payload, category="gateway")
     print(
         json.dumps(
             {

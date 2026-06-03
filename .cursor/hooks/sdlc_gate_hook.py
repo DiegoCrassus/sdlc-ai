@@ -42,6 +42,18 @@ def _extract_write_path(payload: dict) -> str:
     return ""
 
 
+def _emit_gate_event(event_type: str, payload: dict) -> None:
+    try:
+        hooks_dir = Path(__file__).resolve().parent
+        if str(hooks_dir) not in sys.path:
+            sys.path.insert(0, str(hooks_dir))
+        from sdlc_gateway_lib import emit_studio_event  # noqa: PLC0415
+
+        emit_studio_event(event_type, "sdlc_gate_hook", payload, category="gate")
+    except Exception:
+        return
+
+
 def main() -> None:
     raw = sys.stdin.read()
     if not raw.strip():
@@ -61,10 +73,19 @@ def main() -> None:
 
     ok, msg = _gate.check_write(rel_path, REPO)
     if ok:
+        _emit_gate_event("gate.write_allowed", {"path": rel_path, "tool": "Write"})
         print(json.dumps({"permission": "allow"}))
         sys.exit(0)
 
     card = _gate.load_session_gate(REPO).card or "INVES-N"
+    _emit_gate_event(
+        "gate.write_denied",
+        {
+            "path": rel_path,
+            "reason": msg,
+            "card_required": card,
+        },
+    )
     agent_msg = (
         f"SDLC gate blocked write to '{rel_path}'. {msg} "
         f"Auto-fix: python3 .sdlc/dsl/cli.py workflow start --card {card} --stage sdlc_meta "

@@ -69,3 +69,21 @@ SELECT
     SUM(tests_failed)                                           AS tests_failed
 FROM sdlc_runs
 GROUP BY stage, agent;
+
+-- Unified Studio observability events (gateway, handoff, gate, obs projections)
+CREATE TABLE IF NOT EXISTS sdlc_events (
+    id              TEXT PRIMARY KEY,
+    category        TEXT NOT NULL,          -- gateway | obs | handoff | gate
+    event_type      TEXT NOT NULL,
+    source          TEXT NOT NULL,
+    timestamp       TEXT NOT NULL,          -- ISO-8601 UTC
+    schema_version  TEXT NOT NULL DEFAULT '1.0',
+    correlation_id  TEXT NOT NULL DEFAULT '',
+    correlation     TEXT NOT NULL DEFAULT '{}',
+    payload         TEXT NOT NULL DEFAULT '{}',
+    created_at      TEXT DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_events_timestamp ON sdlc_events(timestamp);
+CREATE INDEX IF NOT EXISTS idx_events_category ON sdlc_events(category);
+CREATE INDEX IF NOT EXISTS idx_events_correlation ON sdlc_events(correlation_id);
