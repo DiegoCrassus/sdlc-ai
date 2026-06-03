@@ -34,6 +34,9 @@ def test_validate_studio_sources_is_deterministic_and_schema_shaped() -> None:
         "validation.compiler.output_boundaries",
         "validation.compiler.authority_boundaries",
     ]
+    _assert_standard_report_shape(first.report, kind="validate")
+    assert first.report["summary"]["counts"] == first.summary
+    assert _section_item_statuses(first.report, "findings") == {record["id"]: record["status"] for record in first.results}
     for record in first.results:
         _assert_validation_result_shape(record)
 
@@ -147,6 +150,24 @@ def _assert_validation_result_shape(record: dict[str, Any]) -> None:
         assert set(source_schema["required"]).issubset(source_ref)
         assert source_ref["ref_type"] in set(source_schema["properties"]["ref_type"]["enum"])
         assert source_ref["ref"]
+
+
+def _assert_standard_report_shape(report: dict[str, Any], *, kind: str) -> None:
+    assert set(report) == {"id", "kind", "status", "authority", "summary", "sections", "source_refs", "non_goals"}
+    assert report["id"] == f"report.studio.{kind}"
+    assert report["kind"] == kind
+    assert report["status"] in {"pass", "warn", "fail", "not_run"}
+    assert report["authority"] == "derived_non_authoritative"
+    assert isinstance(report["summary"]["counts"], dict)
+    assert report["sections"]
+    assert report["source_refs"]
+    assert report["non_goals"]
+
+
+def _section_item_statuses(report: dict[str, Any], section_id: str) -> dict[str, str]:
+    sections = [section for section in report["sections"] if section["id"] == section_id]
+    assert len(sections) == 1
+    return {item["label"]: item["status"] for item in sections[0]["items"]}
 
 
 def _load_schema(name: str) -> dict[str, Any]:

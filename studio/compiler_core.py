@@ -8,6 +8,8 @@ from typing import Any
 
 import yaml
 
+from studio.reporting import build_report
+
 REQUIRED_SOURCE_PATHS: tuple[str, ...] = (
     "studio/compiler-validator-boundaries.md", "studio/graph-ir-contract.md",
     "studio/validation-result-ir-contract.md", "studio/schemas/graph.schema.yaml",
@@ -22,7 +24,7 @@ REQUIRED_SOURCE_PATHS: tuple[str, ...] = (
 _NON_GOALS = {
     "graph": ("Does not replace .sdlc/, .cursor/, Plane, GitHub, or .sdlc/registry/.", "Does not execute workflows, commands, gates, agents, validators, or compilers.", "Does not store local tickets, backlog, specs, generated outputs, or durable evidence.", "Does not define UI, backend, frontend, API, database, deployment, or AI orchestration behavior."),
     "workflow": ("This workflow view does not execute stages, agents, commands, gates, or transitions.", "This workflow view does not update Plane, GitHub, .sdlc/, .cursor/, or registry state.", "This workflow view does not store local tickets, backlog, generated outputs, or durable evidence."),
-    "report": ("No CLI surface, stdout UX, command runner, workflow runner, validator engine, or generated output persistence.", "No copied agent prompts, skill bodies, rule bodies, hook logic, templates, lifecycle prose, CI logs, or evidence.", "No replacement behavior for .sdlc/, .cursor/, .sdlc/registry/, Plane, or GitHub."),
+    "report": ("No command runner, workflow runner, validator engine, or generated output persistence.", "No copied agent prompts, skill bodies, rule bodies, hook logic, templates, lifecycle prose, CI logs, or evidence.", "No replacement behavior for .sdlc/, .cursor/, .sdlc/registry/, Plane, or GitHub."),
 }
 _EXCLUDED_SOURCE_AREAS = ("app/", "studio/examples/", "studio/generated/", "specs/", "local tickets", "local backlog", "local evidence files", "generated Graph IR, Workflow IR, reports, validation, snapshots, and command outputs")
 _GRAPH_NODE_TYPES = {"workflow", "stage", "agent", "skill", "command", "gate", "policy", "template", "hook", "rule", "module", "registry_entity", "registry_relationship", "validation", "artifact", "external_authority"}
@@ -201,17 +203,51 @@ def _transition_to_record(transition: dict[str, Any]) -> dict[str, Any]:
 def _build_report(root: Path, required_paths: tuple[str, ...], artifacts: list[dict[str, Any]], relationships: list[dict[str, Any]], stages: list[dict[str, Any]], transitions: list[dict[str, Any]]) -> dict[str, Any]:
     registry_ids = {str(artifact.get("id")) for artifact in artifacts}
     unresolved = sorted(str(item.get("id", "unknown")) for item in relationships if item.get("from") not in registry_ids or item.get("to") not in registry_ids)
-    return {
-        "id": "report.studio.compiler_core",
-        "status": "pass" if not unresolved else "warn",
-        "authority": "derived_non_authoritative",
-        "source_refs": list(required_paths),
-        "coverage": {"required_inputs": len(required_paths), "registry_nodes": len(artifacts), "registry_edges": len(relationships), "workflow_stages": len(stages), "workflow_transitions": len(transitions), "unresolved_relationships": unresolved},
-        "missing_optional_source_paths": _missing_optional_paths(root, required_paths, artifacts, relationships),
-        "excluded_source_areas": list(_EXCLUDED_SOURCE_AREAS),
-        "non_goals": list(_NON_GOALS["report"]),
-        "suggested_next_actions": ["QA should run focused compiler tests and SDLC validation commands for INVES-61.", "Future cards may add CLI, validator, or UI consumers without changing these authority boundaries."],
+    missing_optional_paths = _missing_optional_paths(root, required_paths, artifacts, relationships)
+    status = "pass" if not unresolved else "warn"
+    counts = {
+        "graph_edges": len(relationships),
+        "graph_nodes": len(artifacts),
+        "missing_optional_source_paths": len(missing_optional_paths),
+        "required_inputs": len(required_paths),
+        "unresolved_relationships": len(unresolved),
+        "workflow_stages": len(stages),
+        "workflow_transitions": len(transitions),
     }
+    return build_report(
+        report_id="report.studio.compile",
+        kind="compile",
+        status=status,
+        summary={"description": "Compiled Graph IR and Workflow IR in memory.", "counts": counts},
+        sections=[
+            {
+                "id": "coverage",
+                "title": "Coverage",
+                "status": status,
+                "items": [{"label": key, "value": value} for key, value in counts.items()],
+            },
+            {
+                "id": "boundaries",
+                "title": "Boundaries",
+                "status": "pass",
+                "items": [{"label": "excluded_source_area", "value": path} for path in _EXCLUDED_SOURCE_AREAS],
+            },
+            {
+                "id": "unresolved_relationships",
+                "title": "Unresolved Relationships",
+                "status": "warn" if unresolved else "pass",
+                "items": [{"label": relationship_id, "value": "unresolved"} for relationship_id in unresolved],
+            },
+            {
+                "id": "missing_optional_source_paths",
+                "title": "Missing Optional Source Paths",
+                "status": "warn" if missing_optional_paths else "pass",
+                "items": [{"label": path, "value": "missing"} for path in missing_optional_paths],
+            },
+        ],
+        source_refs=list(required_paths),
+        non_goals=list(_NON_GOALS["report"]),
+    )
 
 
 def _missing_optional_paths(root: Path, required_paths: tuple[str, ...], artifacts: list[dict[str, Any]], relationships: list[dict[str, Any]]) -> list[str]:
