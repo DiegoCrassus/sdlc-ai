@@ -11,6 +11,7 @@ from typing import Any
 
 from studio.canvas_view_model import build_canvas_from_sources, render_canvas_text
 from studio.compiler_core import CompilerInputError, compile_studio_sources
+from studio.mvp_readiness import build_mvp_readiness_from_sources, render_mvp_readiness_text
 from studio.publish_evidence import (
     PublishEvidenceInputError,
     build_publish_evidence_from_sources,
@@ -56,6 +57,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             return _run_preview_simulation(root, args)
         if args.command == "publish-evidence":
             return _run_publish_evidence(root, args)
+        if args.command == "check-readiness":
+            return _run_check_readiness(root, args)
     except (
         CompilerInputError,
         ValidationInspectionInputError,
@@ -158,6 +161,19 @@ def _build_parser() -> argparse.ArgumentParser:
     evidence_parser.add_argument("--card", default=None, help="Plane card id for evidence_fields.card (INVES-N).")
     evidence_parser.add_argument("--title", default=None, help="Override evidence_fields.title.")
     evidence_parser.add_argument("--branch", default=None, help="Override evidence_fields.artifacts.branch.")
+    readiness_parser = subparsers.add_parser("check-readiness")
+    readiness_parser.add_argument(
+        "--format",
+        choices=("text", "json"),
+        default="text",
+        help="Output format.",
+    )
+    readiness_parser.add_argument(
+        "--root",
+        type=Path,
+        default=None,
+        help="Repository root to inspect. Defaults to the current directory.",
+    )
     return parser
 
 
@@ -234,6 +250,20 @@ def _run_publish_evidence(root: Path, args: argparse.Namespace) -> int:
     else:
         sys.stdout.write(render_publish_evidence_text(model))
     return 1 if model["summary"]["validation_fail"] > 0 else 0
+
+
+def _run_check_readiness(root: Path, args: argparse.Namespace) -> int:
+    model = build_mvp_readiness_from_sources(root)
+    if args.format == "json":
+        _write_json(model)
+    else:
+        sys.stdout.write(render_mvp_readiness_text(model))
+    summary = model["summary"]
+    if summary["fail"] > 0:
+        return 1
+    if summary["warn"] > 0:
+        return 2
+    return 0
 
 
 def _run_preview_simulation(root: Path, args: argparse.Namespace) -> int:

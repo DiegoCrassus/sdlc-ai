@@ -6,44 +6,48 @@
 |-------|-------|
 | **Next agent** | qa |
 | **Stage complete** | no |
-| **Previous agent** | auto-fixer |
+| **Previous agent** | implementer |
 
 ## Session
 
 | Field | Value |
 |-------|-------|
 | **Intent** | FEATURE |
-| **Card** | INVES-72 — `[AI][SDLC] Define publish evidence workflow` |
-| **Epic** | INVES-53 — `[AI][EPIC] Build SDLC Studio MVP` |
-| **Branch** | feature/INVES-72-publish-evidence-workflow |
-| **Stage** | auto-fixer → qa |
+| **Card** | INVES-74 — Validate MVP readiness loop |
+| **Epic** | INVES-53 |
+| **Branch** | feature/INVES-74-mvp-readiness-loop |
+| **Stage** | qa |
 
-## Validation (auto-fixer re-run)
+## Scope
 
-| Check | Result |
-|-------|--------|
-| **Tests passed** | yes (studio scope) |
-| **Doctor exit** | 0 |
-| **Pytest** | 22 passed in 8.55s (`studio/test_publish_evidence.py`, `studio/test_cli.py`) |
-| **Ruff** | clean (`studio/cli.py`, `studio/publish_evidence.py`) |
-| **Gate tests** | skipped (no `.sdlc/` changes) |
-| **Product tests** | skipped (no `app/` changes) |
-| **Build** | skipped (no frontend changes) |
+- MVP readiness validation loop in studio/ (CLI + model + tests).
+- studio/ only; diff under 500.
 
-## Fixes applied
+## Implementation Summary
 
-1. **Ruff I001** — sorted `studio.publish_evidence` import before `studio.reporting` in `studio/cli.py` (isort).
-2. **AC-4** — added "Rollback and roll-forward (AC-4)" section to `studio/ai-publish-evidence-prototype.md`.
+- `studio/mvp_readiness.py` — deterministic non-executing readiness loop over compile → validate → canvas → inspection → assistance → simulation → publish-evidence pipeline; checks modules, docs, derived model keys, operating model markers.
+- `studio/cli.py` — `check-readiness` command (exit 0 pass, 1 fail, 2 warn).
+- `studio/ai-mvp-readiness-prototype.md` — prototype doc.
+- `studio/test_mvp_readiness.py`, `studio/test_cli.py` — unit and CLI smoke tests.
+- `studio/README.md` — index entry.
 
-## Acceptance criteria (pending QA re-verify)
+## Test Evidence
 
-| AC | Description | Expected |
-|----|-------------|----------|
-| AC-1 | Publish model keeps Plane as record for work state and delivery evidence | pass |
-| AC-2 | PR guidance separates source changes from generated outputs | pass |
-| AC-3 | Doctor and Studio validations both considered before merge where relevant | pass |
-| AC-4 | Rollback or roll-forward considerations documented for Studio metadata changes | pass (doc added) |
+```
+python3 -m pytest studio/ -q
+56 passed (pre-commit); 58 passed after INVES-74 additions
+```
+
+## Commits
+
+| Hash | Message |
+|------|---------|
+| (pending commit) | [INVES-74] Add MVP readiness loop CLI and checks |
+
+## Blockers
+
+None.
 
 ## Exact Next Action
 
-Spawn **QA** on `feature/INVES-72-publish-evidence-workflow`: re-run minimum checklist, verify AC-1–AC-4, hand off to Reviewer on pass.
+QA validates acceptance criteria for INVES-74 on branch `feature/INVES-74-mvp-readiness-loop`.
