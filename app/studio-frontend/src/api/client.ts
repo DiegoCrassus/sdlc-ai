@@ -3,12 +3,14 @@ import type {
   CanvasFullResponse,
   CanvasNodeDetailResponse,
 } from "../types/canvas";
+import type { ObsFilterParams, TimelineResponse } from "../types/observability";
 import type {
   DashboardSummary,
   ReadinessResponse,
   SessionGateResponse,
   StudioHealth,
 } from "../types/studio";
+import { obsQueryString } from "./obsQuery";
 
 /** Browser dev uses Vite proxy (`/studio`); override for direct API access. */
 export function studioApiBase(): string {
@@ -49,4 +51,6 @@ export const studioApi = {
     request<CanvasFullResponse>(`/canvas/full${canvasQueryString(filters)}`),
   canvasNode: (displayId: string) =>
     request<CanvasNodeDetailResponse>(`/canvas/nodes/${encodeURIComponent(displayId)}`),
+  obsTimeline: (filters?: ObsFilterParams) =>
+    request<TimelineResponse>(`/obs/timeline${obsQueryString(filters)}`),
 };
