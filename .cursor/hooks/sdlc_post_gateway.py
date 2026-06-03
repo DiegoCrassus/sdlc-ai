@@ -7,6 +7,7 @@ import json
 import sys
 
 from sdlc_gateway_lib import (
+    emit_studio_event,
     fallback_for,
     handoff_value,
     load_policy,
@@ -36,6 +37,16 @@ def blockers_are_clear(blockers: str) -> bool:
 def followup(agent: str, reason: str, details: list[str]) -> None:
     route = normalize_agent(agent) or "planner"
     detail_text = "\n".join(f"- {item}" for item in details) if details else "- unspecified"
+    emit_studio_event(
+        "gateway.handoff_blocked",
+        "sdlc_post_gateway",
+        {
+            "next_agent": route,
+            "blockers": details or [reason],
+            "reason": reason,
+        },
+        category="gateway",
+    )
     message = f"""SDLC deterministic gateway blocked stage advancement.
 
 Return to `{route}` before continuing.

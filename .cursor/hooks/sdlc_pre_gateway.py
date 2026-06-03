@@ -33,6 +33,8 @@ def deny_unsafe_shell(command: str, policy: dict) -> None:
                     f"({pattern!r}). Return to the previous SDLC step and use the "
                     "approved workflow instead."
                 ),
+                event_type="gateway.shell_denied",
+                event_payload={"command": command, "matcher": pattern},
             )
 
 
@@ -65,6 +67,12 @@ def enforce_next_subagent(payload: dict, policy: dict) -> None:
             f"'{requested}'. Read `.sdlc/memory/orchestrator-handoff.md` and "
             "return to the routed step before continuing."
         ),
+        event_type="gateway.subagent_start",
+        event_payload={
+            "subagent_type": requested,
+            "expected_agent": expected,
+            "allowed": False,
+        },
     )
 
 
