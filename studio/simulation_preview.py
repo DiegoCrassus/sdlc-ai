@@ -30,29 +30,25 @@ VALID_SCENARIOS = (
     "devops_finish",
 )
 VALID_PATH_LABELS = ("expected", "blocked", "unsupported")
-TRANSITION_LIFECYCLE_SOURCES = {
-    "transition.requirements_to_architecture": ".sdlc/workflows/transitions.yaml#requirements_to_architecture",
-    "transition.architecture_to_implementation": ".sdlc/workflows/transitions.yaml#architecture_to_implementation",
-    "transition.implementation_to_validation": ".sdlc/workflows/transitions.yaml#implementation_to_validation",
-    "transition.validation_to_review": ".sdlc/workflows/transitions.yaml#validation_to_review",
-    "transition.review_to_deployment": ".sdlc/workflows/transitions.yaml#review_to_deployment",
-    "transition.deployment_to_observability": ".sdlc/workflows/transitions.yaml#deployment_to_observability",
-    "transition.incident_to_autofix": ".sdlc/workflows/transitions.yaml#incident_to_autofix",
-}
-SIMULATION_NON_GOALS = (
-    "Does not execute workflows, invoke agents, MCP, shell, Plane/GitHub mutation, or replace workflow status.",
-    "Does not persist outputs, emit QA evidence, or present preview steps as live gate results.",
-    "Preview path labels are explanatory only; authoritative state remains Plane and session-gate.",
+_TRANSITION_YAML = ".sdlc/workflows/transitions.yaml#"
+_TRANSITION_KEYS = (
+    "requirements_to_architecture",
+    "architecture_to_implementation",
+    "implementation_to_validation",
+    "validation_to_review",
+    "review_to_deployment",
+    "deployment_to_observability",
+    "incident_to_autofix",
 )
+TRANSITION_LIFECYCLE_SOURCES = {f"transition.{key}": f"{_TRANSITION_YAML}{key}" for key in _TRANSITION_KEYS}
+SIMULATION_NON_GOALS = ("Non-executing preview only; see studio/ai-simulation-preview-prototype.md.",)
 
 
 class SimulationPreviewInputError(ValueError):
-    """Raised for unsupported scenario filters."""
+    pass
 
 
 def build_simulation_preview_from_sources(root: Any, *, scenario: str | None = None) -> dict[str, Any]:
-    """Compile, validate, derive inspection data, and build simulation preview in memory."""
-
     compiled = compile_studio_sources(root)
     validation = validate_compiler_result(compiled, root)
     canvas = build_canvas_view_model(compiled, validation)
@@ -68,8 +64,6 @@ def build_simulation_preview_model(
     *,
     scenario: str | None = None,
 ) -> dict[str, Any]:
-    """Build a deterministic non-executing simulation preview from derived records."""
-
     if scenario is not None and scenario not in VALID_SCENARIOS:
         raise SimulationPreviewInputError(f"invalid scenario: {scenario}")
 
@@ -107,8 +101,6 @@ def build_simulation_preview_model(
 
 
 def render_simulation_preview_text(model: dict[str, Any]) -> str:
-    """Render a concise stdout-only simulation preview summary."""
-
     simulation, summary = model["simulation"], model["summary"]
     lines = [
         "Studio simulation preview: derived, non-executing output",
@@ -132,8 +124,6 @@ def render_simulation_preview_text(model: dict[str, Any]) -> str:
             )
             lines.append(f"      {step['summary']}")
     lines.append(f"lifecycle_map: {len(model['lifecycle_map'])} transitions")
-    lines.append("reminder: preview is non-executing; does not run agents, gates, Plane, GitHub, or shell.")
-    lines.append("reminder: path_label expected|blocked|unsupported is explanatory, not live gate status.")
     return "\n".join(lines) + "\n"
 
 

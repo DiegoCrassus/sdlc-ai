@@ -4,4 +4,4 @@ Non-executing lifecycle preview for `INVES-70` (roadmap phase 8). Walks derived 
 
 Pipeline: compile → validate → canvas → validation_inspection → simulation_preview. CLI: `python -m studio.cli preview-simulation [--format text|json] [--root PATH] [--scenario SCENARIO]`.
 
-Output: `simulation` (`derived_non_authoritative`, `execution_mode=non_executing_preview`), `summary`, `scenarios` (steps with `path_label` expected|blocked|unsupported), `lifecycle_map`. Non-goals: execution, persistence, Plane/GitHub. Implementation: `studio/simulation_preview.py`.
+Output: `simulation` (`derived_non_authoritative`, `execution_mode=non_executing_preview`), `summary`, `scenarios` (steps with `path_label` expected|blocked|unsupported), `lifecycle_map`. Non-goals: no execution, agents, MCP, persistence, or live gate status; see step summaries below. Implementation: `studio/simulation_preview.py`. Scenarios: docs_only, feature_implementation, qa_failure, reviewer_escalation, devops_finish.
