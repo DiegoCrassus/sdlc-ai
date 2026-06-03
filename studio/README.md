@@ -31,6 +31,7 @@ SDLC Studio is not product code and is unrelated to `app/`. It operates over the
   future AI composition assistance over derived Studio outputs.
 - `ai-workflow-assistance-prototype.md` — workflow assistance prototype (`assist-workflow` CLI).
 - `ai-simulation-preview-prototype.md` — non-executing lifecycle simulation preview (`preview-simulation` CLI).
+- `ai-publish-evidence-prototype.md` — non-executing Plane evidence field projection (`publish-evidence` CLI).
 - `schemas/` contains descriptive YAML schema documents for future Studio data contracts.
 
 ## Boundaries

@@ -209,6 +209,43 @@ def test_preview_simulation_cli_smoke_and_scenario_filter() -> None:
     assert bogus.returncode == 1 and bogus.stderr == "error: invalid scenario: bogus\n"
 
 
+def test_publish_evidence_cli_smoke_and_card_filter() -> None:
+    with unchanged_repo_outputs():
+        text = run_cli("publish-evidence")
+        first_json = run_cli("publish-evidence", "--format", "json")
+    assert text.returncode == 0 and "derived_non_authoritative" in text.stdout
+    assert "non_executing_projection" in text.stdout
+    assert "transient stdout/in-memory" in text.stdout
+    assert first_json.returncode == 0 and first_json.stdout == run_cli("publish-evidence", "--format", "json").stdout
+    payload = json.loads(first_json.stdout)
+    assert set(payload) == {"projection", "summary", "evidence_fields"}
+    assert set(payload["evidence_fields"]) == {
+        "card",
+        "title",
+        "summary",
+        "problems_solved",
+        "technical",
+        "validation",
+        "artifacts",
+        "context_for_future",
+    }
+    filtered = json.loads(
+        run_cli(
+            "publish-evidence",
+            "--format",
+            "json",
+            "--card",
+            "INVES-72",
+            "--branch",
+            "feature/INVES-72-publish-evidence-workflow",
+        ).stdout
+    )
+    assert filtered["projection"]["filters"]["card"] == "INVES-72"
+    assert filtered["evidence_fields"]["artifacts"]["branch"] == "feature/INVES-72-publish-evidence-workflow"
+    bogus = run_cli("publish-evidence", "--card", "bogus")
+    assert bogus.returncode == 1 and bogus.stderr == "error: invalid card: bogus\n"
+
+
 def test_assist_workflow_invalid_kind_exits_nonzero_without_traceback() -> None:
     completed = run_cli("assist-workflow", "--kind", "bogus")
 

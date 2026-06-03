@@ -23,6 +23,11 @@ from studio.validation_inspection import (
     render_validation_inspection_text,
 )
 from studio.validator_core import validate_studio_sources
+from studio.publish_evidence import (
+    PublishEvidenceInputError,
+    build_publish_evidence_from_sources,
+    render_publish_evidence_text,
+)
 from studio.workflow_assistance import (
     WorkflowAssistanceInputError,
     build_workflow_assistance_from_sources,
@@ -49,11 +54,14 @@ def main(argv: Sequence[str] | None = None) -> int:
             return _run_assist_workflow(root, args)
         if args.command == "preview-simulation":
             return _run_preview_simulation(root, args)
+        if args.command == "publish-evidence":
+            return _run_publish_evidence(root, args)
     except (
         CompilerInputError,
         ValidationInspectionInputError,
         WorkflowAssistanceInputError,
         SimulationPreviewInputError,
+        PublishEvidenceInputError,
     ) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 1
@@ -134,6 +142,22 @@ def _build_parser() -> argparse.ArgumentParser:
     preview_parser.add_argument("--path-label", default=None, help="Filter steps by path label.")
     preview_parser.add_argument("--step-kind", default=None, help="Filter steps by kind (handoff, stage, transition).")
     preview_parser.add_argument("--tag", default=None, help="Filter scenarios by tag.")
+    evidence_parser = subparsers.add_parser("publish-evidence")
+    evidence_parser.add_argument(
+        "--format",
+        choices=("text", "json"),
+        default="text",
+        help="Output format.",
+    )
+    evidence_parser.add_argument(
+        "--root",
+        type=Path,
+        default=None,
+        help="Repository root to inspect. Defaults to the current directory.",
+    )
+    evidence_parser.add_argument("--card", default=None, help="Plane card id for evidence_fields.card (INVES-N).")
+    evidence_parser.add_argument("--title", default=None, help="Override evidence_fields.title.")
+    evidence_parser.add_argument("--branch", default=None, help="Override evidence_fields.artifacts.branch.")
     return parser
 
 
@@ -195,6 +219,20 @@ def _run_assist_workflow(root: Path, args: argparse.Namespace) -> int:
         _write_json(model)
     else:
         sys.stdout.write(render_workflow_assistance_text(model))
+    return 1 if model["summary"]["validation_fail"] > 0 else 0
+
+
+def _run_publish_evidence(root: Path, args: argparse.Namespace) -> int:
+    model = build_publish_evidence_from_sources(
+        root,
+        card=args.card,
+        title=args.title,
+        branch=args.branch,
+    )
+    if args.format == "json":
+        _write_json(model)
+    else:
+        sys.stdout.write(render_publish_evidence_text(model))
     return 1 if model["summary"]["validation_fail"] > 0 else 0
 
 
