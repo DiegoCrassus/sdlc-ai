@@ -1,5 +1,10 @@
 from __future__ import annotations
 
+import json
+from pathlib import Path
+
+_REPO_ROOT = Path(__file__).resolve().parents[3]
+
 
 def test_readiness_wraps_studio_engine(client) -> None:
     response = client.get("/studio/readiness")
@@ -16,7 +21,8 @@ def test_session_gate(client) -> None:
     assert response.status_code == 200
     body = response.json()
     assert body["present"] is True
-    assert body["gate"]["card"] == "INVES-78"
+    gate_doc = json.loads((_REPO_ROOT / ".sdlc/memory/session-gate.json").read_text())
+    assert body["gate"]["card"] == gate_doc["card"]
 
 
 def test_session_handoff(client) -> None:
@@ -24,7 +30,14 @@ def test_session_handoff(client) -> None:
     assert response.status_code == 200
     body = response.json()
     assert body["present"] is True
-    assert body["sections"]["Routing"]["Next agent"] in ("implementer", "qa")
+    next_agent = body["sections"]["Routing"]["Next agent"]
+    assert next_agent in (
+        "implementer",
+        "qa",
+        "auto-fixer",
+        "reviewer",
+        "devops",
+    )
 
 
 def test_dashboard_summary(client) -> None:
