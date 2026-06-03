@@ -13,6 +13,8 @@ SDLC Studio is not product code and is unrelated to `app/`. It operates over the
 
 ## Contents
 
+- `studio-operating-model.md` documents roles, CLI usage, derived-vs-authoritative
+  boundaries, and the Plane/GitHub delivery workflow for Studio outputs.
 - `foundation-inventory.md` inventories the current Studio Foundation source
   areas and source-of-truth boundaries.
 - `source-boundaries.md` extends the foundation inventory with stable boundary
