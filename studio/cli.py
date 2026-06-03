@@ -12,6 +12,7 @@ from typing import Any
 from studio.canvas_view_model import build_canvas_from_sources, render_canvas_text
 from studio.compiler_core import CompilerInputError, compile_studio_sources
 from studio.mvp_readiness import build_mvp_readiness_from_sources, render_mvp_readiness_text
+from studio.mvp_test_skeleton import build_mvp_test_skeleton, render_mvp_test_skeleton_text
 from studio.publish_evidence import (
     PublishEvidenceInputError,
     build_publish_evidence_from_sources,
@@ -59,6 +60,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             return _run_publish_evidence(root, args)
         if args.command == "check-readiness":
             return _run_check_readiness(root, args)
+        if args.command == "list-skeleton":
+            return _run_list_skeleton(args)
     except (
         CompilerInputError,
         ValidationInspectionInputError,
@@ -174,6 +177,19 @@ def _build_parser() -> argparse.ArgumentParser:
         default=None,
         help="Repository root to inspect. Defaults to the current directory.",
     )
+    skeleton_parser = subparsers.add_parser("list-skeleton")
+    skeleton_parser.add_argument(
+        "--format",
+        choices=("text", "json"),
+        default="text",
+        help="Output format.",
+    )
+    skeleton_parser.add_argument(
+        "--root",
+        type=Path,
+        default=None,
+        help="Unused; skeleton is in-memory only. Accepted for CLI consistency.",
+    )
     return parser
 
 
@@ -250,6 +266,15 @@ def _run_publish_evidence(root: Path, args: argparse.Namespace) -> int:
     else:
         sys.stdout.write(render_publish_evidence_text(model))
     return 1 if model["summary"]["validation_fail"] > 0 else 0
+
+
+def _run_list_skeleton(args: argparse.Namespace) -> int:
+    model = build_mvp_test_skeleton()
+    if args.format == "json":
+        _write_json(model)
+    else:
+        sys.stdout.write(render_mvp_test_skeleton_text(model))
+    return 0
 
 
 def _run_check_readiness(root: Path, args: argparse.Namespace) -> int:

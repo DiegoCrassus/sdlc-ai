@@ -13,41 +13,38 @@
 | Field | Value |
 |-------|-------|
 | **Intent** | FEATURE |
-| **Card** | INVES-74 — Validate MVP readiness loop |
+| **Card** | INVES-75 — Create MVP test skeleton |
 | **Epic** | INVES-53 |
-| **Branch** | feature/INVES-74-mvp-readiness-loop |
-| **Stage** | qa |
+| **Branch** | feature/INVES-75-mvp-test-skeleton |
+| **Stage** | validation |
 
 ## Scope
 
-- MVP readiness validation loop in studio/ (CLI + model + tests).
-- studio/ only; diff under 500.
+- MVP test traceability skeleton mapping epic INVES-53 phases and consolidated gates to planned validation types.
+- `studio/mvp_test_skeleton.py`, `studio/test_mvp_skeleton.py`, `list-skeleton` CLI, prototype doc, `.sdlc/memory/test-skeleton.md`.
 
-## Implementation Summary
+## Acceptance criteria
 
-- `studio/mvp_readiness.py` — deterministic non-executing readiness loop over compile → validate → canvas → inspection → assistance → simulation → publish-evidence pipeline; checks modules, docs, derived model keys, operating model markers.
-- `studio/cli.py` — `check-readiness` command (exit 0 pass, 1 fail, 2 warn).
-- `studio/ai-mvp-readiness-prototype.md` — prototype doc.
-- `studio/test_mvp_readiness.py`, `studio/test_cli.py` — unit and CLI smoke tests.
-- `studio/README.md` — index entry.
+- [x] Each MVP phase has at least one planned validation approach (10 phase entries + 6 gate entries).
+- [x] Skeleton references Plane child card IDs and acceptance criteria.
+- [x] Skeleton distinguishes automated, manual_review, cli, docs_review, doctor_gate.
+- [x] No test results claimed (`execution_claimed: false`, entry `status: planned`, skipped pytest stubs).
 
-## Test Evidence
+## Test evidence
 
-```
+```text
+python3 -m pytest studio/test_mvp_skeleton.py studio/test_cli.py::test_list_skeleton_cli_smoke_and_deterministic_json -q
+# 5 passed, 16 skipped
+
 python3 -m pytest studio/ -q
-56 passed (pre-commit); 58 passed after INVES-74 additions
+# 61 passed, 16 skipped
 ```
-
-## Commits
-
-| Hash | Message |
-|------|---------|
-| (pending commit) | [INVES-74] Add MVP readiness loop CLI and checks |
 
 ## Blockers
 
 None.
 
-## Exact Next Action
+## Notes
 
-QA validates acceptance criteria for INVES-74 on branch `feature/INVES-74-mvp-readiness-loop`.
+- commits: [a91250d]
+- 16 skipped stubs in `test_mvp_skeleton_future_validation` are intentional skeleton placeholders.
