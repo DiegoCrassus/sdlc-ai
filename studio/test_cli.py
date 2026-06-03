@@ -209,6 +209,21 @@ def test_preview_simulation_cli_smoke_and_scenario_filter() -> None:
     assert bogus.returncode == 1 and bogus.stderr == "error: invalid scenario: bogus\n"
 
 
+def test_check_readiness_cli_smoke_and_deterministic_json() -> None:
+    with unchanged_repo_outputs():
+        text = run_cli("check-readiness")
+        first_json = run_cli("check-readiness", "--format", "json")
+    assert text.returncode == 0 and "non_executing_readiness_loop" in text.stdout
+    assert "mvp_ready: True" in text.stdout
+    assert "check-readiness" in text.stdout
+    assert first_json.returncode == 0 and first_json.stdout == run_cli("check-readiness", "--format", "json").stdout
+    payload = json.loads(first_json.stdout)
+    assert set(payload) == {"readiness", "summary", "checks", "cli_commands"}
+    assert payload["readiness"]["authority"] == "derived_non_authoritative"
+    assert payload["summary"]["mvp_ready"] is True
+    assert payload["summary"]["fail"] == 0
+
+
 def test_publish_evidence_cli_smoke_and_card_filter() -> None:
     with unchanged_repo_outputs():
         text = run_cli("publish-evidence")
