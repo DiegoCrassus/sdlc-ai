@@ -3,14 +3,13 @@ import { Route, Routes } from "react-router-dom";
 import { StudioLayout } from "./components/shell/StudioLayout";
 import { DashboardPage } from "./pages/DashboardPage";
 import { ObservabilityPage } from "./pages/ObservabilityPage";
+import { ConfigBuilderPage } from "./pages/ConfigBuilderPage";
+import { RulesSkillsBuilderPage } from "./pages/RulesSkillsBuilderPage";
 import { StubPage } from "./pages/StubPage";
 import { WorkflowBuilderPage } from "./pages/WorkflowBuilderPage";
 import { WorkflowsPage } from "./pages/WorkflowsPage";
 
 const stubs: { path: string; title: string; phase: string }[] = [
-  { path: "agents", title: "Agents & Subagents", phase: "S4–S5" },
-  { path: "rules", title: "Rules & Skills", phase: "S4–S5" },
-  { path: "commands", title: "Commands", phase: "S4–S5" },
   { path: "registry", title: "Registry", phase: "S5" },
   { path: "validation", title: "Validation", phase: "S5" },
   { path: "simulation", title: "Simulation", phase: "S5" },
@@ -26,6 +25,27 @@ export default function App() {
         <Route path="/" element={<DashboardPage />} />
         <Route path="workflows" element={<WorkflowsPage />} />
         <Route path="builder" element={<WorkflowBuilderPage />} />
+        <Route
+          path="agents"
+          element={
+            <ConfigBuilderPage
+              kind="agent"
+              title="Agents & Subagents"
+              subtitle="Browse .cursor/agents, edit or draft from template, export propose-only patches."
+            />
+          }
+        />
+        <Route path="rules" element={<RulesSkillsBuilderPage />} />
+        <Route
+          path="commands"
+          element={
+            <ConfigBuilderPage
+              kind="command"
+              title="Commands"
+              subtitle="Browse .cursor/commands, edit or draft slash commands as propose-only patches."
+            />
+          }
+        />
         <Route path="observability" element={<ObservabilityPage />} />
         {stubs.map((s) => (
           <Route

@@ -5,6 +5,11 @@ import type {
 } from "../types/canvas";
 import type { ObsFilterParams, TimelineResponse } from "../types/observability";
 import type {
+  ConfigFileContentResponse,
+  ConfigFileListResponse,
+  ConfigKind,
+} from "../types/config";
+import type {
   ProposalCreateRequest,
   ProposalResponse,
   DryRunResult,
@@ -90,4 +95,15 @@ export const studioApi = {
     request<DryRunResult>(`/proposals/${encodeURIComponent(proposalId)}/gateway-check`, {
       method: "POST",
     }),
+  configFiles: (kind: ConfigKind, q?: string) => {
+    const params = new URLSearchParams({ kind });
+    if (q) {
+      params.set("q", q);
+    }
+    return request<ConfigFileListResponse>(`/config/files?${params}`);
+  },
+  configFile: (path: string) =>
+    request<ConfigFileContentResponse>(
+      `/config/file?${new URLSearchParams({ path })}`,
+    ),
 };
