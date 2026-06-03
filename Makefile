@@ -29,7 +29,7 @@ help:
 	@echo "  sdlc-meta-commit  Meta-tool: lint + commit + push (CARD=INVES-N MSG='...')"
 	@echo "  sdlc-meta-qa      Meta-tool: tests + doctor + QA evidence (CARD=INVES-N)"
 	@echo ""
-	@echo "  studio-dev        Studio Service API (http://127.0.0.1:8100)"
+	@echo "  studio-dev        Studio API :8100 + UI :5174 (install npm in app/studio-frontend first)"
 	@echo ""
 	@echo "Workflow: .sdlc/process/change-lifecycle.md"
 
@@ -132,5 +132,9 @@ export-pdf:
 	@echo "PDF: simulacao-end-to-end-sdlc.pdf"
 
 studio-dev:
-	@echo "Starting Studio Service API on http://127.0.0.1:8100 (OpenAPI /docs)"
-	@STUDIO_REPO_ROOT=$$(pwd) PYTHONPATH=app/studio-backend/src:$$PWD $(PYTHON) -m uvicorn studio_service.main:app --reload --host 127.0.0.1 --port 8100
+	@test -d app/studio-frontend/node_modules || (echo "Run: cd app/studio-frontend && npm install" && exit 1)
+	@echo "Starting Studio API http://127.0.0.1:8100 and UI http://127.0.0.1:5174 (Ctrl+C stops both)"
+	@trap 'kill 0' INT TERM EXIT; \
+	  STUDIO_REPO_ROOT=$$(pwd) PYTHONPATH=app/studio-backend/src:$$PWD $(PYTHON) -m uvicorn studio_service.main:app --reload --host 127.0.0.1 --port 8100 & \
+	  cd app/studio-frontend && npm run dev & \
+	  wait
