@@ -13,35 +13,37 @@
 | Field | Value |
 |-------|-------|
 | **Intent** | FEATURE |
-| **Card** | INVES-70 — `[AI][SDLC] Design simulation preview model` |
+| **Card** | INVES-72 — `[AI][SDLC] Define publish evidence workflow` |
 | **Epic** | INVES-53 — `[AI][EPIC] Build SDLC Studio MVP` |
-| **Branch** | feature/INVES-70-simulation-preview-model |
-| **Stage** | validation |
+| **Branch** | feature/INVES-72-publish-evidence-workflow |
+| **Stage** | auto-fixer → qa |
 
-## AutoFixer summary
-
-| Fix | Detail |
-|-----|--------|
-| Ruff I001 | Sorted `studio.cli` imports (`simulation_preview` before `validation_inspection`) |
-| Diff budget | Compacted `simulation_preview.py`: dict-comprehension transitions, single `non_goals`, removed duplicate render reminders; scenario narrative in prototype doc |
-| Diff stat | `develop...HEAD` studio changed lines: **498** (≤500) |
-
-## Validation (re-run)
+## Validation (auto-fixer re-run)
 
 | Check | Result |
 |-------|--------|
-| **Ruff** | pass (`ruff check studio/`) |
-| **Pytest** | 22 passed (`studio/test_simulation_preview.py`, `studio/test_cli.py`) |
+| **Tests passed** | yes (studio scope) |
+| **Doctor exit** | 0 |
+| **Pytest** | 22 passed in 8.55s (`studio/test_publish_evidence.py`, `studio/test_cli.py`) |
+| **Ruff** | clean (`studio/cli.py`, `studio/publish_evidence.py`) |
+| **Gate tests** | skipped (no `.sdlc/` changes) |
+| **Product tests** | skipped (no `app/` changes) |
+| **Build** | skipped (no frontend changes) |
 
-## Acceptance criteria
+## Fixes applied
 
-| AC | Status | Evidence |
-|----|--------|----------|
-| AC-1: Model covers stages, gates, handoffs, validations, blockers, next-agent | pass | unchanged — 5 scenarios, 23 steps |
-| AC-2: Preview states no execution | pass | `execution_mode=non_executing_preview` |
-| AC-3: expected / blocked / unsupported paths | pass | `path_labels` in summary |
-| AC-4: Transitions map to `.sdlc` lifecycle sources | pass | `lifecycle_map` with `lifecycle_source` |
+1. **Ruff I001** — sorted `studio.publish_evidence` import before `studio.reporting` in `studio/cli.py` (isort).
+2. **AC-4** — added "Rollback and roll-forward (AC-4)" section to `studio/ai-publish-evidence-prototype.md`.
+
+## Acceptance criteria (pending QA re-verify)
+
+| AC | Description | Expected |
+|----|-------------|----------|
+| AC-1 | Publish model keeps Plane as record for work state and delivery evidence | pass |
+| AC-2 | PR guidance separates source changes from generated outputs | pass |
+| AC-3 | Doctor and Studio validations both considered before merge where relevant | pass |
+| AC-4 | Rollback or roll-forward considerations documented for Studio metadata changes | pass (doc added) |
 
 ## Exact Next Action
 
-Delegate to **QA**: full minimum checklist (ruff, pytest, diff budget, plane validate-all) on `feature/INVES-70-simulation-preview-model`.
+Spawn **QA** on `feature/INVES-72-publish-evidence-workflow`: re-run minimum checklist, verify AC-1–AC-4, hand off to Reviewer on pass.
