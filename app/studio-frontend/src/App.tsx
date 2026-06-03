@@ -2,6 +2,7 @@ import { Route, Routes } from "react-router-dom";
 
 import { StudioLayout } from "./components/shell/StudioLayout";
 import { DashboardPage } from "./pages/DashboardPage";
+import { ObservabilityPage } from "./pages/ObservabilityPage";
 import { StubPage } from "./pages/StubPage";
 import { WorkflowsPage } from "./pages/WorkflowsPage";
 
@@ -14,7 +15,6 @@ const stubs: { path: string; title: string; phase: string }[] = [
   { path: "validation", title: "Validation", phase: "S5" },
   { path: "simulation", title: "Simulation", phase: "S5" },
   { path: "assistance", title: "Assistance", phase: "S5" },
-  { path: "observability", title: "Observability", phase: "S3 SSE" },
   { path: "evidence", title: "Evidence & Delivery", phase: "S6" },
   { path: "settings", title: "Settings", phase: "meta" },
 ];
@@ -25,6 +25,7 @@ export default function App() {
       <Route element={<StudioLayout />}>
         <Route path="/" element={<DashboardPage />} />
         <Route path="workflows" element={<WorkflowsPage />} />
+        <Route path="observability" element={<ObservabilityPage />} />
         {stubs.map((s) => (
           <Route
             key={s.path}
