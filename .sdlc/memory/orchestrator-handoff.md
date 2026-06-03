@@ -38,7 +38,7 @@ None.
 
 ## Notes
 
-- **commits:** `45eaafb`
+- **commits:** `6d99b64`
 - **branch:** `feature/INVES-79-studio-ui-shell-s1`
 - **Tests:** `cd app/studio-frontend && npm run test` — 3 passed; `npm run build` — OK; `npm run smoke` — OK (API on :8100)
 - **Dev:** `make studio-dev` after `npm install` in `app/studio-frontend`
