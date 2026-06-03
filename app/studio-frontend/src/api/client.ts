@@ -5,6 +5,11 @@ import type {
 } from "../types/canvas";
 import type { ObsFilterParams, TimelineResponse } from "../types/observability";
 import type {
+  ProposalCreateRequest,
+  ProposalResponse,
+  DryRunResult,
+} from "../types/proposals";
+import type {
   DashboardSummary,
   ReadinessResponse,
   SessionGateResponse,
@@ -53,4 +58,36 @@ export const studioApi = {
     request<CanvasNodeDetailResponse>(`/canvas/nodes/${encodeURIComponent(displayId)}`),
   obsTimeline: (filters?: ObsFilterParams) =>
     request<TimelineResponse>(`/obs/timeline${obsQueryString(filters)}`),
+  createProposal: (body: ProposalCreateRequest) =>
+    request<ProposalResponse>("/proposals", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    }),
+  getProposal: (proposalId: string) =>
+    request<ProposalResponse>(`/proposals/${encodeURIComponent(proposalId)}`),
+  deleteProposal: async (proposalId: string): Promise<void> => {
+    const response = await fetch(
+      `${studioApiBase()}/proposals/${encodeURIComponent(proposalId)}`,
+      { method: "DELETE" },
+    );
+    if (!response.ok) {
+      const detail = await response.text().catch(() => "");
+      throw new Error(
+        `Studio API ${response.status}: ${response.statusText}${detail ? ` — ${detail.slice(0, 120)}` : ""}`,
+      );
+    }
+  },
+  validateProposal: (proposalId: string) =>
+    request<DryRunResult>(`/proposals/${encodeURIComponent(proposalId)}/validate`, {
+      method: "POST",
+    }),
+  doctorProposal: (proposalId: string) =>
+    request<DryRunResult>(`/proposals/${encodeURIComponent(proposalId)}/doctor`, {
+      method: "POST",
+    }),
+  gatewayCheckProposal: (proposalId: string) =>
+    request<DryRunResult>(`/proposals/${encodeURIComponent(proposalId)}/gateway-check`, {
+      method: "POST",
+    }),
 };
