@@ -54,6 +54,7 @@ All JSON routes live under **`/studio/*`** (see architecture doc for phase map).
 | Phase | Example routes |
 |-------|----------------|
 | S1 | `GET /studio/health`, `GET /studio/readiness`, `GET /studio/engine/canvas` |
+| S2 | `GET /studio/canvas/full`, `GET /studio/canvas`, `GET /studio/canvas/nodes/{display_id}` |
 | S3 | `GET /studio/obs/timeline`, `GET /studio/obs/events` (SSE) |
 | S4 | `POST /studio/proposals` (preview only — no apply endpoint) |
 | S6 | `GET /studio/integrations/plane/cards/{card}` |
