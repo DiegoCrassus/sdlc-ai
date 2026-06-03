@@ -157,6 +157,41 @@ def check_write(rel_path: str, root: Path | None = None) -> tuple[bool, str]:
     )
 
 
+def check_write_simulated(
+    rel_path: str,
+    simulated_stage: str,
+    root: Path | None = None,
+) -> tuple[bool, str]:
+    """Gateway-check helper: live gate when open, else *simulated_stage* (Studio S4)."""
+
+    root = root or repo_root()
+    rel = normalize_repo_path(rel_path, root)
+    config = load_gate_config(root)
+    state = load_session_gate(root)
+
+    if state.gate_status == "open" and state.stage:
+        return check_write(rel_path, root)
+
+    if not is_protected(rel, config):
+        return True, "path not protected"
+
+    if not simulated_stage:
+        return False, "simulated stage unset — provide simulated_gate.stage on proposal"
+
+    if stage_allows(rel, simulated_stage, config):
+        if state.gate_status != "open":
+            return True, (
+                f"simulated allowed for stage '{simulated_stage}' "
+                "(gate closed — real apply requires workflow start)"
+            )
+        return True, f"simulated allowed for stage '{simulated_stage}'"
+
+    return False, (
+        f"Path '{rel}' not allowed for simulated stage '{simulated_stage}'. "
+        "Real apply requires workflow start with matching --stage."
+    )
+
+
 def open_gate(
     *,
     card: str,

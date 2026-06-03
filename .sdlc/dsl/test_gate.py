@@ -13,6 +13,7 @@ sys.path.insert(0, str(DSL))
 
 from gate import (  # noqa: E402
     check_write,
+    check_write_simulated,
     close_gate,
     is_protected,
     load_gate_config,
@@ -64,3 +65,9 @@ def test_sdlc_meta_allows_cursor(clean_gate):
     open_gate(card="INVES-99", branch="sdlc/meta", stage="sdlc_meta")
     ok, msg = check_write(".cursor/rules/orchestrator.mdc")
     assert ok, msg
+
+
+def test_check_write_simulated_when_gate_closed(clean_gate):
+    ok, msg = check_write_simulated("app/backend/foo.py", "implementation", ROOT)
+    assert ok, msg
+    assert "simulated" in msg.casefold() or "gate closed" in msg.casefold()
