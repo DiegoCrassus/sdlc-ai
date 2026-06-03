@@ -31,11 +31,17 @@ app/studio-backend/
     └── schemas/               # OpenAPI models
 ```
 
-## Run (after INVES-78 scaffold)
+## Run
 
 ```bash
-# From repo root (PYTHONPATH until pyproject extra is wired)
-PYTHONPATH=app/studio-backend/src python -m uvicorn studio_service.main:app \
+# From repo root
+make studio-dev
+```
+
+Or manually:
+
+```bash
+STUDIO_REPO_ROOT=$(pwd) PYTHONPATH=app/studio-backend/src:$PWD python -m uvicorn studio_service.main:app \
   --reload --host 127.0.0.1 --port 8100
 ```
 
@@ -63,7 +69,7 @@ All JSON routes live under **`/studio/*`** (see architecture doc for phase map).
 ## Tests
 
 ```bash
-PYTHONPATH=app/studio-backend/src python -m pytest app/studio-backend/tests/ -v
+STUDIO_REPO_ROOT=$(pwd) PYTHONPATH=app/studio-backend/src:$PWD python -m pytest app/studio-backend/tests/ -v
 ```
 
 ## Related
