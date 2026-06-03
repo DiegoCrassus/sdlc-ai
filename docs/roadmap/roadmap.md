@@ -1,8 +1,17 @@
 # Roadmap
 
+## SDLC product lines
+
+| Track | Document | Status |
+|-------|----------|--------|
+| **Studio Foundation** (engine + CLI) | [`sdlc-studio-mvp-roadmap.md`](sdlc-studio-mvp-roadmap.md) | Delivered (INVES-53) — historical name “MVP” |
+| **Studio Service** (backend + UI + observability) | [`sdlc-studio-service-roadmap.md`](sdlc-studio-service-roadmap.md) | **Active** — next implementation |
+| **SDLC enforcement** (hooks, CI, fail-closed) | [`sdlc-enforcement-roadmap.md`](sdlc-enforcement-roadmap.md) | Planned / in progress |
+| **Investment product** (`app/`) | Phases 2–4 below | Separate from Studio |
+
 ## Current Phase: Foundation
 
-**Status:** SDLC operating system initialized. No application code yet.
+**Status:** SDLC operating system initialized. Studio Foundation engine in `studio/`; Studio Service UI not started.
 
 ## Phase 1 — Foundation (current)
 

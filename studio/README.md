@@ -9,7 +9,9 @@ SDLC Studio is not product code and is unrelated to `app/`. It operates over the
 - Provide a stable place for future Studio modeling documents and schemas.
 - Describe workflow graphs, registry entities, and validation results without making them executable.
 - Keep `.sdlc/` and `.cursor/` as the authoritative sources of truth.
-- Support future UI or visualization planning without choosing a frontend, backend, runtime, or storage architecture.
+- Support the **Studio Service** UI and API planned in
+  `docs/roadmap/sdlc-studio-service-roadmap.md` (backend + frontend + observability).
+  Foundation code here remains the engine; it is not the product UI.
 
 ## Contents
 
