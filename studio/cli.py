@@ -18,6 +18,11 @@ from studio.validation_inspection import (
     render_validation_inspection_text,
 )
 from studio.validator_core import validate_studio_sources
+from studio.workflow_assistance import (
+    WorkflowAssistanceInputError,
+    build_workflow_assistance_from_sources,
+    render_workflow_assistance_text,
+)
 
 
 def main(argv: Sequence[str] | None = None) -> int:
@@ -35,7 +40,9 @@ def main(argv: Sequence[str] | None = None) -> int:
             return _run_canvas(root, args.format)
         if args.command == "inspect-validation":
             return _run_inspect_validation(root, args)
-    except (CompilerInputError, ValidationInspectionInputError) as exc:
+        if args.command == "assist-workflow":
+            return _run_assist_workflow(root, args)
+    except (CompilerInputError, ValidationInspectionInputError, WorkflowAssistanceInputError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 1
     parser.error("missing command")
@@ -83,6 +90,20 @@ def _build_parser() -> argparse.ArgumentParser:
         default="status",
         help="Group visible records by status, check_type, or target_type.",
     )
+    assist_parser = subparsers.add_parser("assist-workflow")
+    assist_parser.add_argument(
+        "--format",
+        choices=("text", "json"),
+        default="text",
+        help="Output format.",
+    )
+    assist_parser.add_argument(
+        "--root",
+        type=Path,
+        default=None,
+        help="Repository root to inspect. Defaults to the current directory.",
+    )
+    assist_parser.add_argument("--kind", default=None, help="Filter suggestions by kind.")
     return parser
 
 
@@ -136,6 +157,15 @@ def _run_inspect_validation(root: Path, args: argparse.Namespace) -> int:
     else:
         sys.stdout.write(render_validation_inspection_text(model))
     return 1 if model["summary"]["by_status"].get("fail", 0) else 0
+
+
+def _run_assist_workflow(root: Path, args: argparse.Namespace) -> int:
+    model = build_workflow_assistance_from_sources(root, kind=args.kind)
+    if args.format == "json":
+        _write_json(model)
+    else:
+        sys.stdout.write(render_workflow_assistance_text(model))
+    return 1 if model["summary"]["validation_fail"] > 0 else 0
 
 
 def _write_json(payload: dict[str, Any]) -> None:

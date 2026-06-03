@@ -29,6 +29,7 @@ SDLC Studio is not product code and is unrelated to `app/`. It operates over the
   architecture boundary for a future visual orchestration prototype.
 - `ai-composition-guardrails.md` defines advisory, non-executable guardrails for
   future AI composition assistance over derived Studio outputs.
+- `ai-workflow-assistance-prototype.md` — workflow assistance prototype (`assist-workflow` CLI).
 - `schemas/` contains descriptive YAML schema documents for future Studio data contracts.
 
 ## Boundaries
