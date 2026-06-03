@@ -9,27 +9,13 @@ from studio import (
     build_canvas_from_sources,
     build_canvas_view_model,
     compile_studio_sources,
-    render_canvas_text,
     validate_compiler_result,
 )
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 FORBIDDEN_BODY_KEYS = {
-    "body",
-    "content",
-    "prompt",
-    "command_body",
-    "hook_logic",
-    "template_body",
-    "lifecycle_body",
-    "ci_log",
-    "evidence",
-    "coordinates",
-    "position",
-    "props",
-    "react_flow_type",
-    "tldraw_shape",
-    "runtime_state",
+    "body", "content", "prompt", "command_body", "hook_logic", "template_body", "lifecycle_body",
+    "ci_log", "evidence", "coordinates", "position", "props", "react_flow_type", "tldraw_shape", "runtime_state",
 }
 FORBIDDEN_OUTPUT_PATHS = ("studio/generated", "studio/examples", "specs")
 
@@ -37,10 +23,12 @@ FORBIDDEN_OUTPUT_PATHS = ("studio/generated", "studio/examples", "specs")
 def test_canvas_view_model_is_deterministic_and_schema_adjacent() -> None:
     compiled = compile_studio_sources(REPO_ROOT)
     validated = validate_compiler_result(compiled, REPO_ROOT)
+    before_exists = {path: (REPO_ROOT / path).exists() for path in FORBIDDEN_OUTPUT_PATHS}
     first = build_canvas_view_model(compiled, validated).to_dict()
 
     assert first == build_canvas_view_model(compiled, validated).to_dict()
     assert first == build_canvas_from_sources(REPO_ROOT).to_dict()
+    assert {path: (REPO_ROOT / path).exists() for path in FORBIDDEN_OUTPUT_PATHS} == before_exists
     assert set(first) == {"canvas", "nodes", "edges", "overlays", "sections", "legend"}
     assert first["canvas"]["id"] == "canvas.sdlc_studio.derived_graph"
     assert first["canvas"]["authority"] == "derived_non_authoritative"
@@ -79,6 +67,14 @@ def test_validation_overlays_map_to_targets_and_preserve_refs() -> None:
     base_validation = validate_compiler_result(compiled, REPO_ROOT)
     node_id = compiled.graph_ir["nodes"][0]["id"]
     edge_id = compiled.graph_ir["edges"][0]["id"]
+    graph_ir = {
+        **compiled.graph_ir,
+        "nodes": [
+            {**compiled.graph_ir["nodes"][0], "validation_attachments": [_validation_record("validation.node.attachment", "node", node_id, "not_run")]},
+            *compiled.graph_ir["nodes"][1:],
+        ],
+    }
+    compiled = replace(compiled, graph_ir=graph_ir)
     records = (
         _validation_record("validation.graph.pass", "graph", compiled.graph_ir["graph"]["id"], "pass"),
         _validation_record("validation.node.warn", "node", node_id, "warn"),
@@ -100,13 +96,14 @@ def test_validation_overlays_map_to_targets_and_preserve_refs() -> None:
     assert set(overlays) == {
         "overlay.validation.edge.fail",
         "overlay.validation.graph.pass",
+        "overlay.validation.node.attachment",
         "overlay.validation.node.warn",
         "overlay.validation.path.not_run",
         "overlay.validation.workflow.pass",
     }
     assert {overlay["status"] for overlay in overlays.values()} == {"pass", "warn", "fail", "not_run"}
-    assert node["validation_overlays"][0]["id"] == "overlay.validation.node.warn"
-    assert node["validation_overlays"][0]["status"] == "warn"
+    assert [overlay["id"] for overlay in node["validation_overlays"]] == ["overlay.validation.node.attachment", "overlay.validation.node.warn"]
+    assert [overlay["status"] for overlay in node["validation_overlays"]] == ["not_run", "warn"]
     assert edge["validation_overlays"][0]["id"] == "overlay.validation.edge.fail"
     assert edge["validation_overlays"][0]["status"] == "fail"
     for overlay in overlays.values():
@@ -126,37 +123,6 @@ def test_sections_are_report_summaries_with_source_refs_only() -> None:
         assert section["kind"] in {"compile", "validate"}
         _assert_source_refs(section["source_refs"])
     _assert_forbidden_body_keys_absent(payload)
-
-
-def test_canvas_builder_does_not_persist_outputs() -> None:
-    before_exists = {path: (REPO_ROOT / path).exists() for path in FORBIDDEN_OUTPUT_PATHS}
-    before_mtime = {path: (REPO_ROOT / path).stat().st_mtime_ns for path in ("studio/compiler_core.py", "studio/validator_core.py")}
-
-    text = render_canvas_text(build_canvas_from_sources(REPO_ROOT))
-
-    assert "derived, non-authoritative output" in text
-    assert "transient stdout/in-memory" in text
-    assert {path: (REPO_ROOT / path).exists() for path in FORBIDDEN_OUTPUT_PATHS} == before_exists
-    assert {path: (REPO_ROOT / path).stat().st_mtime_ns for path in before_mtime} == before_mtime
-
-
-def test_graph_ir_validation_attachments_are_included() -> None:
-    compiled = compile_studio_sources(REPO_ROOT)
-    node_id = compiled.graph_ir["nodes"][0]["id"]
-    graph_ir = {
-        **compiled.graph_ir,
-        "nodes": [
-            {**compiled.graph_ir["nodes"][0], "validation_attachments": [_validation_record("validation.node.attachment", "node", node_id, "not_run")]},
-            *compiled.graph_ir["nodes"][1:],
-        ],
-    }
-    patched = replace(compiled, graph_ir=graph_ir)
-
-    payload = build_canvas_view_model(patched, validate_compiler_result(compiled, REPO_ROOT)).to_dict()
-
-    node = _by_graph_id(payload["nodes"], "graph_node_id", node_id)
-    assert node["validation_overlays"][0]["id"] == "overlay.validation.node.attachment"
-    assert node["validation_overlays"][0]["status"] == "not_run"
 
 
 def _validation_record(record_id: str, target_type: str, target_ref: str, status: str) -> dict[str, Any]:

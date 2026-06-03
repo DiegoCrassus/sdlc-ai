@@ -26,8 +26,6 @@ CANVAS_NON_GOALS = (
 
 @dataclass(frozen=True)
 class CanvasViewModel:
-    """Serializable in-memory canvas view model."""
-
     canvas: dict[str, Any]
     nodes: tuple[dict[str, Any], ...]
     edges: tuple[dict[str, Any], ...]
@@ -36,8 +34,6 @@ class CanvasViewModel:
     legend: dict[str, Any]
 
     def to_dict(self) -> dict[str, Any]:
-        """Return a deterministic JSON-ready payload."""
-
         return {
             "canvas": self.canvas,
             "nodes": list(self.nodes),
@@ -168,9 +164,6 @@ def _overlay(record: dict[str, Any], index: int) -> dict[str, Any]:
         "messages": _messages(record.get("messages")),
         "source_refs": _source_refs(record.get("source_refs")),
     }
-    for key in ("checked_by", "checker_version", "checker_authority"):
-        if key in record:
-            overlay[key] = record[key]
     return overlay
 
 
