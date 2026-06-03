@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import pytest
-
 from studio_service.services.mutation import reset_proposal_store_for_tests
 
 

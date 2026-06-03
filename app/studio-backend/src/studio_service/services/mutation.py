@@ -20,7 +20,6 @@ from studio_service.schemas.proposals import (
     GatewayPathResult,
     ProposalCreateRequest,
     ProposalResponse,
-    SimulatedGate,
     StructuredOp,
 )
 from studio_service.services.doctor_runner import run_doctor_in_workspace
