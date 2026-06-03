@@ -5,37 +5,34 @@
 | Field | Value |
 |-------|-------|
 | **Next agent** | qa |
-| **Stage complete** | no |
+| **Stage complete** | yes |
 | **Previous agent** | implementer |
 
 ## Session
 
 | Field | Value |
 |-------|-------|
-| **Card** | INVES-83 |
-| **Branch** | feature/INVES-83-studio-ui-obs-s3 |
-| **Stage** | implementation → qa |
+| **Card** | INVES-86 |
+| **Branch** | feature/INVES-86-studio-api-patch-s4 |
+| **Stage** | implementation |
 
-## Scope
+## Deliverables
 
-Observability page `/observability`: timeline REST, SSE EventSource, filters (category, card, run_id, event_type), correlation panel.
+- S4 routes: `POST/GET/DELETE /studio/proposals`, `POST .../validate`, `.../doctor`, `.../gateway-check`
+- No `POST .../apply` (verified in OpenAPI + tests)
+- `gate.check_write_simulated` for gateway-check when session gate closed
+- In-memory proposal store (24h TTL); `.studio/` gitignored
 
-## Implementation
+## Test evidence
 
-| Item | Detail |
-|------|--------|
-| **commits** | [`ca9024e`](ca9024e) |
-| **branch** | `feature/INVES-83-studio-ui-obs-s3` |
-| **tests** | `npm run test` — 18 passed; `npm run build` — OK |
+```bash
+STUDIO_REPO_ROOT=$(pwd) PYTHONPATH=app/studio-backend/src:$PWD python3 -m pytest app/studio-backend/tests/ .sdlc/dsl/test_gate.py -v
+# 34 passed
+```
 
-## Files
+## Commits
 
-- `app/studio-frontend/src/pages/ObservabilityPage.tsx`
-- `app/studio-frontend/src/hooks/useStudioObsStream.ts`
-- `app/studio-frontend/src/api/obsQuery.ts` (+ tests)
-- `app/studio-frontend/src/types/observability.ts`
-- `app/studio-frontend/src/components/observability/*`
-- `app/studio-frontend/src/App.tsx`, `src/api/client.ts`
+- `5d2bf6c5e0f939fcdb0e3cbd2723c29821505682`
 
 ## Blockers
 
@@ -43,4 +40,4 @@ None.
 
 ## Exact Next Action
 
-QA: validate acceptance criteria (timeline, SSE live badge, filters, correlation_id panel), run `npm run test` + `npm run build` in `app/studio-frontend`, optional smoke with `make studio-dev`.
+QA validates acceptance criteria against ADR-010 / architecture.md § Propose-only mutation contract.

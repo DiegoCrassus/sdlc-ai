@@ -111,6 +111,9 @@ specs/
 specs/__generated__/
 simulacao-end-to-end-sdlc.pdf
 
+# Studio S4 proposal scratch (never committed)
+.studio/
+
 # SDLC Observability (transient state)
 .sdlc_obs_state.json
 .sdlc/memory/session-gate.json
