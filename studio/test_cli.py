@@ -194,12 +194,17 @@ def test_preview_simulation_cli_smoke_and_scenario_filter() -> None:
         first_json = run_cli("preview-simulation", "--format", "json")
     assert text.returncode == 1 and "non_executing_preview" in text.stdout
     assert "execution_mode: non_executing_preview" in text.stdout
+    assert "outcome=" in text.stdout
     assert first_json.returncode == 1 and first_json.stdout == run_cli("preview-simulation", "--format", "json").stdout
     payload = json.loads(first_json.stdout)
     assert set(payload) == {"simulation", "summary", "scenarios", "lifecycle_map"}
+    assert set(payload["simulation"]["filters"]) == {"scenario", "intent", "path_label", "step_kind", "tag"}
     filtered = json.loads(run_cli("preview-simulation", "--format", "json", "--scenario", "devops_finish").stdout)
-    assert filtered["simulation"]["filters"] == {"scenario": "devops_finish"}
+    assert filtered["simulation"]["filters"]["scenario"] == "devops_finish"
     assert len(filtered["scenarios"]) == 1
+    tag_filtered = json.loads(run_cli("preview-simulation", "--format", "json", "--tag", "docs_scope").stdout)
+    assert tag_filtered["simulation"]["filters"]["tag"] == "docs_scope"
+    assert len(tag_filtered["scenarios"]) == 1
     bogus = run_cli("preview-simulation", "--scenario", "bogus")
     assert bogus.returncode == 1 and bogus.stderr == "error: invalid scenario: bogus\n"
 

@@ -130,6 +130,10 @@ def _build_parser() -> argparse.ArgumentParser:
         help="Repository root to inspect. Defaults to the current directory.",
     )
     preview_parser.add_argument("--scenario", default=None, help="Filter preview to one scenario id.")
+    preview_parser.add_argument("--intent", default=None, help="Filter scenarios by intent (DOCS_ONLY or FEATURE).")
+    preview_parser.add_argument("--path-label", default=None, help="Filter steps by path label.")
+    preview_parser.add_argument("--step-kind", default=None, help="Filter steps by kind (handoff, stage, transition).")
+    preview_parser.add_argument("--tag", default=None, help="Filter scenarios by tag.")
     return parser
 
 
@@ -195,7 +199,14 @@ def _run_assist_workflow(root: Path, args: argparse.Namespace) -> int:
 
 
 def _run_preview_simulation(root: Path, args: argparse.Namespace) -> int:
-    model = build_simulation_preview_from_sources(root, scenario=args.scenario)
+    model = build_simulation_preview_from_sources(
+        root,
+        scenario=args.scenario,
+        intent=args.intent,
+        path_label=args.path_label,
+        step_kind=args.step_kind,
+        tag=args.tag,
+    )
     if args.format == "json":
         _write_json(model)
     else:
