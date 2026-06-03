@@ -176,6 +176,43 @@ def test_inspect_validation_invalid_args_exit_nonzero_without_traceback() -> Non
     assert "Traceback" not in completed.stderr
 
 
+def test_assist_workflow_cli_smoke_and_kind_filter() -> None:
+    with unchanged_repo_outputs():
+        text = run_cli("assist-workflow")
+        first_json = run_cli("assist-workflow", "--format", "json")
+    assert text.returncode == 0 and "derived_non_authoritative" in text.stdout
+    assert first_json.returncode == 0 and first_json.stdout == run_cli("assist-workflow", "--format", "json").stdout
+    payload = json.loads(first_json.stdout)
+    assert set(payload) == {"assistance", "summary", "explanations", "suggestions", "annotations"}
+    filtered = json.loads(run_cli("assist-workflow", "--format", "json", "--kind", "workflow_handoff").stdout)
+    assert filtered["assistance"]["filters"] == {"kind": "workflow_handoff"}
+
+
+def test_assist_workflow_invalid_kind_exits_nonzero_without_traceback() -> None:
+    completed = run_cli("assist-workflow", "--kind", "bogus")
+
+    assert completed.returncode == 1
+    assert completed.stdout == ""
+    assert completed.stderr == "error: invalid kind: bogus\n"
+    assert "Traceback" not in completed.stderr
+
+
+def test_assist_workflow_exits_nonzero_when_validation_failures_present(tmp_path: Path) -> None:
+    root = copy_required_inputs(tmp_path)
+    artifact_path = root / ".sdlc/registry/sdlc-artifacts.yaml"
+    payload = yaml.safe_load(artifact_path.read_text(encoding="utf-8"))
+    payload["artifacts"][0]["path"] = "app/forbidden.py"
+    artifact_path.write_text(yaml.safe_dump(payload, sort_keys=False), encoding="utf-8")
+
+    completed = run_cli("assist-workflow", "--format", "json", "--root", str(root))
+
+    assert completed.returncode == 1
+    assert completed.stderr == ""
+    payload = json.loads(completed.stdout)
+    assert payload["summary"]["validation_fail"] > 0
+    assert not (root / "studio/generated").exists()
+
+
 def test_inspect_validation_exits_nonzero_when_visible_records_fail(tmp_path: Path) -> None:
     root = copy_required_inputs(tmp_path)
     artifact_path = root / ".sdlc/registry/sdlc-artifacts.yaml"
