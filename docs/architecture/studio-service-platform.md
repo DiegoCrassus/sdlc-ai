@@ -280,6 +280,8 @@ Implementer adds `studio_service/schemas/events.py` mirroring this spec; OpenAPI
 
 ## 5. Propose-only mutation flow
 
+> **Frozen contract (INVES-84):** allowlist, `structured_ops` → unified diff, dry-run exit codes, mandatory gateway-check, and apply path are defined in [`.sdlc/memory/architecture.md`](../../.sdlc/memory/architecture.md) (§ Propose-only mutation contract). [ADR-010](./decisions.md#adr-010--studio-s4-propose-only-mutation-contract). Policy mirror: `.sdlc/gateways/policy.yaml` → `studio_proposals`.
+
 Visual and form edits **never** write authoritative paths directly. Studio generates previews; humans apply via existing SDLC git/Plane workflow.
 
 ```mermaid

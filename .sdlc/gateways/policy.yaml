@@ -79,3 +79,36 @@ post_gateway:
   reroute_on_incomplete_stage: true
   reroute_on_blockers: true
   max_autofix_cycles: 2
+
+# Studio S4 propose-only mutations (INVES-84). Reference for gateway-check simulation;
+# hooks do not parse this block today — studio_service reads it + gate.py.
+studio_proposals:
+  authority_badge: proposed_non_authoritative
+  mandatory_dry_run_steps:
+    - validate
+    - doctor
+    - gateway-check
+  allowed_target_prefixes:
+    - .sdlc/workflows/
+    - .sdlc/stages/
+    - .sdlc/pipeline/
+    - .sdlc/manifest/
+    - .sdlc/gates/
+    - .cursor/agents/
+    - .cursor/rules/
+    - .cursor/skills/
+    - .cursor/commands/
+  forbidden_target_prefixes:
+    - .sdlc/memory/
+    - .sdlc/templates/plane/
+    - .cursor/hooks/
+    - .cursor/mcp.json
+    - app/
+    - specs/
+  forbidden_api_patterns:
+    - "POST /studio/proposals/{id}/apply"
+    - "git commit"
+    - "git push"
+    - "gh pr merge"
+  gate_check_module: .sdlc/dsl/gate.py
+  gate_check_function: check_write
