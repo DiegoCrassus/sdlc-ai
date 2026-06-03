@@ -11,7 +11,9 @@ from studio_service.api.routes import (
     obs,
     proposals,
     readiness,
+    registry,
     session,
+    validation_suite,
 )
 
 router = APIRouter()
@@ -24,3 +26,5 @@ router.include_router(canvas.router)
 router.include_router(obs.router)
 router.include_router(proposals.router)
 router.include_router(config.router)
+router.include_router(registry.router)
+router.include_router(validation_suite.router)

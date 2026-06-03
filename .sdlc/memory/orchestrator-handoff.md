@@ -12,34 +12,30 @@
 
 | Field | Value |
 |-------|-------|
-| **Card** | INVES-87 |
-| **Branch** | feature/INVES-87-studio-ui-config-builders-s5 |
+| **Card** | INVES-88 |
+| **Branch** | feature/INVES-88-studio-api-registry-s6 |
 | **Stage** | implementation |
 
 ## Scope
 
-Config builders UI (agents, rules/skills, commands) — propose-only via `POST /studio/proposals`.
+Registry + validation API S5 (registry graph, validation inspect/run, doctor, simulation, assistance, skeleton).
 
 ## Deliverables
 
-- `GET /studio/config/files` and `GET /studio/config/file` (read-only browse)
-- `/agents`, `/rules` (tabs: rules + skills), `/commands` builder pages
-- Shared `ConfigBuilderPage`, `configDraft` helpers, `ProposalPanel` dry-run flow
-
-## Git
-
-| Field | Value |
-|-------|-------|
-| **commits** | [1474637] |
-| **branch** | feature/INVES-87-studio-ui-config-builders-s5 |
+- `GET /studio/registry/graph` — registry graph + broken_refs from compile report
+- `GET /studio/validation/inspect` — inspect-validation projection (query filters)
+- `POST /studio/validation/run` — full validate result
+- `POST /studio/doctor/run` — repo-root doctor subprocess
+- `POST /studio/simulation/preview` — non-executing simulation
+- `POST /studio/assistance/workflow` — advisory assistance
+- `GET /studio/skeleton/tests` — MVP test skeleton list
 
 ## Verification (implementer)
 
-| Check | Result |
-|-------|--------|
-| `pytest app/studio-backend/tests/test_config.py tests/test_proposals.py` | 10 passed |
-| `npm test -- --run` (studio-frontend) | 34 passed |
-| `npm run build` (studio-frontend) | OK |
+```bash
+STUDIO_REPO_ROOT=$(pwd) PYTHONPATH=app/studio-backend/src:$PWD python3 -m pytest app/studio-backend/tests/ -q
+# 44 passed
+```
 
 ## Blockers
 
@@ -47,4 +43,4 @@ None.
 
 ## Exact Next Action
 
-QA: validate acceptance criteria against real test evidence; map to Plane card INVES-87.
+QA: map acceptance criteria, run pytest + ruff, post evidence on Plane card.
