@@ -11,6 +11,11 @@ from typing import Any
 
 from studio.canvas_view_model import build_canvas_from_sources, render_canvas_text
 from studio.compiler_core import CompilerInputError, compile_studio_sources
+from studio.publish_evidence import (
+    PublishEvidenceInputError,
+    build_publish_evidence_from_sources,
+    render_publish_evidence_text,
+)
 from studio.reporting import render_report_text
 from studio.simulation_preview import (
     SimulationPreviewInputError,
@@ -23,11 +28,6 @@ from studio.validation_inspection import (
     render_validation_inspection_text,
 )
 from studio.validator_core import validate_studio_sources
-from studio.publish_evidence import (
-    PublishEvidenceInputError,
-    build_publish_evidence_from_sources,
-    render_publish_evidence_text,
-)
 from studio.workflow_assistance import (
     WorkflowAssistanceInputError,
     build_workflow_assistance_from_sources,
