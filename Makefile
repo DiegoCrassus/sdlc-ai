@@ -1,4 +1,4 @@
-.PHONY: sdlc-doctor sdlc-validate sdlc-stages docs-check obs-init obs-server obs-seed sdlc-audit plane-in-progress auto-merge-pr issue-triage plane-reformat plane-evidence workflow-status workflow-start workflow-discover sdlc-compact-memory sdlc-session-status sdlc-meta-start sdlc-meta-commit sdlc-meta-qa help
+.PHONY: sdlc-doctor sdlc-validate sdlc-stages docs-check obs-init obs-server obs-seed sdlc-audit plane-in-progress auto-merge-pr issue-triage plane-reformat plane-evidence workflow-status workflow-start workflow-discover sdlc-compact-memory sdlc-session-status sdlc-meta-start sdlc-meta-commit sdlc-meta-qa studio-dev help
 
 help:
 	@echo "SDLC AI — Available targets:"
@@ -28,6 +28,8 @@ help:
 	@echo "  sdlc-meta-start   Meta-tool: validate + gate + branch (CARD=INVES-N SLUG=...)"
 	@echo "  sdlc-meta-commit  Meta-tool: lint + commit + push (CARD=INVES-N MSG='...')"
 	@echo "  sdlc-meta-qa      Meta-tool: tests + doctor + QA evidence (CARD=INVES-N)"
+	@echo ""
+	@echo "  studio-dev        Studio Service API (http://127.0.0.1:8100)"
 	@echo ""
 	@echo "Workflow: .sdlc/process/change-lifecycle.md"
 
@@ -128,3 +130,7 @@ export-pdf:
 	@echo "Generating simulation PDF..."
 	@$(PYTHON) app/infra/sdlc_obs/export_simulation_pdf.py
 	@echo "PDF: simulacao-end-to-end-sdlc.pdf"
+
+studio-dev:
+	@echo "Starting Studio Service API on http://127.0.0.1:8100 (OpenAPI /docs)"
+	@STUDIO_REPO_ROOT=$$(pwd) PYTHONPATH=app/studio-backend/src:$$PWD $(PYTHON) -m uvicorn studio_service.main:app --reload --host 127.0.0.1 --port 8100
