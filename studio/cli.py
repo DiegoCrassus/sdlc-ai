@@ -12,6 +12,11 @@ from typing import Any
 from studio.canvas_view_model import build_canvas_from_sources, render_canvas_text
 from studio.compiler_core import CompilerInputError, compile_studio_sources
 from studio.reporting import render_report_text
+from studio.simulation_preview import (
+    SimulationPreviewInputError,
+    build_simulation_preview_from_sources,
+    render_simulation_preview_text,
+)
 from studio.validation_inspection import (
     ValidationInspectionInputError,
     build_validation_inspection_from_sources,
@@ -42,7 +47,14 @@ def main(argv: Sequence[str] | None = None) -> int:
             return _run_inspect_validation(root, args)
         if args.command == "assist-workflow":
             return _run_assist_workflow(root, args)
-    except (CompilerInputError, ValidationInspectionInputError, WorkflowAssistanceInputError) as exc:
+        if args.command == "preview-simulation":
+            return _run_preview_simulation(root, args)
+    except (
+        CompilerInputError,
+        ValidationInspectionInputError,
+        WorkflowAssistanceInputError,
+        SimulationPreviewInputError,
+    ) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 1
     parser.error("missing command")
@@ -104,6 +116,20 @@ def _build_parser() -> argparse.ArgumentParser:
         help="Repository root to inspect. Defaults to the current directory.",
     )
     assist_parser.add_argument("--kind", default=None, help="Filter suggestions by kind.")
+    preview_parser = subparsers.add_parser("preview-simulation")
+    preview_parser.add_argument(
+        "--format",
+        choices=("text", "json"),
+        default="text",
+        help="Output format.",
+    )
+    preview_parser.add_argument(
+        "--root",
+        type=Path,
+        default=None,
+        help="Repository root to inspect. Defaults to the current directory.",
+    )
+    preview_parser.add_argument("--scenario", default=None, help="Filter preview to one scenario id.")
     return parser
 
 
@@ -166,6 +192,16 @@ def _run_assist_workflow(root: Path, args: argparse.Namespace) -> int:
     else:
         sys.stdout.write(render_workflow_assistance_text(model))
     return 1 if model["summary"]["validation_fail"] > 0 else 0
+
+
+def _run_preview_simulation(root: Path, args: argparse.Namespace) -> int:
+    model = build_simulation_preview_from_sources(root, scenario=args.scenario)
+    if args.format == "json":
+        _write_json(model)
+    else:
+        sys.stdout.write(render_simulation_preview_text(model))
+    blocked = model["summary"]["path_labels"].get("blocked", 0)
+    return 1 if model["summary"]["validation_fail"] > 0 or blocked > 0 else 0
 
 
 def _write_json(payload: dict[str, Any]) -> None:

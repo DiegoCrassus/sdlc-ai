@@ -188,6 +188,22 @@ def test_assist_workflow_cli_smoke_and_kind_filter() -> None:
     assert filtered["assistance"]["filters"] == {"kind": "workflow_handoff"}
 
 
+def test_preview_simulation_cli_smoke_and_scenario_filter() -> None:
+    with unchanged_repo_outputs():
+        text = run_cli("preview-simulation")
+        first_json = run_cli("preview-simulation", "--format", "json")
+    assert text.returncode == 1 and "non_executing_preview" in text.stdout
+    assert "execution_mode: non_executing_preview" in text.stdout
+    assert first_json.returncode == 1 and first_json.stdout == run_cli("preview-simulation", "--format", "json").stdout
+    payload = json.loads(first_json.stdout)
+    assert set(payload) == {"simulation", "summary", "scenarios", "lifecycle_map"}
+    filtered = json.loads(run_cli("preview-simulation", "--format", "json", "--scenario", "devops_finish").stdout)
+    assert filtered["simulation"]["filters"] == {"scenario": "devops_finish"}
+    assert len(filtered["scenarios"]) == 1
+    bogus = run_cli("preview-simulation", "--scenario", "bogus")
+    assert bogus.returncode == 1 and bogus.stderr == "error: invalid scenario: bogus\n"
+
+
 def test_assist_workflow_invalid_kind_exits_nonzero_without_traceback() -> None:
     completed = run_cli("assist-workflow", "--kind", "bogus")
 
