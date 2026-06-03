@@ -25,9 +25,9 @@ def test_compile_text_succeeds_from_repo_root_without_persisting_outputs() -> No
     assert completed.stderr == ""
     assert "Studio compile: derived, non-authoritative output" in completed.stdout
     assert "status: " in completed.stdout
-    assert "required inputs: " in completed.stdout
-    assert "graph nodes: " in completed.stdout
     assert "graph edges: " in completed.stdout
+    assert "graph nodes: " in completed.stdout
+    assert "required inputs: " in completed.stdout
     assert "workflow stages: " in completed.stdout
     assert "workflow transitions: " in completed.stdout
     assert "unresolved relationships: " in completed.stdout
@@ -46,7 +46,8 @@ def test_compile_json_succeeds_with_stable_required_keys() -> None:
     assert set(payload) == {"graph_ir", "workflow_ir", "report"}
     assert isinstance(payload["graph_ir"], dict)
     assert isinstance(payload["workflow_ir"], dict)
-    assert isinstance(payload["report"], dict)
+    assert_standard_report_shape(payload["report"], kind="compile")
+    assert payload["report"]["summary"]["counts"]["graph_nodes"] == len(payload["graph_ir"]["nodes"])
 
 
 def test_validate_text_succeeds_from_repo_root_without_persisting_outputs() -> None:
@@ -56,12 +57,12 @@ def test_validate_text_succeeds_from_repo_root_without_persisting_outputs() -> N
     assert completed.returncode == 0
     assert completed.stderr == ""
     assert "Studio validate: derived, non-authoritative output" in completed.stdout
-    assert "summary: pass=" in completed.stdout
-    assert "warn=0" in completed.stdout
-    assert "fail=0" in completed.stdout
-    assert "not_run=0" in completed.stdout
-    assert "pass validation.graph.relationship_targets" in completed.stdout
-    assert "pass validation.compiler.authority_boundaries" in completed.stdout
+    assert "pass: 6" in completed.stdout
+    assert "warn: 0" in completed.stdout
+    assert "fail: 0" in completed.stdout
+    assert "not run: 0" in completed.stdout
+    assert "- validation.graph.relationship_targets: pass" in completed.stdout
+    assert "- validation.compiler.authority_boundaries: pass" in completed.stdout
 
 
 def test_validate_json_succeeds_with_stable_required_keys() -> None:
@@ -73,9 +74,11 @@ def test_validate_json_succeeds_with_stable_required_keys() -> None:
     assert first.stderr == ""
     assert first.stdout == second.stdout
     payload = json.loads(first.stdout)
-    assert set(payload) == {"results", "summary"}
+    assert set(payload) == {"report", "results", "summary"}
     assert isinstance(payload["results"], list)
     assert payload["summary"] == {"pass": 6, "warn": 0, "fail": 0, "not_run": 0}
+    assert_standard_report_shape(payload["report"], kind="validate")
+    assert payload["report"]["summary"]["counts"] == payload["summary"]
 
 
 def test_compile_bad_root_exits_nonzero_with_concise_stderr(tmp_path: Path) -> None:
@@ -154,3 +157,16 @@ def assert_forbidden_keys_absent(value: object) -> None:
     elif isinstance(value, list):
         for child in value:
             assert_forbidden_keys_absent(child)
+
+
+def assert_standard_report_shape(report: object, *, kind: str) -> None:
+    assert isinstance(report, dict)
+    assert set(report) == {"id", "kind", "status", "authority", "summary", "sections", "source_refs", "non_goals"}
+    assert report["id"] == f"report.studio.{kind}"
+    assert report["kind"] == kind
+    assert report["authority"] == "derived_non_authoritative"
+    assert isinstance(report["summary"], dict)
+    assert isinstance(report["summary"]["counts"], dict)
+    assert report["sections"]
+    assert report["source_refs"]
+    assert report["non_goals"]

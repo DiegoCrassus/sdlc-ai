@@ -162,6 +162,20 @@ Studio readers understand coverage and findings, but they are not Plane
 evidence, GitHub state, workflow gates, source-of-truth records, generated
 outputs, or execution logs.
 
+Compiler and validator reports use one shared envelope shape:
+
+- `id`: stable report identifier such as `report.studio.compile` or
+  `report.studio.validate`.
+- `kind`: `compile` or `validate`.
+- `status`: one of `pass`, `warn`, `fail`, or `not_run`.
+- `authority`: exactly `derived_non_authoritative`.
+- `summary`: deterministic description and counts used by both JSON and text
+  rendering.
+- `sections`: deterministic report sections for coverage, findings, boundaries,
+  skipped work, or other concise derived summaries.
+- `source_refs`: concise repository path or external authority pointers only.
+- `non_goals`: inherited report boundaries that prevent source-of-truth drift.
+
 Reports must:
 
 - Distinguish compiler coverage, validator findings, source authority

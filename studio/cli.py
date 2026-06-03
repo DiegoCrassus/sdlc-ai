@@ -10,9 +10,8 @@ from pathlib import Path
 from typing import Any
 
 from studio.compiler_core import CompilerInputError, compile_studio_sources
+from studio.reporting import render_report_text
 from studio.validator_core import validate_studio_sources
-
-_STATUSES = ("pass", "warn", "fail", "not_run")
 
 
 def main(argv: Sequence[str] | None = None) -> int:
@@ -66,20 +65,21 @@ def _run_compile(root: Path, output_format: str) -> int:
     if output_format == "json":
         _write_json(payload)
     else:
-        _write_compile_text(payload)
+        _write_report_text(result.report)
     return 0
 
 
 def _run_validate(root: Path, output_format: str) -> int:
     result = validate_studio_sources(root)
     payload = {
+        "report": result.report,
         "results": result.results,
         "summary": result.summary,
     }
     if output_format == "json":
         _write_json(payload)
     else:
-        _write_validate_text(payload)
+        _write_report_text(result.report)
     return 1 if result.summary.get("fail", 0) else 0
 
 
@@ -88,46 +88,8 @@ def _write_json(payload: dict[str, Any]) -> None:
     sys.stdout.write("\n")
 
 
-def _write_compile_text(payload: dict[str, Any]) -> None:
-    graph_ir = payload["graph_ir"]
-    workflow_ir = payload["workflow_ir"]
-    report = payload["report"]
-    coverage = report.get("coverage", {}) if isinstance(report.get("coverage"), dict) else {}
-    workflow = workflow_ir.get("workflow", {}) if isinstance(workflow_ir.get("workflow"), dict) else {}
-    unresolved = coverage.get("unresolved_relationships", [])
-    unresolved_count = len(unresolved) if isinstance(unresolved, list) else 0
-    lines = [
-        "Studio compile: derived, non-authoritative output",
-        f"status: {report.get('status', 'unknown')}",
-        f"required inputs: {_count(coverage, 'required_inputs')}",
-        f"graph nodes: {len(_list(graph_ir.get('nodes')))}",
-        f"graph edges: {len(_list(graph_ir.get('edges')))}",
-        f"workflow stages: {len(_list(workflow.get('stages')))}",
-        f"workflow transitions: {len(_list(workflow.get('transitions')))}",
-        f"unresolved relationships: {unresolved_count}",
-        "reminder: CLI stdout is derived and non-authoritative only.",
-    ]
-    sys.stdout.write("\n".join(lines) + "\n")
-
-
-def _write_validate_text(payload: dict[str, Any]) -> None:
-    summary = payload["summary"]
-    results = payload["results"]
-    lines = [
-        "Studio validate: derived, non-authoritative output",
-        "summary: " + ", ".join(f"{status}={summary.get(status, 0)}" for status in _STATUSES),
-    ]
-    lines.extend(f"{record.get('status', 'unknown')} {record.get('id', 'unknown')}" for record in results)
-    sys.stdout.write("\n".join(lines) + "\n")
-
-
-def _count(coverage: dict[str, Any], key: str) -> int:
-    value = coverage.get(key, 0)
-    return value if isinstance(value, int) else 0
-
-
-def _list(value: Any) -> list[Any]:
-    return value if isinstance(value, list) else []
+def _write_report_text(report: dict[str, Any]) -> None:
+    sys.stdout.write(render_report_text(report))
 
 
 if __name__ == "__main__":

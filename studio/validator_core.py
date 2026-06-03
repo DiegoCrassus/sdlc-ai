@@ -3,11 +3,12 @@
 from __future__ import annotations
 
 import posixpath
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
 from studio.compiler_core import CompilerResult, compile_studio_sources
+from studio.reporting import build_report
 
 _ALLOWED_PATH_PREFIXES = (".sdlc/", ".cursor/", "studio/", "docs/")
 _FORBIDDEN_PATH_PREFIXES = ("app/", "studio/examples/", "studio/generated/", "specs/")
@@ -34,6 +35,7 @@ class ValidationRunResult:
 
     results: tuple[dict[str, Any], ...]
     summary: dict[str, int]
+    report: dict[str, Any] = field(default_factory=dict)
 
 
 def validate_studio_sources(root: Path | str) -> ValidationRunResult:
@@ -54,7 +56,8 @@ def validate_compiler_result(result: CompilerResult, root: Path | str) -> Valida
         _validate_output_boundaries(result),
         _validate_authority_boundaries(result),
     )
-    return ValidationRunResult(results=records, summary=_summary(records))
+    summary = _summary(records)
+    return ValidationRunResult(results=records, summary=summary, report=_build_validation_report(records, summary))
 
 
 def _validate_graph_relationship_targets(graph_ir: dict[str, Any]) -> dict[str, Any]:
@@ -65,10 +68,10 @@ def _validate_graph_relationship_targets(graph_ir: dict[str, Any]) -> dict[str, 
     for edge in _dict_items(graph_ir.get("edges")):
         edge_id = str(edge.get("id", "edge.unknown"))
         source_refs.extend(_source_refs(edge.get("source_refs")))
-        for field in ("from", "to"):
-            target = str(edge.get(field, ""))
+        for field_name in ("from", "to"):
+            target = str(edge.get(field_name, ""))
             if target not in node_ids:
-                failures.append(f"{edge_id}.{field} references missing node {target or '<empty>'}.")
+                failures.append(f"{edge_id}.{field_name} references missing node {target or '<empty>'}.")
     if failures:
         return _result(
             "validation.graph.relationship_targets",
@@ -96,10 +99,10 @@ def _validate_workflow_transition_targets(workflow_ir: dict[str, Any]) -> dict[s
     for transition in _dict_items(workflow.get("transitions")):
         transition_id = str(transition.get("id", "transition.unknown"))
         source_refs.extend(_source_refs(transition.get("source_refs")))
-        for field in ("from", "to"):
-            target = str(transition.get(field, ""))
+        for field_name in ("from", "to"):
+            target = str(transition.get(field_name, ""))
             if target not in stage_ids:
-                failures.append(f"{transition_id}.{field} references missing stage {target or '<empty>'}.")
+                failures.append(f"{transition_id}.{field_name} references missing stage {target or '<empty>'}.")
     if failures:
         return _result(
             "validation.workflow.transition_targets",
@@ -247,6 +250,49 @@ def _compiler_source_refs(result: CompilerResult) -> list[dict[str, str]]:
         refs.extend(_source_refs(transition.get("source_refs")))
     refs.extend(_source_refs(result.report.get("source_refs") if isinstance(result.report, dict) else None))
     return _unique_source_refs(refs)
+
+
+def _build_validation_report(records: tuple[dict[str, Any], ...], summary: dict[str, int]) -> dict[str, Any]:
+    status = _report_status(summary)
+    return build_report(
+        report_id="report.studio.validate",
+        kind="validate",
+        status=status,
+        summary={"description": "Validated derived Studio compiler outputs in memory.", "counts": summary},
+        sections=[
+            {
+                "id": "findings",
+                "title": "Findings",
+                "status": status,
+                "items": [{"label": str(record.get("id", "unknown")), "status": str(record.get("status", "not_run"))} for record in records],
+            },
+            {
+                "id": "boundaries",
+                "title": "Boundaries",
+                "status": "pass",
+                "items": [
+                    {"label": "persistence", "value": "stdout_only"},
+                    {"label": "authority", "value": "Plane and GitHub remain durable evidence authorities"},
+                ],
+            },
+        ],
+        source_refs=[*_VALIDATOR_SOURCE_REFS, {"ref_type": "path", "ref": "studio/compiler-validator-boundaries.md"}],
+        non_goals=[
+            "No workflow, command, gate, CI, lint, or doctor execution.",
+            "No copied source bodies, command outputs, CI logs, local evidence, or durable delivery evidence.",
+            "No replacement behavior for .sdlc/, .cursor/, Plane, GitHub, or .sdlc/registry/.",
+        ],
+    )
+
+
+def _report_status(summary: dict[str, int]) -> str:
+    if summary.get("fail", 0):
+        return "fail"
+    if summary.get("warn", 0):
+        return "warn"
+    if summary.get("not_run", 0) and not summary.get("pass", 0):
+        return "not_run"
+    return "pass"
 
 
 def _result(

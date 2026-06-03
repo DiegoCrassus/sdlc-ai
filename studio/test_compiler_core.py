@@ -34,8 +34,10 @@ def test_compile_studio_sources_preserves_source_refs_without_source_bodies() ->
     assert all(stage["source_refs"] for stage in result.workflow_ir["workflow"]["stages"])
     assert all(item["source_refs"] for item in result.workflow_ir["workflow"]["transitions"])
     assert any(node["registry_ref"].startswith("cursor.") and node["source_refs"][0]["ref"].startswith(".cursor/") for node in result.graph_ir["nodes"])
-    assert result.report["authority"] == "derived_non_authoritative"
-    assert "studio/generated/" in result.report["excluded_source_areas"]
+    _assert_standard_report_shape(result.report, kind="compile")
+    assert result.report["summary"]["counts"]["graph_nodes"] == len(result.graph_ir["nodes"])
+    assert _section_item_values(result.report, "boundaries", "excluded_source_area")
+    assert "studio/generated/" in _section_item_values(result.report, "boundaries", "excluded_source_area")
     for payload in (result.graph_ir, result.workflow_ir, result.report):
         _assert_forbidden_body_keys_absent(payload)
 
@@ -128,6 +130,24 @@ def _assert_workflow_schema_shape(workflow_ir: dict[str, Any]) -> None:
 def _assert_source_ref_objects(source_refs: list[dict[str, Any]]) -> None:
     assert source_refs
     assert all(source_ref["ref_type"] == "path" and source_ref["ref"] for source_ref in source_refs)
+
+
+def _assert_standard_report_shape(report: dict[str, Any], *, kind: str) -> None:
+    assert set(report) == {"id", "kind", "status", "authority", "summary", "sections", "source_refs", "non_goals"}
+    assert report["id"] == f"report.studio.{kind}"
+    assert report["kind"] == kind
+    assert report["status"] in {"pass", "warn", "fail", "not_run"}
+    assert report["authority"] == "derived_non_authoritative"
+    assert isinstance(report["summary"]["counts"], dict)
+    assert report["sections"]
+    _assert_source_ref_objects(report["source_refs"])
+    assert report["non_goals"]
+
+
+def _section_item_values(report: dict[str, Any], section_id: str, label: str) -> list[Any]:
+    sections = [section for section in report["sections"] if section["id"] == section_id]
+    assert len(sections) == 1
+    return [item["value"] for item in sections[0]["items"] if item["label"] == label]
 
 
 def _assert_forbidden_body_keys_absent(value: Any) -> None:
