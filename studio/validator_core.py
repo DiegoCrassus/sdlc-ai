@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import posixpath
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -9,20 +10,10 @@ from typing import Any
 from studio.compiler_core import CompilerResult, compile_studio_sources
 
 _ALLOWED_PATH_PREFIXES = (".sdlc/", ".cursor/", "studio/", "docs/")
-_FORBIDDEN_PATH_PREFIXES = (
-    "app/",
-    "studio/examples/",
-    "studio/generated/",
-    "specs/",
-)
+_FORBIDDEN_PATH_PREFIXES = ("app/", "studio/examples/", "studio/generated/", "specs/")
 _FORBIDDEN_PATH_PARTS = (
-    "local tickets",
-    "local backlog",
-    "local evidence",
-    "generated snapshots",
-    "generated reports",
-    "command outputs",
-    "ci logs",
+    "local tickets", "local backlog", "local evidence", "generated snapshots",
+    "generated reports", "command outputs", "ci logs",
 )
 _CHECKER_SOURCE = {"ref_type": "path", "ref": "studio/validator_core.py"}
 _CHECKER_AUTHORITY = {"ref_type": "path", "ref": "studio/validation-result-ir-contract.md"}
@@ -317,12 +308,21 @@ def _dict_items(value: Any) -> list[dict[str, Any]]:
 
 
 def _path_allowed(path: str) -> bool:
-    return path.startswith(_ALLOWED_PATH_PREFIXES) and not _path_forbidden(path)
+    normalized = _normalize_repo_relative_path(path)
+    return normalized is not None and normalized.startswith(_ALLOWED_PATH_PREFIXES) and not _path_forbidden(normalized)
 
 
 def _path_forbidden(path: str) -> bool:
+    normalized = _normalize_repo_relative_path(path)
     lowered = path.lower()
-    return path.startswith(_FORBIDDEN_PATH_PREFIXES) or any(part in lowered for part in _FORBIDDEN_PATH_PARTS)
+    return normalized is None or normalized.startswith(_FORBIDDEN_PATH_PREFIXES) or any(part in lowered for part in _FORBIDDEN_PATH_PARTS)
+
+
+def _normalize_repo_relative_path(path: str) -> str | None:
+    normalized = posixpath.normpath(path.replace("\\", "/")) if path else "."
+    if normalized in (".", "..") or normalized.startswith(("../", "/", "\\")):
+        return None
+    return normalized
 
 
 def _summary(records: tuple[dict[str, Any], ...]) -> dict[str, int]:

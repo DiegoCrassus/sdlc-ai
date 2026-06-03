@@ -86,6 +86,21 @@ def test_source_ref_path_existence_and_scope_behavior() -> None:
     _assert_validation_result_shape(workflow_record)
 
 
+def test_source_ref_traversal_resolving_into_forbidden_root_fails() -> None:
+    compiled = compile_studio_sources(REPO_ROOT)
+    graph_ir = deepcopy(compiled.graph_ir)
+    traversal_ref = "studio/../app/frontend/package.json"
+    graph_ir["nodes"][0]["source_refs"] = [traversal_ref]
+    broken = type(compiled)(graph_ir=graph_ir, workflow_ir=compiled.workflow_ir, report=compiled.report)
+
+    record = _record(validate_compiler_result(broken, REPO_ROOT), "validation.graph.source_refs")
+
+    assert record["status"] == "fail"
+    expected_text = f"Source ref is outside allowed scopes: {traversal_ref}."
+    assert record["messages"] == [{"level": "error", "text": expected_text, "path": traversal_ref}]
+    _assert_validation_result_shape(record)
+
+
 def test_validate_studio_sources_does_not_add_cli_or_persist_outputs() -> None:
     forbidden_paths = [REPO_ROOT / path for path in ("studio/generated", "studio/examples", "specs")]
     before_exists = {path: path.exists() for path in forbidden_paths}
