@@ -7,9 +7,7 @@ from typing import Any
 import pytest
 import yaml
 
-from studio import CompilerInputError, compile_studio_sources
-from studio import compiler_core
-
+from studio import CompilerInputError, compile_studio_sources, compiler_core
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 

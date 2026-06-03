@@ -13,7 +13,6 @@ from typing import Any
 
 import yaml
 
-
 REQUIRED_SOURCE_PATHS: tuple[str, ...] = (
     "studio/compiler-validator-boundaries.md",
     "studio/graph-ir-contract.md",
