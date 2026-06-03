@@ -2,9 +2,12 @@ from __future__ import annotations
 
 import json
 import os
+import shutil
 import subprocess
 import sys
 from pathlib import Path
+
+import yaml
 
 from studio import compiler_core
 
@@ -113,6 +116,83 @@ def test_canvas_json_succeeds_with_stable_required_keys() -> None:
     assert isinstance(payload["sections"], list)
 
 
+def test_inspect_validation_text_succeeds_from_repo_root_without_persisting_outputs() -> None:
+    with unchanged_repo_outputs():
+        completed = run_cli("inspect-validation")
+
+    assert completed.returncode == 0
+    assert completed.stderr == ""
+    assert "Studio validation inspection: derived, non-authoritative output" in completed.stdout
+    assert "authority: derived_non_authoritative" in completed.stdout
+    assert "records: 6 visible of 6 total" in completed.stdout
+    assert "transient stdout/in-memory" in completed.stdout
+
+
+def test_inspect_validation_json_succeeds_with_stable_required_keys() -> None:
+    with unchanged_repo_outputs():
+        first = run_cli("inspect-validation", "--format", "json")
+        second = run_cli("inspect-validation", "--format", "json")
+
+    assert first.returncode == 0
+    assert first.stderr == ""
+    assert first.stdout == second.stdout
+    payload = json.loads(first.stdout)
+    assert set(payload) == {"inspection", "summary", "groups", "records"}
+    assert payload["inspection"]["authority"] == "derived_non_authoritative"
+    assert payload["inspection"]["canvas_ref"] == "canvas.sdlc_studio.derived_graph"
+    assert payload["summary"]["by_status"] == {"pass": 6, "warn": 0, "fail": 0, "not_run": 0}
+    assert payload["records"][0]["source_refs"]
+
+
+def test_inspect_validation_filters_and_grouping_are_deterministic() -> None:
+    completed = run_cli(
+        "inspect-validation",
+        "--format",
+        "json",
+        "--status",
+        "pass",
+        "--check-type",
+        "policy",
+        "--target-type",
+        "path",
+        "--group-by",
+        "target_type",
+    )
+
+    assert completed.returncode == 0
+    payload = json.loads(completed.stdout)
+    assert payload["inspection"]["filters"] == {"status": "pass", "check_type": "policy", "target_type": "path"}
+    assert payload["inspection"]["group_by"] == "target_type"
+    assert payload["summary"]["visible_records"] == 2
+    assert [group["key"] for group in payload["groups"]] == ["path"]
+
+
+def test_inspect_validation_invalid_args_exit_nonzero_without_traceback() -> None:
+    completed = run_cli("inspect-validation", "--status", "bogus")
+
+    assert completed.returncode == 1
+    assert completed.stdout == ""
+    assert completed.stderr == "error: invalid status: bogus\n"
+    assert "Traceback" not in completed.stderr
+
+
+def test_inspect_validation_exits_nonzero_when_visible_records_fail(tmp_path: Path) -> None:
+    root = copy_required_inputs(tmp_path)
+    artifact_path = root / ".sdlc/registry/sdlc-artifacts.yaml"
+    payload = yaml.safe_load(artifact_path.read_text(encoding="utf-8"))
+    payload["artifacts"][0]["path"] = "app/forbidden.py"
+    artifact_path.write_text(yaml.safe_dump(payload, sort_keys=False), encoding="utf-8")
+
+    completed = run_cli("inspect-validation", "--format", "json", "--status", "fail", "--root", str(root))
+
+    assert completed.returncode == 1
+    assert completed.stderr == ""
+    payload = json.loads(completed.stdout)
+    assert payload["summary"]["by_status"]["fail"] > 0
+    assert all(record["status"] == "fail" for record in payload["records"])
+    assert not (root / "studio/generated").exists()
+
+
 def test_compile_bad_root_exits_nonzero_with_concise_stderr(tmp_path: Path) -> None:
     completed = run_cli("compile", "--root", str(tmp_path / "missing"))
 
@@ -158,6 +238,16 @@ def run_cli(*args: str) -> subprocess.CompletedProcess[str]:
         capture_output=True,
         check=False,
     )
+
+
+def copy_required_inputs(tmp_path: Path) -> Path:
+    root = tmp_path / "repo"
+    for relative_path in compiler_core.REQUIRED_SOURCE_PATHS:
+        source = REPO_ROOT / relative_path
+        destination = root / relative_path
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source, destination)
+    return root
 
 
 class unchanged_repo_outputs:
