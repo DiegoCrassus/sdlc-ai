@@ -132,10 +132,10 @@ def _run_inspect_validation(root: Path, args: argparse.Namespace) -> int:
         group_by=args.group_by,
     )
     if args.format == "json":
-        _write_json(model.to_dict())
+        _write_json(model)
     else:
         sys.stdout.write(render_validation_inspection_text(model))
-    return 1 if model.summary["by_status"].get("fail", 0) else 0
+    return 1 if model["summary"]["by_status"].get("fail", 0) else 0
 
 
 def _write_json(payload: dict[str, Any]) -> None:

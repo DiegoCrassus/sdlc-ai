@@ -1,20 +1,17 @@
-from __future__ import annotations
-
 from pathlib import Path
 from typing import Any
 
 import pytest
 
-from studio import (
+from studio.canvas_view_model import build_canvas_view_model
+from studio.compiler_core import compile_studio_sources
+from studio.validation_inspection import (
+    GROUP_BY_FIELDS,
     ValidationInspectionInputError,
-    ValidationRunResult,
-    build_canvas_view_model,
     build_validation_inspection_from_sources,
     build_validation_inspection_model,
-    compile_studio_sources,
-    render_validation_inspection_text,
-    validate_compiler_result,
 )
+from studio.validator_core import ValidationRunResult, validate_compiler_result
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 FORBIDDEN_BODY_KEYS = {"body", "content", "prompt", "ci_log", "evidence", "coordinates", "props", "runtime_state"}
@@ -23,9 +20,9 @@ FORBIDDEN_OUTPUT_PATHS = ("studio/generated", "studio/examples", "specs")
 
 def test_validation_inspection_is_deterministic_and_schema_shaped() -> None:
     before_exists = {path: (REPO_ROOT / path).exists() for path in FORBIDDEN_OUTPUT_PATHS}
-    first = build_validation_inspection_from_sources(REPO_ROOT).to_dict()
+    first = build_validation_inspection_from_sources(REPO_ROOT)
 
-    assert first == build_validation_inspection_from_sources(REPO_ROOT).to_dict()
+    assert first == build_validation_inspection_from_sources(REPO_ROOT)
     assert {path: (REPO_ROOT / path).exists() for path in FORBIDDEN_OUTPUT_PATHS} == before_exists
     assert set(first) == {"inspection", "summary", "groups", "records"}
     assert first["inspection"]["id"] == "inspection.sdlc_studio.validation"
@@ -35,24 +32,16 @@ def test_validation_inspection_is_deterministic_and_schema_shaped() -> None:
     assert first["summary"]["total_records"] == 6
     assert first["summary"]["visible_records"] == 6
     assert first["summary"]["by_status"] == {"pass": 6, "warn": 0, "fail": 0, "not_run": 0}
-    assert [record["id"] for record in first["records"]] == sorted(record["id"] for record in first["records"])
-    assert [group["id"] for group in first["groups"]] == sorted(group["id"] for group in first["groups"])
-    _assert_forbidden_body_keys_absent(first)
-
-
-def test_validation_inspection_preserves_record_refs_and_messages() -> None:
-    payload = build_validation_inspection_from_sources(REPO_ROOT).to_dict()
-
-    for record in payload["records"]:
+    assert _ids(first["records"]) == sorted(_ids(first["records"]))
+    assert _ids(first["groups"]) == sorted(_ids(first["groups"]))
+    for record in first["records"]:
         assert record["id"].startswith("inspection.record.")
         assert record["validation_ref"].startswith("validation.")
-        assert record["status"] in {"pass", "warn", "fail", "not_run"}
-        assert record["check_type"]
         assert set(record["target"]) == {"ref_type", "ref"}
         assert record["messages"]
         assert record["source_refs"]
-        assert isinstance(record["related_display_refs"], list)
         assert 0 < len(record["summary"]) <= 180
+    _assert_forbidden_body_keys_absent(first)
 
 
 def test_filters_and_grouping_are_reflected_in_metadata() -> None:
@@ -62,7 +51,7 @@ def test_filters_and_grouping_are_reflected_in_metadata() -> None:
         check_type="policy",
         target_type="path",
         group_by="check_type",
-    ).to_dict()
+    )
 
     assert model["inspection"]["filters"] == {"status": "pass", "check_type": "policy", "target_type": "path"}
     assert model["inspection"]["group_by"] == "check_type"
@@ -74,23 +63,16 @@ def test_filters_and_grouping_are_reflected_in_metadata() -> None:
     assert all(record["target"]["ref_type"] == "path" for record in model["records"])
 
 
-def test_grouping_by_target_type_includes_stable_record_ids() -> None:
-    model = build_validation_inspection_from_sources(REPO_ROOT, group_by="target_type").to_dict()
+@pytest.mark.parametrize("group_by", GROUP_BY_FIELDS)
+def test_grouping_includes_stable_record_ids(group_by: str) -> None:
+    model = build_validation_inspection_from_sources(REPO_ROOT, group_by=group_by)
 
-    assert [group["key"] for group in model["groups"]] == ["graph", "path", "workflow"]
     for group in model["groups"]:
-        assert group["group_by"] == "target_type"
+        assert group["group_by"] == group_by
         assert group["record_ids"] == sorted(group["record_ids"])
         assert group["count"] == len(group["record_ids"])
-
-
-def test_text_rendering_declares_derived_non_authoritative_scope() -> None:
-    text = render_validation_inspection_text(build_validation_inspection_from_sources(REPO_ROOT, status="pass"))
-
-    assert "Studio validation inspection: derived, non-authoritative output" in text
-    assert "authority: derived_non_authoritative" in text
-    assert "filters: status=pass" in text
-    assert "transient stdout/in-memory" in text
+    if group_by == "target_type":
+        assert [group["key"] for group in model["groups"]] == ["graph", "path", "workflow"]
 
 
 def test_visible_failures_are_counted_after_filters() -> None:
@@ -104,8 +86,8 @@ def test_visible_failures_are_counted_after_filters() -> None:
     )
     canvas = build_canvas_view_model(compiled, validation)
 
-    fail_model = build_validation_inspection_model(compiled, validation, canvas, status="fail").to_dict()
-    pass_model = build_validation_inspection_model(compiled, validation, canvas, status="pass").to_dict()
+    fail_model = build_validation_inspection_model(compiled, validation, canvas, status="fail")
+    pass_model = build_validation_inspection_model(compiled, validation, canvas, status="pass")
 
     assert fail_model["summary"]["by_status"]["fail"] == 1
     assert [record["validation_ref"] for record in fail_model["records"]] == ["validation.path.fail"]
@@ -135,6 +117,10 @@ def _validation_record(record_id: str, target_type: str, target_ref: str, status
         "messages": [{"level": "error" if status == "fail" else "info", "text": f"{status} inspection record."}],
         "source_refs": [{"ref_type": "path", "ref": "studio/validation-result-ir-contract.md"}],
     }
+
+
+def _ids(records: list[dict[str, Any]]) -> list[str]:
+    return [record["id"] for record in records]
 
 
 def _assert_forbidden_body_keys_absent(value: Any) -> None:

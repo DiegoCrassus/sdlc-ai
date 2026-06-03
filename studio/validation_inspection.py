@@ -1,8 +1,5 @@
 """Derived, non-authoritative validation inspection view model."""
 
-from __future__ import annotations
-
-from dataclasses import dataclass
 from typing import Any
 
 from studio.canvas_view_model import CanvasViewModel, build_canvas_view_model
@@ -11,62 +8,18 @@ from studio.reporting import AUTHORITY, STATUSES
 from studio.validator_core import ValidationRunResult, validate_compiler_result
 
 INSPECTION_ID = "inspection.sdlc_studio.validation"
-INSPECTION_NAME = "SDLC Studio Validation Inspection"
-INSPECTION_VERSION = "0.1.0"
-INSPECTION_SOURCE_REFS = (
-    {"ref_type": "path", "ref": "studio/validation_inspection.py"},
-    {"ref_type": "path", "ref": "studio/validation-result-ir-contract.md"},
-    {"ref_type": "path", "ref": "studio/visual-orchestration-prototype.md"},
+INSPECTION_SOURCE_PATHS = (
+    "studio/validation_inspection.py",
+    "studio/validation-result-ir-contract.md",
+    "studio/visual-orchestration-prototype.md",
 )
-INSPECTION_NON_GOALS = (
-    "Does not replace validator, compiler, canvas, .sdlc/, .cursor/, Plane, GitHub, or registry authority.",
-    "Does not persist inspection output, generated artifacts, screenshots, reports, local tickets, or evidence.",
-    "Does not execute checks, update workflow state, call external services, or define frontend/backend runtime state.",
-)
-VALID_CHECK_TYPES = (
-    "yaml_parse",
-    "path_exists",
-    "path_scope",
-    "relationship_target",
-    "doctor",
-    "lint",
-    "policy",
-    "custom",
-)
-VALID_TARGET_TYPES = (
-    "edge",
-    "github",
-    "graph",
-    "node",
-    "path",
-    "plane",
-    "registry_entity",
-    "stage",
-    "workflow",
-)
+VALID_CHECK_TYPES = ("yaml_parse", "path_exists", "path_scope", "relationship_target", "doctor", "lint", "policy", "custom")
+VALID_TARGET_TYPES = ("edge", "github", "graph", "node", "path", "plane", "registry_entity", "stage", "workflow")
 GROUP_BY_FIELDS = ("status", "check_type", "target_type")
 
 
 class ValidationInspectionInputError(ValueError):
     """Raised for unsupported filters or grouping dimensions."""
-
-
-@dataclass(frozen=True)
-class ValidationInspectionModel:
-    """JSON-serializable validation inspection projection."""
-
-    inspection: dict[str, Any]
-    summary: dict[str, Any]
-    groups: tuple[dict[str, Any], ...]
-    records: tuple[dict[str, Any], ...]
-
-    def to_dict(self) -> dict[str, Any]:
-        return {
-            "inspection": self.inspection,
-            "summary": self.summary,
-            "groups": list(self.groups),
-            "records": list(self.records),
-        }
 
 
 def build_validation_inspection_from_sources(
@@ -76,7 +29,7 @@ def build_validation_inspection_from_sources(
     check_type: str | None = None,
     target_type: str | None = None,
     group_by: str = "status",
-) -> ValidationInspectionModel:
+) -> dict[str, Any]:
     """Compile, validate, derive canvas data, and inspect validation records in memory."""
 
     compiled = compile_studio_sources(root)
@@ -102,43 +55,37 @@ def build_validation_inspection_model(
     check_type: str | None = None,
     target_type: str | None = None,
     group_by: str = "status",
-) -> ValidationInspectionModel:
+) -> dict[str, Any]:
     """Build a filtered, deterministic inspection model from existing derived records."""
 
     filters = _validated_filters(status=status, check_type=check_type, target_type=target_type)
     if group_by not in GROUP_BY_FIELDS:
         raise ValidationInspectionInputError(f"invalid group_by: {group_by}")
 
-    related_refs = _related_display_refs(canvas)
-    all_records = tuple(_inspection_record(record, related_refs) for record in _sorted_validation_records(validation.results))
-    visible_records = tuple(record for record in all_records if _matches_filters(record, filters))
+    all_records = tuple(_inspection_record(record) for record in sorted(validation.results, key=_record_id))
+    visible_records = tuple(
+        record
+        for record in all_records
+        if (filters["status"] is None or record["status"] == filters["status"])
+        and (filters["check_type"] is None or record["check_type"] == filters["check_type"])
+        and (filters["target_type"] is None or record["target"]["ref_type"] == filters["target_type"])
+    )
     inspection = {
         "id": INSPECTION_ID,
-        "name": INSPECTION_NAME,
-        "version": INSPECTION_VERSION,
         "authority": AUTHORITY,
         "canvas_ref": str(canvas.canvas.get("id", "canvas.unknown")),
-        "graph_ref": str(compiled.graph_ir.get("graph", {}).get("id", "graph.unknown")),
-        "workflow_ref": str(compiled.workflow_ir.get("workflow", {}).get("id", "workflow.unknown")),
-        "source_refs": _unique_source_refs([*INSPECTION_SOURCE_REFS, *_source_refs(validation.report.get("source_refs"))]),
-        "non_goals": list(INSPECTION_NON_GOALS),
+        "source_refs": _unique_source_refs([*_path_refs(INSPECTION_SOURCE_PATHS), *_source_refs(validation.report.get("source_refs"))]),
         "filters": filters,
         "group_by": group_by,
     }
-    return ValidationInspectionModel(
-        inspection=inspection,
-        summary=_summary(all_records, visible_records),
-        groups=tuple(_groups(visible_records, group_by)),
-        records=visible_records,
-    )
+    return {"inspection": inspection, "summary": _summary(all_records, visible_records), "groups": _groups(visible_records, group_by), "records": list(visible_records)}
 
 
-def render_validation_inspection_text(model: ValidationInspectionModel) -> str:
+def render_validation_inspection_text(model: dict[str, Any]) -> str:
     """Render a concise stdout-only validation inspection."""
 
-    payload = model.to_dict()
-    inspection = payload["inspection"]
-    summary = payload["summary"]
+    inspection = model["inspection"]
+    summary = model["summary"]
     lines = [
         "Studio validation inspection: derived, non-authoritative output",
         f"inspection: {inspection['id']}",
@@ -151,11 +98,11 @@ def render_validation_inspection_text(model: ValidationInspectionModel) -> str:
     for status in STATUSES:
         lines.append(f"{status}: {summary['by_status'].get(status, 0)}")
     lines.append("groups:")
-    lines.extend(f"- {group['label']}: {group['count']} ({', '.join(group['statuses'])})" for group in payload["groups"])
+    lines.extend(f"- {group['label']}: {group['count']} ({', '.join(group['statuses'])})" for group in model["groups"])
     lines.append("records:")
     lines.extend(
         f"- {record['id']} [{record['status']}/{record['check_type']}] {record['target']['ref_type']}:{record['target']['ref']} - {record['summary']}"
-        for record in payload["records"]
+        for record in model["records"]
     )
     lines.append("reminder: inspection data is transient stdout/in-memory view-model data only.")
     return "\n".join(lines) + "\n"
@@ -171,7 +118,7 @@ def _validated_filters(*, status: str | None, check_type: str | None, target_typ
     return {"status": status, "check_type": check_type, "target_type": target_type}
 
 
-def _inspection_record(record: dict[str, Any], related_refs: dict[str, list[dict[str, str]]]) -> dict[str, Any]:
+def _inspection_record(record: dict[str, Any]) -> dict[str, Any]:
     validation_ref = str(record.get("id", record.get("validation_ref", "validation.unknown")))
     target = _target_ref(record.get("target_ref"))
     messages = _messages(record.get("messages"))
@@ -183,7 +130,6 @@ def _inspection_record(record: dict[str, Any], related_refs: dict[str, list[dict
         "target": target,
         "messages": messages,
         "source_refs": _source_refs(record.get("source_refs")),
-        "related_display_refs": related_refs.get(validation_ref, []),
         "summary": _trim(messages[0]["text"], 180),
     }
 
@@ -193,20 +139,18 @@ def _groups(records: tuple[dict[str, Any], ...], group_by: str) -> list[dict[str
     for record in records:
         key = str(record["target"]["ref_type"] if group_by == "target_type" else record[group_by])
         grouped.setdefault(key, []).append(record)
-    return [_group_record(group_by, key, grouped[key]) for key in sorted(grouped)]
-
-
-def _group_record(group_by: str, key: str, records: list[dict[str, Any]]) -> dict[str, Any]:
-    record_ids = sorted(record["id"] for record in records)
-    return {
-        "id": f"inspection.group.{group_by}.{key}",
-        "group_by": group_by,
-        "key": key,
-        "label": key.replace("_", " "),
-        "count": len(records),
-        "statuses": [status for status in STATUSES if any(record["status"] == status for record in records)],
-        "record_ids": record_ids,
-    }
+    return [
+        {
+            "id": f"inspection.group.{group_by}.{key}",
+            "group_by": group_by,
+            "key": key,
+            "label": key.replace("_", " "),
+            "count": len(grouped[key]),
+            "statuses": [status for status in STATUSES if any(record["status"] == status for record in grouped[key])],
+            "record_ids": sorted(record["id"] for record in grouped[key]),
+        }
+        for key in sorted(grouped)
+    ]
 
 
 def _summary(all_records: tuple[dict[str, Any], ...], visible_records: tuple[dict[str, Any], ...]) -> dict[str, Any]:
@@ -219,37 +163,8 @@ def _summary(all_records: tuple[dict[str, Any], ...], visible_records: tuple[dic
     }
 
 
-def _related_display_refs(canvas: CanvasViewModel) -> dict[str, list[dict[str, str]]]:
-    refs: dict[str, list[dict[str, str]]] = {}
-    for node in canvas.nodes:
-        _add_related_refs(refs, node.get("validation_overlays"), "node", str(node.get("id", "")))
-    for edge in canvas.edges:
-        _add_related_refs(refs, edge.get("validation_overlays"), "edge", str(edge.get("id", "")))
-    for overlay in canvas.canvas.get("validation_overlays", []):
-        _append_related_ref(refs, str(overlay.get("id", "")).removeprefix("overlay."), "canvas", str(canvas.canvas.get("id", "")))
-    return {key: sorted(value, key=lambda item: (item["ref_type"], item["ref"])) for key, value in refs.items()}
-
-
-def _add_related_refs(refs: dict[str, list[dict[str, str]]], overlays: Any, ref_type: str, ref: str) -> None:
-    for overlay in overlays if isinstance(overlays, list) else []:
-        _append_related_ref(refs, str(overlay.get("id", "")).removeprefix("overlay."), ref_type, ref)
-
-
-def _append_related_ref(refs: dict[str, list[dict[str, str]]], validation_ref: str, ref_type: str, ref: str) -> None:
-    if validation_ref and ref:
-        refs.setdefault(validation_ref, []).append({"ref_type": ref_type, "ref": ref})
-
-
-def _matches_filters(record: dict[str, Any], filters: dict[str, str | None]) -> bool:
-    return (
-        (filters["status"] is None or record["status"] == filters["status"])
-        and (filters["check_type"] is None or record["check_type"] == filters["check_type"])
-        and (filters["target_type"] is None or record["target"]["ref_type"] == filters["target_type"])
-    )
-
-
-def _sorted_validation_records(records: tuple[dict[str, Any], ...]) -> list[dict[str, Any]]:
-    return sorted(records, key=lambda item: str(item.get("id", item.get("validation_ref", ""))))
+def _record_id(record: dict[str, Any]) -> str:
+    return str(record.get("id", record.get("validation_ref", "")))
 
 
 def _target_ref(value: Any) -> dict[str, str]:
@@ -280,6 +195,10 @@ def _source_refs(value: Any) -> list[dict[str, str]]:
                 ref["summary"] = _trim(item["summary"], 180)
             refs.append(ref)
     return _unique_source_refs(refs)
+
+
+def _path_refs(paths: tuple[str, ...]) -> list[dict[str, str]]:
+    return [{"ref_type": "path", "ref": path} for path in paths]
 
 
 def _unique_source_refs(refs: list[dict[str, str]]) -> list[dict[str, str]]:
