@@ -81,6 +81,38 @@ def test_validate_json_succeeds_with_stable_required_keys() -> None:
     assert payload["report"]["summary"]["counts"] == payload["summary"]
 
 
+def test_canvas_text_succeeds_from_repo_root_without_persisting_outputs() -> None:
+    with unchanged_repo_outputs():
+        completed = run_cli("canvas")
+
+    assert completed.returncode == 0
+    assert completed.stderr == ""
+    assert "Studio canvas: derived, non-authoritative output" in completed.stdout
+    assert "authority: derived_non_authoritative" in completed.stdout
+    assert "nodes: " in completed.stdout
+    assert "edges: " in completed.stdout
+    assert "overlays: " in completed.stdout
+    assert "transient stdout/in-memory" in completed.stdout
+
+
+def test_canvas_json_succeeds_with_stable_required_keys() -> None:
+    with unchanged_repo_outputs():
+        first = run_cli("canvas", "--format", "json")
+        second = run_cli("canvas", "--format", "json")
+
+    assert first.returncode == 0
+    assert first.stderr == ""
+    assert first.stdout == second.stdout
+    payload = json.loads(first.stdout)
+    assert set(payload) == {"canvas", "nodes", "edges", "overlays", "sections", "legend"}
+    assert payload["canvas"]["authority"] == "derived_non_authoritative"
+    assert payload["canvas"]["id"] == "canvas.sdlc_studio.derived_graph"
+    assert isinstance(payload["nodes"], list)
+    assert isinstance(payload["edges"], list)
+    assert isinstance(payload["overlays"], list)
+    assert isinstance(payload["sections"], list)
+
+
 def test_compile_bad_root_exits_nonzero_with_concise_stderr(tmp_path: Path) -> None:
     completed = run_cli("compile", "--root", str(tmp_path / "missing"))
 
@@ -100,7 +132,7 @@ def test_validate_bad_root_exits_nonzero_with_concise_stderr(tmp_path: Path) -> 
 
 
 def test_cli_output_does_not_include_source_bodies_or_persisted_evidence() -> None:
-    completed = run_cli("compile", "--format", "json")
+    completed = run_cli("canvas", "--format", "json")
 
     assert completed.returncode == 0
     payload = json.loads(completed.stdout)
