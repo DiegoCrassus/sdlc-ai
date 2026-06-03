@@ -4,10 +4,10 @@ import { StudioLayout } from "./components/shell/StudioLayout";
 import { DashboardPage } from "./pages/DashboardPage";
 import { ObservabilityPage } from "./pages/ObservabilityPage";
 import { StubPage } from "./pages/StubPage";
+import { WorkflowBuilderPage } from "./pages/WorkflowBuilderPage";
 import { WorkflowsPage } from "./pages/WorkflowsPage";
 
 const stubs: { path: string; title: string; phase: string }[] = [
-  { path: "builder", title: "Workflow Builder", phase: "S4 propose-only" },
   { path: "agents", title: "Agents & Subagents", phase: "S4–S5" },
   { path: "rules", title: "Rules & Skills", phase: "S4–S5" },
   { path: "commands", title: "Commands", phase: "S4–S5" },
@@ -25,6 +25,7 @@ export default function App() {
       <Route element={<StudioLayout />}>
         <Route path="/" element={<DashboardPage />} />
         <Route path="workflows" element={<WorkflowsPage />} />
+        <Route path="builder" element={<WorkflowBuilderPage />} />
         <Route path="observability" element={<ObservabilityPage />} />
         {stubs.map((s) => (
           <Route
