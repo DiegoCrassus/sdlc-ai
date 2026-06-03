@@ -1,4 +1,9 @@
 import type {
+  CanvasFilterParams,
+  CanvasFullResponse,
+  CanvasNodeDetailResponse,
+} from "../types/canvas";
+import type {
   DashboardSummary,
   ReadinessResponse,
   SessionGateResponse,
@@ -25,9 +30,23 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   return response.json() as Promise<T>;
 }
 
+function canvasQueryString(filters: CanvasFilterParams = {}): string {
+  const params = new URLSearchParams();
+  if (filters.section) params.set("section", filters.section);
+  if (filters.validation_status) params.set("validation_status", filters.validation_status);
+  if (filters.entity_type) params.set("entity_type", filters.entity_type);
+  if (filters.q) params.set("q", filters.q);
+  const qs = params.toString();
+  return qs ? `?${qs}` : "";
+}
+
 export const studioApi = {
   health: () => request<StudioHealth>("/health"),
   readiness: () => request<ReadinessResponse>("/readiness"),
   sessionGate: () => request<SessionGateResponse>("/session/gate"),
   dashboardSummary: () => request<DashboardSummary>("/dashboard/summary"),
+  canvasFull: (filters?: CanvasFilterParams) =>
+    request<CanvasFullResponse>(`/canvas/full${canvasQueryString(filters)}`),
+  canvasNode: (displayId: string) =>
+    request<CanvasNodeDetailResponse>(`/canvas/nodes/${encodeURIComponent(displayId)}`),
 };

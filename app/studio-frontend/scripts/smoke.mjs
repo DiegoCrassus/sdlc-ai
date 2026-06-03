@@ -8,7 +8,12 @@ const base = (process.env.VITE_STUDIO_API_URL ?? "http://127.0.0.1:8100").replac
   "",
 );
 
-const paths = ["/studio/health", "/studio/readiness", "/studio/dashboard/summary"];
+const paths = [
+  "/studio/health",
+  "/studio/readiness",
+  "/studio/dashboard/summary",
+  "/studio/canvas/full",
+];
 
 let failed = false;
 for (const path of paths) {
