@@ -149,3 +149,21 @@
   - OpenAPI for Studio is independent of `/api/v1/` — ContractValidator runs separately per product surface.
   - Full route map and event schema: `docs/architecture/studio-service-platform.md`.
   - Auth deferred to S7 (local bind `127.0.0.1` until then).
+
+---
+
+## ADR-010 — Studio S4 Propose-Only Mutation Contract
+
+- **Date:** 2026-06-03
+- **Status:** accepted
+- **Context:** INVES-84 requires a frozen contract before S4 Workflow Builder and `POST /studio/proposals` land. Risk: Studio API bypasses `.cursor/hooks` write gate and silently mutates `.sdlc/` or `.cursor/`. Implementers need a single allowlist, patch format, and dry-run exit semantics.
+- **Decision:**
+  - **No apply route.** Proposals are preview + dry-run only; apply remains Plane child → `workflow start` → branch → git commit → PR.
+  - **Allowlist:** strict prefixes under `.sdlc/workflows|stages|pipeline|manifest|gates/` and `.cursor/agents|rules|skills|commands/`; explicit denylist for `.sdlc/memory/`, hooks, `app/`, `specs/`, etc. (see `.sdlc/memory/architecture.md` § Propose-only mutation contract).
+  - **Wire format:** `patch_format: unified_diff` in API responses; builder may send `structured_ops` compiled server-side to unified diff.
+  - **Dry-run order:** validate (engine) → doctor (subprocess, exit 0/1) → gateway-check (`gate.check_write` per path, exit 0/1). Gateway-check is **mandatory** before UI apply checklist (no MVP bypass).
+  - **Policy reference:** `.sdlc/gateways/policy.yaml` `studio_proposals` block documents the same rules for reviewers and simulation tests.
+- **Consequences:**
+  - S4 backend implements `mutation.py` + `proposals.py` against this contract only.
+  - QA must assert absence of `/apply` and forbidden writes in integration tests.
+  - Enforcement roadmap fail-closed work remains separate; this ADR does not weaken hooks.
