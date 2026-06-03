@@ -4,127 +4,87 @@
 
 | Field | Value |
 |-------|-------|
-| **Next agent** | orchestrator |
-| **Stage complete** | no |
-| **Previous agent** | devops |
+| **Next agent** | devops |
+| **Stage complete** | yes |
+| **Previous agent** | reviewer |
 
 ## Session
 
 | Field | Value |
 |-------|-------|
 | **Intent** | FEATURE |
-| **Card** | INVES-61 - [AI][SDLC] Implement Studio compiler core |
+| **Card** | INVES-60 - [AI][SDLC] Architect compiler validator boundaries |
 | **Epic** | INVES-53 - [AI][EPIC] Build SDLC Studio MVP |
-| **Branch** | feature/INVES-61-studio-compiler-core |
-| **Stage** | PR opened; merge blocked by auto-merge policy |
-| **AutoFix commit validated** | `a47c681` |
-| **Pull request** | https://github.com/DiegoCrassus/sdlc-ai/pull/69 |
+| **Branch** | feature/INVES-60-compiler-validator-boundaries |
+| **Stage** | review complete |
+| **Commits** | [f2ca375, ee8b8fb] |
 
 ## Reviewer Verdict
 
-APPROVE for `INVES-61` on branch `feature/INVES-61-studio-compiler-core`. Reviewer confirmed the compiler core is local, deterministic, read-only over repository sources, returns in-memory derived outputs, adds no CLI/shell/MCP/Plane/GitHub/API/persistence behavior, and keeps `.sdlc/memory/discovery-context.json` outside the branch scope.
+APPROVE for `INVES-60` on branch `feature/INVES-60-compiler-validator-boundaries`. Reviewer confirmed the branch is docs/schema-only, preserves source-of-truth boundaries, does not add executable compiler/validator behavior, and keeps the unrelated `.sdlc/memory/discovery-context.json` change outside the branch scope.
 
-## Scope Reviewed
+## QA Result
 
-- Branch: `feature/INVES-61-studio-compiler-core`, ahead of `origin/develop` by 3 commits.
-- Latest commits:
-  - `a47c681` `[INVES-61] Fix Studio import ordering.`
-  - `3bd5417` `[INVES-61] Record compiler implementation handoff.`
-  - `f1d1264` `[INVES-61] Implement Studio compiler core.`
-- Branch diff versus `origin/develop`:
-  - `.sdlc/memory/orchestrator-handoff.md`
-  - `studio/__init__.py`
-  - `studio/compiler_core.py`
-  - `studio/test_compiler_core.py`
-- Unrelated local changes still present and not part of the committed branch diff:
-  - `.sdlc/memory/discovery-context.json`
-  - working-tree update to `.sdlc/memory/orchestrator-handoff.md` from this QA report
+QA passed for `INVES-60`. The branch diff against `origin/develop` stays within Studio docs, Studio schema YAML, and `.sdlc/memory/orchestrator-handoff.md`; it does not add `app/`, `studio/examples/`, `specs/`, local tickets, local backlog, local task evidence, runtime behavior, UI behavior, CLI behavior, backend/frontend behavior, compiler execution, validator execution, workflow runners, command runners, AI composition, APIs, services, schedulers, databases, generated outputs, or durable evidence files.
+
+## Branch Diff Reviewed
+
+`git diff --name-status origin/develop...HEAD`:
+
+- `M .sdlc/memory/orchestrator-handoff.md`
+- `M studio/README.md`
+- `A studio/compiler-validator-boundaries.md`
+- `M studio/graph-ir-contract.md`
+- `M studio/schemas/README.md`
+- `M studio/schemas/graph.schema.yaml`
+- `M studio/schemas/validation-result.schema.yaml`
+- `A studio/validation-result-ir-contract.md`
+
+Unrelated local working-tree change protected:
+
+- `.sdlc/memory/discovery-context.json` is locally modified, is not part of `origin/develop...HEAD`, and was not touched for QA.
+
+## Acceptance Criteria
+
+- Dedicated Studio boundary contract exists for Compiler/Validator phase boundaries and is in English: PASS. Verified `studio/compiler-validator-boundaries.md`.
+- Contract defines compiler inputs, compiler derived outputs, compiler non-outputs, validator inputs, validator outputs, report contracts, failure semantics, and explicit non-goals: PASS. Verified named sections in `studio/compiler-validator-boundaries.md`.
+- Contract preserves source-of-truth boundaries for `.sdlc/`, `.cursor/`, Plane, GitHub, and `.sdlc/registry/`: PASS. Verified source-of-truth boundary section and related non-goals.
+- Contract states Graph IR, Workflow IR, Validation Result IR, and reports are derived/referential and non-executable: PASS. Verified boundary contract plus Graph IR and Validation Result IR contracts.
+- Contract states future compiler/validator execution requires separate Plane cards, workflow gates, implementation scope, QA evidence, review, and DevOps flow: PASS. Verified future implementation gate section.
+- README/schema updates only point to boundary contract and clarify descriptive semantics; no execution semantics: PASS. Verified `studio/README.md`, `studio/schemas/README.md`, `studio/schemas/graph.schema.yaml`, and `studio/schemas/validation-result.schema.yaml`.
+- Diff remains limited to allowed docs/schema/handoff paths and no forbidden behavior/paths: PASS. Verified branch diff against `origin/develop`.
+- Unrelated `.sdlc/memory/discovery-context.json` modification protected: PASS. It remains a local-only modification and was not added to the branch diff.
 
 ## Validation Evidence
 
-- `ruff check studio/`: PASS, exit 0.
-  - Output: `All checks passed!`
-- `pytest studio/test_compiler_core.py -q`: PASS, exit 0.
-  - Output: `5 passed in 0.65s`
-- `python3 .sdlc/scripts/plane_card.py validate-all --card INVES-61`: PASS, exit 0.
-  - Output:
-    - `OK: INVES-61 plan validated`
-    - `OK: INVES-61 granularity validated (0 linked children)`
-- `make sdlc-doctor`: PASS, exit 0.
-  - Summary: `Doctor summary: 220 passed, 3 warnings, 0 failed`
-  - Warnings reviewed: missing optional integration env vars for `vcs`, `workboard`, and `llm`; not blocking this QA pass.
-- `pytest .sdlc/dsl/test_gate.py -q`: PASS, exit 0.
-  - Output: `5 passed in 0.07s`
-- `git diff --check origin/develop...HEAD`: PASS, exit 0.
-  - Output: no output.
-- `ReadLints` on changed files: PASS.
-  - Files checked: `studio/compiler_core.py`, `studio/test_compiler_core.py`, `studio/__init__.py`, `.sdlc/memory/orchestrator-handoff.md`
-  - Output: no linter errors found.
+- `git status --short --branch`: PASS, on `feature/INVES-60-compiler-validator-boundaries`; only local uncommitted file before QA handoff update was `.sdlc/memory/discovery-context.json`.
+- `git diff --name-status origin/develop...HEAD`: PASS, branch diff limited to `.sdlc/memory/orchestrator-handoff.md`, `studio/README.md`, `studio/compiler-validator-boundaries.md`, `studio/graph-ir-contract.md`, `studio/schemas/README.md`, `studio/schemas/graph.schema.yaml`, `studio/schemas/validation-result.schema.yaml`, and `studio/validation-result-ir-contract.md`.
+- Changed YAML parse command: PASS. Output: `Changed YAML files: studio/schemas/graph.schema.yaml, studio/schemas/validation-result.schema.yaml` and `YAML parse PASS: 2 file(s)`.
+- Studio Markdown link check: PASS. Output: `Markdown link check PASS: 3 local link(s) across 7 Studio markdown file(s)`.
+- `python3 .sdlc/scripts/plane_card.py validate-all --card INVES-60`: PASS. Output: `OK: INVES-60 plan validated` and `OK: INVES-60 granularity validated (0 linked children)`.
+- `make sdlc-doctor`: PASS. Output summary: `Doctor summary: 220 passed, 3 warnings, 0 failed`. Warnings: missing optional integration environment variables `GITHUB_PERSONAL_ACCESS_TOKEN_CLASSIC`, `PLANE_API_KEY`, and `OPENAI_API_KEY`.
+- `pytest .sdlc/dsl/test_gate.py -q`: PASS. Output: `5 passed in 0.07s`.
+- `git diff --check origin/develop...HEAD`: PASS with no output.
+- `ReadLints` on changed branch files: PASS, no linter errors found.
 
-## Acceptance Criteria Verification
+## Skipped Validation
 
-- AC-1: Compiler outputs are reproducible from the same source artifacts with deterministic ordering.
-  - PASS. Verified by `test_compile_studio_sources_is_deterministic_and_schema_shaped`, including repeated compilation equality and sorted node, edge, transition, and lifecycle stage ordering.
-- AC-2: Outputs include source references for each generated node, edge, or workflow element.
-  - PASS. Verified by `test_compile_studio_sources_preserves_source_references_without_source_bodies`, including graph, node, edge, stage, and transition source references.
-- AC-3: Compiler fails or reports clearly when required registry or schema inputs are missing.
-  - PASS. Verified by `test_compile_studio_sources_reports_missing_required_inputs` and `test_compile_studio_sources_reports_unreadable_required_yaml`.
-- AC-4: Generated outputs do not copy authoritative body text.
-  - PASS. Verified by `test_compile_studio_sources_preserves_source_references_without_source_bodies`, which rejects forbidden body/content/prompt/command/template/lifecycle/evidence keys in emitted graph, workflow, and report records.
+- Product tests under `app/`: skipped because the branch does not change `app/` or product runtime behavior.
+- Frontend build: skipped because the branch does not change `app/frontend/` or UI implementation.
+- Backend lint on changed product paths: skipped because no backend or Python product files changed.
+- Compiler execution tests and validator execution tests: skipped because this card is explicitly docs/schema boundary work and does not implement compiler or validator execution.
+- Schema instance validation: skipped because no Graph IR, Workflow IR, or Validation Result IR instance documents were introduced by this branch.
 
-## Additional Confirmations
+## Risks And Notes
 
-- Deterministic in-memory compiler behavior: PASS.
-  - Evidence: focused compiler tests compile twice in memory and compare full `CompilerResult` equality.
-- No persisted generated outputs: PASS.
-  - Evidence: `test_compile_studio_sources_does_not_persist_generated_outputs` confirms `studio/generated`, `studio/examples`, and `specs` existence state is unchanged and required source file mtimes are unchanged after compilation.
-- No CLI surface: PASS.
-  - Evidence: branch diff adds only Python interface exports, compiler core, and tests; search in `studio/compiler_core.py` found no `argparse`, `click`, `typer`, `__main__`, command runner, subprocess, or persistence APIs.
-- No app/product/runtime/UI/backend/frontend/AI/Plane/GitHub API behavior: PASS.
-  - Evidence: branch diff contains no `app/backend`, `app/frontend`, `app/shared`, runtime, UI, AI orchestration, Plane API, or GitHub API implementation changes. The compiler records those areas as explicit non-goals only.
-- Branch diff scoped: PASS.
-  - Evidence: `git diff --name-status origin/develop...HEAD` includes only `.sdlc/memory/orchestrator-handoff.md` and `studio/` files.
-- Unrelated `.sdlc/memory/discovery-context.json` outside branch diff: PASS.
-  - Evidence: it appears in working-tree `git diff --name-status`, but not in `git diff --name-status origin/develop...HEAD`.
-
-## Skipped Checks
-
-- `pytest app/`: skipped because branch diff contains no `app/` backend/product changes.
-- Frontend build: skipped because branch diff contains no `app/frontend/` changes.
-- Product runtime/UI/browser checks: skipped because INVES-61 scope is a non-executable in-memory compiler core with no runtime/UI surface.
-- Push, PR, merge, and Plane Done transition: skipped by instruction; QA does not push or merge.
-
-## Risks
-
-- `make sdlc-doctor` still reports three environment warnings for optional integrations (`GITHUB_PERSONAL_ACCESS_TOKEN_CLASSIC`, `PLANE_API_KEY`, `OPENAI_API_KEY`). These do not fail Doctor but should remain visible to Reviewer/DevOps.
-- `.sdlc/memory/discovery-context.json` remains an unrelated local modification and must stay excluded from commits for this card.
-
-## DevOps Result
-
-- PR created: https://github.com/DiegoCrassus/sdlc-ai/pull/69
-- Branch pushed: `feature/INVES-61-studio-compiler-core` at `fa3a2e99c50d78730b72003f34ca57d2577dc88d`.
-- PR files confirmed in scope:
-  - `.sdlc/memory/orchestrator-handoff.md`
-  - `studio/__init__.py`
-  - `studio/compiler_core.py`
-  - `studio/test_compiler_core.py`
-- PR diff size: `4 files changed, 779 insertions(+), 58 deletions(-)`.
-- GitHub combined status immediately after PR creation: `pending`, `total_count: 0`; CI checks had not yet reported through the status API.
-- Merge status: not merged.
-- Workflow finish status: not run.
-- Plane status: not moved to Done; `INVES-53` was not touched.
-- Remote branch deletion status: not deleted because PR #69 remains open and unmerged.
+- Residual risk: future compiler or validator implementation cards must not infer execution authority from descriptive schema terms such as `status`, `pass`, `fail`, `validator`, `compiler`, or `report`.
+- Residual risk: schema changes are descriptive contracts only; reviewer should confirm they do not imply executable workflow, gate, CI, Plane, GitHub, or local evidence semantics.
+- Note: `make sdlc-doctor` emitted its normal health report paths, but no tracked branch diff outside the reviewed paths was introduced.
 
 ## Blockers
 
-- Auto-merge blocked by `.cursor/skills/auto-merge-policy.md`: `Diff > 500 lines` is a blocking criterion, and this PR has 837 changed lines.
-- Because the policy blocked autonomous merge, DevOps did not run `workflow finish`, did not mark `INVES-61` Done, and did not delete the remote feature branch.
-
-## Residual Local Changes
-
-- `.sdlc/memory/discovery-context.json` remains locally modified and unrelated. It was not staged, committed, pushed, or included in PR #69.
-- This DevOps handoff update is local and uncommitted after PR creation.
+None.
 
 ## Exact Next Action
 
-Orchestrator/human policy decision required: either approve an explicit exception to the `diff > 500 lines` auto-merge blocker for PR #69, or split/reduce the PR before another DevOps merge attempt. Do not mark epic `INVES-53` Done.
+Delegate to DevOps for PR/merge flow on branch `feature/INVES-60-compiler-validator-boundaries`. DevOps must delete/remove the remote feature branch after successful merge.
