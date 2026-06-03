@@ -2,14 +2,20 @@ import { Handle, Position, type Node, type NodeProps } from "@xyflow/react";
 
 import { validationStatusColor, type StudioNodeData } from "./mapViewModel";
 
+const NEUTRAL_BORDER = "#475569";
+
 export function StudioNode({ data, selected }: NodeProps<Node<StudioNodeData>>) {
-  const borderColor = validationStatusColor(data.validationStatus);
+  const showValidationBorder = data.validationBorderVisible !== false;
+  const borderColor = showValidationBorder
+    ? validationStatusColor(data.validationStatus)
+    : NEUTRAL_BORDER;
 
   return (
     <div
       className={[
-        "rounded-lg border-2 bg-surface-card px-3 py-2 shadow-lg transition-shadow",
+        "rounded-lg border-2 bg-surface-card px-3 py-2 shadow-lg transition-all",
         selected ? "ring-2 ring-studio-accent/60" : "",
+        showValidationBorder ? "" : "opacity-60",
       ].join(" ")}
       style={{ borderColor, minWidth: 180, maxWidth: 220 }}
     >

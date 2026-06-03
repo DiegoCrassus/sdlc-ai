@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 
 import { studioApi } from "../api/client";
@@ -7,11 +8,25 @@ import { CanvasFiltersBar } from "../components/canvas/CanvasFiltersBar";
 import { CanvasLegendPanel } from "../components/canvas/CanvasLegendPanel";
 import { NodeInspector } from "../components/canvas/NodeInspector";
 import { WorkflowCanvas } from "../components/canvas/WorkflowCanvas";
-import type { CanvasFilterParams } from "../types/canvas";
+import {
+  DEFAULT_VALIDATION_VISIBILITY,
+  toggleValidationVisibility,
+} from "../components/canvas/validationVisibility";
+import type { CanvasFilterParams, ValidationStatus } from "../types/canvas";
+
+function builderHref(selectedNodeId: string | null): string {
+  if (!selectedNodeId) {
+    return "/builder";
+  }
+  return `/builder?node=${encodeURIComponent(selectedNodeId)}`;
+}
 
 export function WorkflowsPage() {
   const [filters, setFilters] = useState<CanvasFilterParams>({});
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+  const [visibleValidationStatuses, setVisibleValidationStatuses] = useState(
+    DEFAULT_VALIDATION_VISIBILITY,
+  );
 
   const canvasQuery = useQuery({
     queryKey: ["studio", "canvas", "full", filters],
@@ -28,6 +43,10 @@ export function WorkflowsPage() {
   const authority = canvasQuery.data?.canvas.authority ?? "derived_non_authoritative";
 
   const filterKey = useMemo(() => JSON.stringify(filters), [filters]);
+
+  const onToggleValidationStatus = (status: ValidationStatus) => {
+    setVisibleValidationStatuses((current) => toggleValidationVisibility(current, status));
+  };
 
   if (canvasQuery.isError) {
     return (
@@ -50,12 +69,20 @@ export function WorkflowsPage() {
   return (
     <div className="mx-auto flex max-w-[1600px] flex-col gap-4">
       <DerivedBanner authority={authority} />
-      <div>
-        <h1 className="text-2xl font-bold text-white">Workflows</h1>
-        <p className="mt-1 text-sm text-slate-400">
-          Read-only SDLC graph from <code className="text-slate-300">GET /studio/canvas/full</code>
-          {data?.canvas.name ? ` · ${data.canvas.name}` : ""}
-        </p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold text-white">Workflows</h1>
+          <p className="mt-1 text-sm text-slate-400">
+            Read-only SDLC graph from <code className="text-slate-300">GET /studio/canvas/full</code>
+            {data?.canvas.name ? ` · ${data.canvas.name}` : ""}
+          </p>
+        </div>
+        <Link
+          to={builderHref(selectedNodeId)}
+          className="rounded-md border border-studio-accent/50 bg-studio-accent/10 px-4 py-2 text-sm font-medium text-studio-accent hover:bg-studio-accent/20"
+        >
+          Propose change
+        </Link>
       </div>
 
       <CanvasFiltersBar
@@ -79,6 +106,7 @@ export function WorkflowsPage() {
               nodes={data?.nodes ?? []}
               edges={data?.edges ?? []}
               selectedNodeId={selectedNodeId}
+              visibleValidationStatuses={visibleValidationStatuses}
               onSelectNode={setSelectedNodeId}
             />
           </div>
@@ -89,7 +117,11 @@ export function WorkflowsPage() {
               onClose={() => setSelectedNodeId(null)}
             />
           ) : (
-            <CanvasLegendPanel legend={data?.legend} />
+            <CanvasLegendPanel
+              legend={data?.legend}
+              visibleStatuses={visibleValidationStatuses}
+              onToggleStatus={onToggleValidationStatus}
+            />
           )}
         </div>
       )}

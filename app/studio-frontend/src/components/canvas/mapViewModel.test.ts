@@ -61,6 +61,7 @@ describe("mapCanvasNode", () => {
     expect(flow.type).toBe("studioNode");
     expect(flow.data.label).toBe("Implementation");
     expect(flow.data.validationStatus).toBe("pass");
+    expect(flow.data.validationBorderVisible).toBe(true);
     expect(flow.data.authority).toBe("derived_non_authoritative");
     expect(flow.data.sourceRefs).toEqual([".sdlc/stages/implementation.yaml"]);
   });

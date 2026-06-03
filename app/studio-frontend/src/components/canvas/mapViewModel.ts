@@ -23,6 +23,7 @@ export type StudioNodeData = {
   entityType: string;
   graphNodeId: string;
   validationStatus: ValidationStatus;
+  validationBorderVisible: boolean;
   sourceRefs: string[];
   authority: typeof AUTHORITY;
 };
@@ -49,6 +50,7 @@ export function mapCanvasNode(node: CanvasNode): Node<StudioNodeData> {
       entityType: node.type,
       graphNodeId: node.graph_node_id,
       validationStatus: worstValidationStatus(node.validation_overlays),
+      validationBorderVisible: true,
       sourceRefs: node.source_refs.map((ref) => ref.ref),
       authority: AUTHORITY,
     },

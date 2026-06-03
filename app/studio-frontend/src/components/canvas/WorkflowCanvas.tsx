@@ -12,6 +12,10 @@ import "@xyflow/react/dist/style.css";
 import type { CanvasEdge, CanvasNode } from "../../types/canvas";
 import { mapCanvasToFlow, type StudioNodeData } from "./mapViewModel";
 import { StudioNode } from "./StudioNode";
+import {
+  isValidationBorderVisible,
+  type ValidationVisibility,
+} from "./validationVisibility";
 
 const nodeTypes = { studioNode: StudioNode };
 
@@ -19,6 +23,7 @@ type WorkflowCanvasProps = {
   nodes: CanvasNode[];
   edges: CanvasEdge[];
   selectedNodeId: string | null;
+  visibleValidationStatuses: ValidationVisibility;
   onSelectNode: (nodeId: string | null) => void;
 };
 
@@ -26,6 +31,7 @@ export function WorkflowCanvas({
   nodes,
   edges,
   selectedNodeId,
+  visibleValidationStatuses,
   onSelectNode,
 }: WorkflowCanvasProps) {
   const { nodes: flowNodes, edges: flowEdges } = useMemo(
@@ -38,8 +44,15 @@ export function WorkflowCanvas({
       flowNodes.map((node) => ({
         ...node,
         selected: node.id === selectedNodeId,
+        data: {
+          ...node.data,
+          validationBorderVisible: isValidationBorderVisible(
+            node.data.validationStatus,
+            visibleValidationStatuses,
+          ),
+        },
       })),
-    [flowNodes, selectedNodeId],
+    [flowNodes, selectedNodeId, visibleValidationStatuses],
   );
 
   const onSelectionChange = useCallback(
@@ -80,7 +93,11 @@ export function WorkflowCanvas({
         <MiniMap
           className="!border-slate-700 !bg-surface-card"
           nodeColor={(node) => {
-            const status = (node.data as StudioNodeData | undefined)?.validationStatus;
+            const data = node.data as StudioNodeData | undefined;
+            if (!data || data.validationBorderVisible === false) {
+              return "#64748b";
+            }
+            const status = data.validationStatus;
             if (status === "pass") return "#34d399";
             if (status === "warn") return "#fbbf24";
             if (status === "fail") return "#f87171";
