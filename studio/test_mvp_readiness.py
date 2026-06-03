@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any
 
 from studio.canvas_view_model import build_canvas_view_model
 from studio.compiler_core import compile_studio_sources

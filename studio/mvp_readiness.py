@@ -6,12 +6,12 @@ from pathlib import Path
 from typing import Any
 
 from studio.canvas_view_model import CanvasViewModel, build_canvas_view_model
-from studio.compiler_core import CompilerResult, compile_studio_sources
+from studio.compiler_core import compile_studio_sources
 from studio.publish_evidence import build_publish_evidence_model
 from studio.reporting import AUTHORITY
 from studio.simulation_preview import build_simulation_preview_model
 from studio.validation_inspection import build_validation_inspection_model
-from studio.validator_core import ValidationRunResult, validate_compiler_result
+from studio.validator_core import validate_compiler_result
 from studio.workflow_assistance import build_workflow_assistance_model
 
 READINESS_ID = "readiness.sdlc_studio.mvp"
