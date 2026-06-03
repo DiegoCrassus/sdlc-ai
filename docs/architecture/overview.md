@@ -77,6 +77,7 @@ sdlc-ai/
 | Market data | Finnhub, Alpha Vantage, CoinGecko | decided  | ADR-006                                        |
 | API contract| REST `/api/v1`, OpenAPI           | decided  | ADR-008, `investment-radar-api.md`             |
 | Auth        | None (local single-user MVP)      | deferred | ADR-008                                        |
+| Studio Service | Isolated `/studio/*` control plane | decided (arch) | ADR-009, `studio-service-platform.md`     |
 | Deployment  | Local demo only (INVES-24)        | pending  | Runbook sub-task                               |
 
 ## Design Principles
@@ -92,3 +93,4 @@ sdlc-ai/
 - [System context](./system-context.md)
 - [Architecture decisions](./decisions.md)
 - [Investment Radar API contract](./investment-radar-api.md)
+- [Studio Service platform](./studio-service-platform.md) — SDLC control plane (INVES-76/77, ADR-009)

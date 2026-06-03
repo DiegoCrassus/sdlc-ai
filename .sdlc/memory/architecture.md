@@ -4,37 +4,44 @@
 
 ## Current State
 
-**Status:** App reset (2026-05-27) — `app/backend/` and `app/frontend/` are placeholders. No product code in tree.
+**Status:** Dual product surface in `app/` — MarketPulse (financial dashboard) + Studio Service (SDLC control plane, architecture complete INVES-77).
 
-**Retest:** Full SDLC greenfield cycle can be run again from a new agent session.
+| Package | Purpose | Status |
+|---------|---------|--------|
+| `app/backend/` | MarketPulse API (`marketpulse`) | Implemented |
+| `app/frontend/` | MarketPulse UI | Implemented |
+| `app/studio-backend/` | Studio Service API (`studio_service`) | Architecture only — INVES-78 |
+| `app/studio-frontend/` | Studio Service UI | Architecture only — INVES-79 |
+| `app/infra/sdlc_obs/` | SDLC metrics SQLite + dashboard | Implemented |
+| `studio/` | Foundation engine (compile, validate, canvas) | Implemented (S0) |
+| `app/shared/` | Cross-product JSON schemas / TS types | MarketPulse-focused |
 
-## Boundaries
+## Studio Service boundaries (INVES-77)
 
-- `app/frontend/` — placeholder (future web UI)
-- `app/backend/` — placeholder (future API)
-- `app/infra/` — SDLC observability (`sdlc_obs/`) + terraform placeholders
-- `app/shared/` — placeholder
+- **Doc:** `docs/architecture/studio-service-platform.md`
+- **ADR:** ADR-009 in `docs/architecture/decisions.md`
+- API prefix `/studio/*`, ports 8100 (API) + 5174 (UI)
+- Mutations: propose → review → git/Plane apply (no silent writes)
+- Observability: `StudioEvent` envelope over SSE; sources = sdlc_obs + gateway hooks + handoff + gate
+- React Flow: renders derived canvas; layout is UI-local only
 
-## Reference architecture (prior cycle — docs only)
+## MarketPulse boundaries
 
-Investment Radar was delivered once (INVES-19..24). Authoritative specs remain in:
-
-- `docs/architecture/investment-radar-api.md`
-- `docs/architecture/decisions.md` (ADR-004..008)
-- `docs/architecture/overview.md`
-
-Re-implementation should follow those ADRs unless a new ADR supersedes them.
+- `app/backend/src/marketpulse/` — FastAPI, `/api/v1/*`, port 8000
+- `app/frontend/` — Vite SPA, port 5173
+- ADRs: ADR-004..008, `docs/architecture/marketpulse-api-providers.md`
 
 ## Known Constraints
 
 - Python primary backend language
-- SQLite for local dev when product returns
+- SQLite for local dev (product DB + sdlc_obs)
 - Plane + GitHub MCP for workflow
+- Studio never bypasses `.cursor/hooks` write gate
 
 ## Open Questions
 
-- Reuse INVES-19 epic vs new Plane epic for retest (Orchestrator/Planner decision)
-- Frontend/backend re-implementation order unchanged: market → watchlist → portfolio → UI → docs
+- pyproject packaging for `studio_service` — optional `[studio]` extra vs dedicated editable install (INVES-78)
+- `sdlc_events` SQLite table vs JSONL for gateway events (S3 — prefer table for timeline queries)
 
 ## Design Principles
 
@@ -42,3 +49,4 @@ Re-implementation should follow those ADRs unless a new ADR supersedes them.
 - Small, reversible changes
 - Observability from the start
 - SDLC-driven development
+- Derived views labeled; authoritative sources unchanged

@@ -128,3 +128,24 @@
   - Frontend needs no auth headers for local demo.
   - Adding auth later is a breaking change — track via new ADR before any hosted deployment.
   - Full endpoint list and schemas: `docs/architecture/investment-radar-api.md`.
+
+---
+
+## ADR-009 — Studio Service as Isolated SDLC Control Plane
+
+- **Date:** 2026-06-03
+- **Status:** accepted
+- **Context:** INVES-76 requires a usable Studio product (dashboard, canvas, observability) without colliding with MarketPulse (`app/backend/`, `app/frontend/`) or duplicating Foundation logic in `studio/`. Cursor chat, Plane, and GitHub remain authorities for agents, workboard, and delivery.
+- **Decision:**
+  - Add **separate packages** `app/studio-backend/` (`studio_service` Python module) and `app/studio-frontend/` (`studio-frontend` npm package).
+  - Expose all Studio HTTP routes under prefix **`/studio/*`** on port **8100**; UI dev server on **5174**.
+  - Backend **wraps** `studio/` imports — no fork of compiler/validator/canvas logic.
+  - **Propose-only mutations:** API may generate patch previews; no route applies writes to `.sdlc/` or `.cursor/` — operators use existing Plane + git workflow.
+  - **Realtime observability:** unify `sdlc_obs`, gateway hooks, session gate, and handoff via a shared `StudioEvent` envelope over SSE (`GET /studio/obs/events`).
+  - **React Flow** renders derived `CanvasViewModel` JSON; layout coordinates are frontend-local and non-authoritative.
+- **Consequences:**
+  - Root `pyproject.toml` gains a `[studio]` optional extra or PYTHONPATH dev wiring (INVES-78).
+  - MarketPulse and Studio can run concurrently on different ports.
+  - OpenAPI for Studio is independent of `/api/v1/` — ContractValidator runs separately per product surface.
+  - Full route map and event schema: `docs/architecture/studio-service-platform.md`.
+  - Auth deferred to S7 (local bind `127.0.0.1` until then).

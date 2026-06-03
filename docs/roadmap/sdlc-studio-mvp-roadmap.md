@@ -1,8 +1,14 @@
-# SDLC Studio MVP Roadmap
+# SDLC Studio Foundation Roadmap (historical)
+
+> **Naming:** This document describes the **Studio Foundation** delivery (engine + CLI).  
+> **Do not use “MVP” for new Plane epics or titles.**  
+> **Active roadmap:** [`sdlc-studio-service-roadmap.md`](sdlc-studio-service-roadmap.md) — Studio as a **service** (backend, frontend, observability, visual builders).
 
 ## Purpose
 
-This roadmap describes the path from the current SDLC Studio Foundation to a usable MVP. It is a documentation-only planning artifact for future Plane-scoped work; it does not implement Studio behavior, modify source artifacts, or create local task evidence.
+This roadmap described the path from SDLC Studio Foundation to a **minimum engine loop** (CLI and derived models). That loop is **delivered** (epic INVES-53). The **usable product** (dashboard, React Flow, builders, live observability) is planned in the Service roadmap linked above.
+
+This file is retained as the phase-by-phase specification for what was built in `studio/`. It is a documentation-only planning artifact for future Plane-scoped work; it does not implement Studio behavior, modify source artifacts, or create local task evidence.
 
 The current foundation is anchored in `studio/`, `studio/schemas/`, `.sdlc/registry/`, `.sdlc/`, and `.cursor/`. These areas define the modeling context and source-of-truth boundaries for future Studio work:
 
