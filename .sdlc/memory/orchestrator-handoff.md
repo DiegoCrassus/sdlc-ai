@@ -32,7 +32,7 @@ STUDIO_REPO_ROOT=$(pwd) PYTHONPATH=app/studio-backend/src:$PWD python3 -m pytest
 
 ## Commits
 
-See implementer commit on branch (hash recorded below after commit).
+- `5d2bf6c5e0f939fcdb0e3cbd2723c29821505682`
 
 ## Blockers
 
