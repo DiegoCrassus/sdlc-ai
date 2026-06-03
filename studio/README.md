@@ -25,6 +25,8 @@ SDLC Studio is not product code and is unrelated to `app/`. It operates over the
 - `compiler-validator-boundaries.md` defines the descriptive, non-executable
   Compiler/Validator phase boundary contract for future Studio derivation,
   validation, and report work.
+- `visual-orchestration-prototype.md` defines the derived, non-authoritative
+  architecture boundary for a future visual orchestration prototype.
 - `schemas/` contains descriptive YAML schema documents for future Studio data contracts.
 
 ## Boundaries
