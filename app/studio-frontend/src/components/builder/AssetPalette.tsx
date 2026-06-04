@@ -2,15 +2,14 @@ import { useMemo, useState, type ReactNode } from "react";
 
 import type { PipelineAgentMeta, PipelineStageMeta } from "../../types/pipeline";
 
+import { stageDisplayId } from "./builderDnD";
+import { DraggableAssetChip } from "./DraggableAssetChip";
+
 type AssetPaletteProps = {
   stages: PipelineStageMeta[];
   agents: PipelineAgentMeta[];
   onFocusStage: (displayNodeId: string) => void;
 };
-
-function stageDisplayId(stageId: string): string {
-  return `display.node.stage.${stageId}`;
-}
 
 function CollapsibleSection({
   title,
@@ -75,8 +74,8 @@ export function AssetPalette({ stages, agents, onFocusStage }: AssetPaletteProps
       <div className="sticky top-0 z-10 shrink-0 border-b border-slate-800 bg-surface-card p-3 pb-2">
         <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">SDLC assets</p>
         <p className="mt-1 text-xs text-slate-400">
-          Stages are on the canvas. Connect bottom→top handles. Agents apply per transition in the
-          inspector.
+          Drag stages onto the canvas or click to focus. Connect bottom→top handles. Agents apply per
+          transition in the inspector.
         </p>
         <input
           type="search"
@@ -93,15 +92,15 @@ export function AssetPalette({ stages, agents, onFocusStage }: AssetPaletteProps
           <ul className="space-y-1" data-testid="builder-toolbox-stages">
             {filteredStages.map((stage) => (
               <li key={stage.id}>
-                <button
-                  type="button"
-                  data-testid={`builder-toolbox-stage-${stage.id}`}
-                  className="w-full rounded px-2 py-1 text-left text-slate-200 hover:bg-slate-800"
+                <DraggableAssetChip
+                  stageId={stage.id}
+                  testId={`builder-toolbox-stage-${stage.id}`}
+                  className="w-full cursor-grab rounded px-2 py-1 text-left text-slate-200 hover:bg-slate-800 active:cursor-grabbing"
                   onClick={() => onFocusStage(stageDisplayId(stage.id))}
                 >
                   <span className="font-medium">{stage.name}</span>
                   <span className="ml-2 font-mono text-[10px] text-slate-500">{stage.id}</span>
-                </button>
+                </DraggableAssetChip>
               </li>
             ))}
             {filteredStages.length === 0 ? (

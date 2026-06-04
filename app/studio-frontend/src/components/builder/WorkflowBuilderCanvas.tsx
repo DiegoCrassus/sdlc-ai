@@ -1,17 +1,21 @@
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, type DragEvent } from "react";
 import {
   Background,
   Controls,
   MiniMap,
   ConnectionMode,
+  Panel,
   ReactFlow,
+  ReactFlowProvider,
   useEdgesState,
   useNodesState,
+  useReactFlow,
   type Connection,
   type Edge,
   type FinalConnectionState,
   type Node,
   type OnSelectionChangeParams,
+  type XYPosition,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 
@@ -20,7 +24,8 @@ import type { WorkflowTransitionDraft } from "../../types/builder";
 import { StudioNode } from "../canvas/StudioNode";
 import { mapCanvasEdge, mapCanvasNode, type StudioNodeData } from "../canvas/mapViewModel";
 import { applyDagreLayout } from "../canvas/mapViewModel";
-import { draftsToCanvasEdges, stageNodesFromCanvas } from "./workflowDraft";
+import { parseStageDragPayload, REACT_FLOW_DRAG_MIME } from "./builderDnD";
+import { draftsToCanvasEdges } from "./workflowDraft";
 import { TransitionEdge } from "./TransitionEdge";
 
 const nodeTypes = { studioNode: StudioNode };
@@ -31,11 +36,13 @@ type WorkflowBuilderCanvasProps = {
   drafts: WorkflowTransitionDraft[];
   selectedEdgeId: string | null;
   highlightedNodeId: string | null;
+  manualPositions: Record<string, XYPosition>;
   connectOnClick: boolean;
   onConnectOnClickChange: (enabled: boolean) => void;
   onSelectEdge: (edgeDisplayId: string | null) => void;
   onConnectStages: (sourceDisplayId: string, targetDisplayId: string) => void;
   onRemoveEdge: (edgeDisplayId: string) => void;
+  onDropStage: (stageId: string, position: XYPosition) => void;
   onSelectNode?: (nodeId: string | null) => void;
   onConnectionFailed: (message: string) => void;
 };
@@ -43,37 +50,43 @@ type WorkflowBuilderCanvasProps = {
 function mergeNodeData(
   current: Node<StudioNodeData>[],
   mapped: Node<StudioNodeData>[],
+  manualPositions: Record<string, XYPosition>,
 ): Node<StudioNodeData>[] {
   return mapped.map((node) => {
+    const manual = manualPositions[node.id];
     const existing = current.find((item) => item.id === node.id);
-    if (!existing) {
-      return node;
+    if (existing) {
+      return {
+        ...node,
+        position: existing.position,
+      };
     }
-    return {
-      ...node,
-      position: existing.position,
-    };
+    if (manual) {
+      return { ...node, position: manual };
+    }
+    return node;
   });
 }
 
-export function WorkflowBuilderCanvas({
+type WorkflowBuilderFlowProps = WorkflowBuilderCanvasProps;
+
+function WorkflowBuilderFlow({
   nodes,
   drafts,
   selectedEdgeId,
   highlightedNodeId,
+  manualPositions,
   connectOnClick,
   onConnectOnClickChange,
   onSelectEdge,
   onConnectStages,
   onRemoveEdge,
+  onDropStage,
   onSelectNode,
   onConnectionFailed,
-}: WorkflowBuilderCanvasProps) {
-  const stageNodes = useMemo(() => stageNodesFromCanvas(nodes), [nodes]);
-  const mappedNodes = useMemo(
-    () => stageNodes.map((node) => mapCanvasNode(node)),
-    [stageNodes],
-  );
+}: WorkflowBuilderFlowProps) {
+  const { screenToFlowPosition } = useReactFlow();
+  const mappedNodes = useMemo(() => nodes.map((node) => mapCanvasNode(node)), [nodes]);
   const draftEdges = useMemo(() => draftsToCanvasEdges(drafts), [drafts]);
 
   const layoutAppliedRef = useRef(false);
@@ -96,14 +109,20 @@ export function WorkflowBuilderCanvas({
     }
 
     if (!layoutAppliedRef.current) {
-      const { nodes: positioned } = applyDagreLayout(mappedNodes, flowEdgesStatic);
-      setFlowNodes(positioned);
+      const withManual = mergeNodeData([], mappedNodes, manualPositions);
+      const hasManualOnly = withManual.some((node) => manualPositions[node.id]);
+      if (hasManualOnly) {
+        setFlowNodes(withManual);
+      } else {
+        const { nodes: positioned } = applyDagreLayout(withManual, flowEdgesStatic);
+        setFlowNodes(positioned);
+      }
       layoutAppliedRef.current = true;
       return;
     }
 
-    setFlowNodes((current) => mergeNodeData(current, mappedNodes));
-  }, [mappedNodes, flowEdgesStatic, setFlowNodes]);
+    setFlowNodes((current) => mergeNodeData(current, mappedNodes, manualPositions));
+  }, [mappedNodes, flowEdgesStatic, manualPositions, setFlowNodes]);
 
   useEffect(() => {
     setFlowEdges(
@@ -134,6 +153,25 @@ export function WorkflowBuilderCanvas({
         },
       })),
     [flowNodes, highlightedNodeId],
+  );
+
+  const onDragOver = useCallback((event: DragEvent) => {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = "move";
+  }, []);
+
+  const onDrop = useCallback(
+    (event: DragEvent) => {
+      event.preventDefault();
+      const raw = event.dataTransfer.getData(REACT_FLOW_DRAG_MIME);
+      const payload = parseStageDragPayload(raw);
+      if (!payload) {
+        return;
+      }
+      const position = screenToFlowPosition({ x: event.clientX, y: event.clientY });
+      onDropStage(payload.stageId, position);
+    },
+    [onDropStage, screenToFlowPosition],
   );
 
   const onConnect = useCallback(
@@ -193,16 +231,7 @@ export function WorkflowBuilderCanvas({
     [onRemoveEdge],
   );
 
-  if (stageNodes.length === 0) {
-    return (
-      <div
-        data-testid="builder-canvas-empty"
-        className="flex h-full min-h-[420px] items-center justify-center rounded-xl border border-dashed border-slate-700 bg-surface-card/40 text-sm text-slate-500"
-      >
-        Drag stages from the toolbox when WB-2 ships. No lifecycle stages from API.
-      </div>
-    );
-  }
+  const isEmpty = nodes.length === 0;
 
   return (
     <div className="flex h-full min-h-[420px] flex-col gap-2 overflow-hidden">
@@ -211,7 +240,8 @@ export function WorkflowBuilderCanvas({
           type="button"
           data-testid="builder-auto-layout"
           onClick={runAutoLayout}
-          className="rounded-md border border-slate-700 bg-slate-900 px-3 py-1.5 text-xs text-slate-200 hover:bg-slate-800"
+          disabled={isEmpty}
+          className="rounded-md border border-slate-700 bg-slate-900 px-3 py-1.5 text-xs text-slate-200 hover:bg-slate-800 disabled:opacity-50"
         >
           Auto-layout
         </button>
@@ -230,7 +260,10 @@ export function WorkflowBuilderCanvas({
         </span>
       </div>
 
-      <div className="min-h-0 flex-1 overflow-hidden rounded-xl border border-slate-800 bg-slate-950">
+      <div
+        data-testid="builder-canvas-drop-target"
+        className="min-h-0 flex-1 overflow-hidden rounded-xl border border-slate-800 bg-slate-950"
+      >
         <ReactFlow
           nodes={styledNodes}
           edges={flowEdges}
@@ -238,11 +271,13 @@ export function WorkflowBuilderCanvas({
           edgeTypes={edgeTypes}
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
-          fitView
+          onDragOver={onDragOver}
+          onDrop={onDrop}
+          fitView={!isEmpty}
           fitViewOptions={{ padding: 0.2 }}
           minZoom={0.15}
           maxZoom={1.5}
-          nodesConnectable
+          nodesConnectable={!isEmpty}
           elementsSelectable
           connectionMode={ConnectionMode.Loose}
           connectOnClick={connectOnClick}
@@ -260,8 +295,24 @@ export function WorkflowBuilderCanvas({
             nodeColor={() => "#64748b"}
             maskColor="rgb(15 23 42 / 0.75)"
           />
+          {isEmpty ? (
+            <Panel
+              position="top-center"
+              className="pointer-events-none !mt-24 rounded-lg border border-dashed border-slate-700 bg-surface-card/80 px-6 py-4 text-center text-sm text-slate-400"
+            >
+              <p data-testid="builder-canvas-empty">Drag stages from the toolbox onto the canvas.</p>
+            </Panel>
+          ) : null}
         </ReactFlow>
       </div>
     </div>
+  );
+}
+
+export function WorkflowBuilderCanvas(props: WorkflowBuilderCanvasProps) {
+  return (
+    <ReactFlowProvider>
+      <WorkflowBuilderFlow {...props} />
+    </ReactFlowProvider>
   );
 }
