@@ -1,4 +1,4 @@
-.PHONY: sdlc-doctor sdlc-validate sdlc-stages docs-check obs-init obs-server obs-seed sdlc-audit plane-in-progress auto-merge-pr issue-triage plane-reformat plane-evidence workflow-status workflow-start workflow-discover sdlc-compact-memory sdlc-session-status sdlc-meta-start sdlc-meta-commit sdlc-meta-qa studio-dev help
+.PHONY: sdlc-doctor sdlc-validate sdlc-stages docs-check obs-init obs-server obs-seed sdlc-audit plane-in-progress auto-merge-pr issue-triage plane-reformat plane-evidence workflow-status workflow-start workflow-discover sdlc-compact-memory sdlc-session-status sdlc-meta-start sdlc-meta-commit sdlc-meta-qa studio-dev studio-api studio-smoke studio-e2e help
 
 help:
 	@echo "SDLC AI — Available targets:"
@@ -30,6 +30,9 @@ help:
 	@echo "  sdlc-meta-qa      Meta-tool: tests + doctor + QA evidence (CARD=INVES-N)"
 	@echo ""
 	@echo "  studio-dev        Studio API :8100 + UI :5174 (install npm in app/studio-frontend first)"
+	@echo "  studio-api        Studio API only on :8100"
+	@echo "  studio-smoke      HTTP smoke (API must be running; honors STUDIO_AUTH_TOKEN)"
+	@echo "  studio-e2e        Playwright smoke — dashboard, workflows, observability"
 	@echo ""
 	@echo "Workflow: .sdlc/process/change-lifecycle.md"
 
@@ -130,6 +133,16 @@ export-pdf:
 	@echo "Generating simulation PDF..."
 	@$(PYTHON) app/infra/sdlc_obs/export_simulation_pdf.py
 	@echo "PDF: simulacao-end-to-end-sdlc.pdf"
+
+studio-api:
+	@echo "Studio API http://127.0.0.1:8100 (Ctrl+C stops)"
+	@STUDIO_REPO_ROOT=$$(pwd) PYTHONPATH=app/studio-backend/src:$$PWD $(PYTHON) -m uvicorn studio_service.main:app --reload --host 127.0.0.1 --port 8100
+
+studio-smoke:
+	@cd app/studio-frontend && npm run smoke
+
+studio-e2e:
+	@bash tests/e2e/run-studio-e2e.sh
 
 studio-dev:
 	@test -d app/studio-frontend/node_modules || (echo "Run: cd app/studio-frontend && npm install" && exit 1)

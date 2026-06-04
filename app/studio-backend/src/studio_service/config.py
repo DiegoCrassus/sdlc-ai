@@ -32,6 +32,10 @@ class Settings(BaseSettings):
     repo_root: Path | None = Field(default=None, description="SDLC repo root")
     obs_db_path: Path | None = Field(default=None, description="Override sdlc_obs SQLite path")
     cors_origins: str = "http://127.0.0.1:5174"
+    auth_token: str | None = Field(
+        default=None,
+        description="When set, /studio/* requires Authorization: Bearer <token>",
+    )
 
     @property
     def resolved_repo_root(self) -> Path:

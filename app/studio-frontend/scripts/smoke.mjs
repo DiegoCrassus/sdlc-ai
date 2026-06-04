@@ -8,6 +8,9 @@ const base = (process.env.VITE_STUDIO_API_URL ?? "http://127.0.0.1:8100").replac
   "",
 );
 
+const token = process.env.STUDIO_AUTH_TOKEN?.trim();
+const headers = token ? { Authorization: `Bearer ${token}` } : undefined;
+
 const paths = [
   "/studio/health",
   "/studio/readiness",
@@ -19,7 +22,7 @@ let failed = false;
 for (const path of paths) {
   const url = `${base}${path}`;
   try {
-    const res = await fetch(url);
+    const res = await fetch(url, headers ? { headers } : undefined);
     if (!res.ok) {
       console.error(`FAIL ${path}: HTTP ${res.status}`);
       failed = true;
