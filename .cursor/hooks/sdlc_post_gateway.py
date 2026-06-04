@@ -10,10 +10,10 @@ from sdlc_gateway_lib import (
     emit_studio_event,
     fallback_for,
     handoff_value,
-    require_policy,
     normalize_agent,
     parse_handoff,
     read_handoff,
+    require_policy,
     routing,
     validate_handoff,
 )
