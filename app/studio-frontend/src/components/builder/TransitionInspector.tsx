@@ -141,6 +141,7 @@ export function TransitionInspector({
         <label className="block">
           <span className="text-slate-400">Skill</span>
           <select
+            data-testid="builder-inspector-skill"
             className="mt-1 w-full rounded-md border border-slate-700 bg-slate-900 px-3 py-2 font-mono text-xs text-white"
             value={draft.skill}
             onChange={(event) => update({ skill: event.target.value })}

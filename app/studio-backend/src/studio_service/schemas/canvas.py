@@ -44,6 +44,8 @@ class CanvasEdge(BaseModel):
     validation_overlays: list[ValidationOverlaySummary] = Field(default_factory=list)
     label: str | None = None
     summary: str | None = None
+    agent: str | None = None
+    skill: str | None = None
 
 
 class CanvasOverlay(BaseModel):

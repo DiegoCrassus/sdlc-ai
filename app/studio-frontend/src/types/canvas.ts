@@ -35,6 +35,9 @@ export type CanvasEdge = {
   validation_overlays: ValidationOverlaySummary[];
   label?: string | null;
   summary?: string | null;
+  /** Present on workflow-builder edges from transitions.yaml */
+  agent?: string | null;
+  skill?: string | null;
 };
 
 export type CanvasOverlay = {
