@@ -111,4 +111,53 @@ def validate(config: SDLCConfig) -> List[Finding]:
                 )
             )
 
+    _validate_lifecycle_model(findings, lifecycle_ids)
+
     return findings
+
+
+def _validate_lifecycle_model(findings: List[Finding], lifecycle_ids: set[str]) -> None:
+    try:
+        from pathlib import Path
+
+        from .gate import repo_root
+        from .lifecycle_model import gate_stage_aliases, load_model, load_write_policy
+    except ImportError:
+        return
+
+    root = repo_root()
+    model = load_model(root)
+    if not model:
+        findings.append(("WARN", "lifecycle-model.yaml missing — using gates/paths.yaml only"))
+        return
+
+    model_ids = {str(s.get("id")) for s in (model.get("stages") or []) if s.get("id")}
+    for lid in lifecycle_ids:
+        if lid not in model_ids:
+            findings.append(
+                ("WARN", f"lifecycle.yaml stage '{lid}' not in lifecycle-model.yaml")
+            )
+
+    aliases = gate_stage_aliases(root)
+    policy = load_write_policy(root)
+    for gate_key in (policy.get("stages") or {}):
+        mapped = aliases.get(gate_key, [gate_key])
+        for sid in mapped:
+            if sid not in model_ids:
+                findings.append(
+                    (
+                        "FAIL",
+                        f"write_policy gate key '{gate_key}' maps to unknown stage '{sid}'",
+                    )
+                )
+
+    for tr in model.get("transitions") or []:
+        for field in ("from_stage", "to_stage"):
+            val = tr.get(field)
+            if val and val not in model_ids:
+                findings.append(
+                    (
+                        "FAIL",
+                        f"transition '{tr.get('id')}' references unknown {field} '{val}'",
+                    )
+                )

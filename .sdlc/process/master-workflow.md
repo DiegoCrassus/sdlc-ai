@@ -14,6 +14,9 @@
 | L1 — Index | `.sdlc/README.md` + `.sdlc/manifest/catalog.yaml` | Agent + human | Modular SDLC map, agents, skills, MCP catalog |
 | L1 — Process | `.sdlc/process/master-workflow.md` | Agent + human | This document — full flow |
 | L2 — Machine | `.sdlc/sdlc.yaml` + module YAMLs under `.sdlc/<module>/` | Scripts/hooks/CLI | States, gates, paths, transitions |
+| L2 — Canonical model | `.sdlc/process/lifecycle-model.yaml` | Gate, validate, Doctor | Single stage graph + write_policy + operational_map |
+
+Operational steps map to lifecycle stages in `lifecycle-model.yaml` (`operational_map` section). Legacy `gates/paths.yaml` and `workflows/transitions.yaml` are shims during migration.
 
 ---
 
