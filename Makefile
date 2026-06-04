@@ -1,10 +1,11 @@
-.PHONY: sdlc-doctor sdlc-validate sdlc-stages docs-check obs-init obs-server obs-seed sdlc-audit plane-in-progress auto-merge-pr issue-triage plane-reformat plane-evidence workflow-status workflow-start workflow-discover sdlc-compact-memory sdlc-session-status sdlc-meta-start sdlc-meta-commit sdlc-meta-qa studio-dev studio-api studio-smoke studio-e2e help
+.PHONY: sdlc-doctor sdlc-validate sdlc-stages sdlc-sync-model docs-check obs-init obs-server obs-seed sdlc-audit plane-in-progress auto-merge-pr issue-triage plane-reformat plane-evidence workflow-status workflow-start workflow-discover sdlc-compact-memory sdlc-session-status sdlc-meta-start sdlc-meta-commit sdlc-meta-qa studio-dev studio-api studio-smoke studio-e2e help
 
 help:
 	@echo "SDLC AI — Available targets:"
 	@echo ""
 	@echo "  sdlc-doctor    Run the SDLC Doctor (validates structure, YAML, docs)"
 	@echo "  sdlc-validate  Validate YAML schema consistency"
+	@echo "  sdlc-sync-model  Compare lifecycle-model write_policy vs paths.yaml shim"
 	@echo "  sdlc-stages    List lifecycle stages"
 	@echo "  docs-check     Check that all required docs exist and are non-empty"
 	@echo ""
@@ -45,6 +46,9 @@ sdlc-doctor:
 sdlc-validate:
 	@echo "Running SDLC validation..."
 	@$(PYTHON) .sdlc/dsl/cli.py validate
+
+sdlc-sync-model:
+	@$(PYTHON) .sdlc/scripts/sdlc_sync_model.py
 
 sdlc-stages:
 	@$(PYTHON) .sdlc/dsl/cli.py list-stages

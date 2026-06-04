@@ -52,9 +52,15 @@ def _app_is_placeholder() -> bool:
 
 
 def classify_intent(text: str = "") -> dict[str, Any]:
+    empty_app = _app_is_placeholder()
+    from intent_rules import classify_from_rules  # noqa: E402
+
+    ruled = classify_from_rules(text, root=ROOT, empty_app=empty_app)
+    if ruled is not None:
+        return ruled
+
     t = (text or "").lower()
     greenfield_words = any(w in t for w in GREENFIELD_WORDS)
-    empty_app = _app_is_placeholder()
 
     if not text.strip():
         intent = "READONLY"
@@ -297,8 +303,21 @@ def cmd_start(args: argparse.Namespace) -> int:
             print("ERROR: validate-plan failed — fix Plane description or use --force", file=sys.stderr)
             return plan_rc
 
-    intent = args.intent or load_session_gate().intent or "FEATURE"
-    open_gate(card=card, branch=branch, stage=stage, intent=intent)
+    prior = load_session_gate()
+    from transition_check import transition_allowed  # noqa: E402
+
+    prev_stage = prior.stage if prior.gate_status == "open" else (prior.meta or {}).get("last_gate_stage", "")
+    allowed, msg = transition_allowed(prev_stage, stage, root=ROOT)
+    if not allowed and not args.force:
+        print(f"ERROR: {msg}", file=sys.stderr)
+        return 1
+    if not allowed and args.force:
+        print(f"WARN: {msg}", file=sys.stderr)
+
+    intent = args.intent or prior.intent or "FEATURE"
+    state = open_gate(card=card, branch=branch, stage=stage, intent=intent)
+    state.meta["last_gate_stage"] = stage
+    save_session_gate(state)
     print(f"OK: workflow start — {card} branch={branch} stage={stage}")
     return 0
 

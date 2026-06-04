@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import subprocess
 import sys
 from pathlib import Path
 from typing import Any
@@ -107,6 +108,40 @@ def _check_integration_env(role: str, env_var: str) -> Finding:
     return ("WARN", f"Integration not configured: {role} ({env_var} not set)")
 
 
+def _check_studio_import(root: str, module: str) -> Finding:
+    """Import studio_service without starting Uvicorn (validates PYTHONPATH layout)."""
+    backend_src = os.path.join(root, "app", "studio-backend", "src")
+    main_py = os.path.join(backend_src, "studio_service", "main.py")
+    if not os.path.isfile(main_py):
+        return ("FAIL", f"Studio backend entry missing: {main_py}")
+
+    env = os.environ.copy()
+    env["STUDIO_REPO_ROOT"] = root
+    env["PYTHONPATH"] = f"{backend_src}{os.pathsep}{root}"
+
+    snippet = (
+        f"import importlib; m = importlib.import_module({module!r}); "
+        "getattr(m, 'app', None) or getattr(m, 'create_app', lambda: None)()"
+    )
+    try:
+        proc = subprocess.run(
+            [sys.executable, "-c", snippet],
+            cwd=root,
+            env=env,
+            capture_output=True,
+            text=True,
+            timeout=45,
+            check=False,
+        )
+    except subprocess.TimeoutExpired:
+        return ("FAIL", f"Studio import timed out: {module}")
+    if proc.returncode == 0:
+        return ("PASS", f"Studio backend import OK: {module}")
+    detail = (proc.stderr or proc.stdout or "unknown error").strip().splitlines()
+    tail = detail[-1] if detail else "import failed"
+    return ("FAIL", f"Studio backend import failed ({module}): {tail}")
+
+
 def run_doctor(root: str) -> list[Finding]:
     findings: list[Finding] = []
 
@@ -173,6 +208,20 @@ def run_doctor(root: str) -> list[Finding]:
     dsl_entry = checks.get("python_dsl", {}).get("importable")
     if dsl_entry:
         findings.append(_check_file(root, dsl_entry))
+
+    studio_cfg = checks.get("studio", {})
+    import_module = studio_cfg.get("import_app")
+    if import_module:
+        findings.append(_check_studio_import(root, import_module))
+
+    try:
+        sys.path.insert(0, os.path.join(root, ".sdlc", "dsl"))
+        from roster_sync import check_roster_sync  # noqa: WPS433
+
+        for level, message in check_roster_sync(Path(root)):
+            findings.append((level, message))
+    except Exception as exc:
+        findings.append(("WARN", f"roster sync check skipped: {exc}"))
 
     return findings
 

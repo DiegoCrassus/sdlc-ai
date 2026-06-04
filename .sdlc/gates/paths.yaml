@@ -28,6 +28,7 @@ gate_paths:
       - .github/
       - Makefile
       - AGENTS.md
+      - docs/
     validation:
       allowed_prefixes:
       - app/
