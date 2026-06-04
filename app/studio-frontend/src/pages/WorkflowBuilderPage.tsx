@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import type { XYPosition } from "@xyflow/react";
 
 import { studioApi } from "../api/client";
 import { AssetPalette } from "../components/builder/AssetPalette";
@@ -11,10 +12,17 @@ import { ProposedBanner } from "../components/builder/ProposedBanner";
 import { TransitionInspector } from "../components/builder/TransitionInspector";
 import { WorkflowBuilderCanvas } from "../components/builder/WorkflowBuilderCanvas";
 import {
+  createStageCanvasNode,
+  findStageOnCanvas,
+  normalizeStageSlug,
+} from "../components/builder/builderDnD";
+import {
   buildWorkflowProposalRequest,
   createTransitionDraft,
   draftsFromCanvas,
+  stageNodesFromCanvas,
 } from "../components/builder/workflowDraft";
+import type { CanvasNode } from "../types/canvas";
 import type { WorkflowTransitionDraft } from "../types/builder";
 import type { ProposalResponse } from "../types/proposals";
 
@@ -31,6 +39,8 @@ export function WorkflowBuilderPage() {
   const [focusNodeId, setFocusNodeId] = useState<string | null>(highlightedNodeId);
   const [connectOnClick, setConnectOnClick] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [placedStageNodes, setPlacedStageNodes] = useState<CanvasNode[]>([]);
+  const [manualPositions, setManualPositions] = useState<Record<string, XYPosition>>({});
 
   const canvasQuery = useQuery({
     queryKey: ["studio", "canvas", "workflow-builder"],
@@ -70,8 +80,22 @@ export function WorkflowBuilderPage() {
     return () => window.clearTimeout(timer);
   }, [toastMessage]);
 
-  const nodes = canvasQuery.data?.nodes ?? [];
-  const nodesById = useMemo(() => new Map(nodes.map((node) => [node.id, node])), [nodes]);
+  const apiNodes = canvasQuery.data?.nodes ?? [];
+  const canvasStageNodes = useMemo(() => {
+    const fromApi = stageNodesFromCanvas(apiNodes);
+    const byId = new Map(fromApi.map((node) => [node.id, node]));
+    for (const node of placedStageNodes) {
+      if (!byId.has(node.id)) {
+        byId.set(node.id, node);
+      }
+    }
+    return [...byId.values()];
+  }, [apiNodes, placedStageNodes]);
+
+  const nodesById = useMemo(
+    () => new Map(canvasStageNodes.map((node) => [node.id, node])),
+    [canvasStageNodes],
+  );
 
   const selectedDraft = useMemo(
     () => drafts.find((draft) => draft.edgeDisplayId === selectedEdgeId) ?? null,
@@ -118,6 +142,31 @@ export function WorkflowBuilderPage() {
   const onConnectionFailed = useCallback((message: string) => {
     setToastMessage(message);
   }, []);
+
+  const onDropStage = useCallback(
+    (stageId: string, position: XYPosition) => {
+      const existing = findStageOnCanvas(canvasStageNodes, stageId);
+      if (existing) {
+        setFocusNodeId(existing.id);
+        return;
+      }
+
+      const slug = normalizeStageSlug(stageId);
+      const meta = pipelineQuery.data?.stages.find(
+        (stage) => normalizeStageSlug(stage.id) === slug,
+      );
+      if (!meta) {
+        setToastMessage(`Unknown stage: ${stageId}`);
+        return;
+      }
+
+      const node = createStageCanvasNode(meta);
+      setPlacedStageNodes((current) => [...current, node]);
+      setManualPositions((current) => ({ ...current, [node.id]: position }));
+      setFocusNodeId(node.id);
+    },
+    [canvasStageNodes, pipelineQuery.data?.stages],
+  );
 
   const createProposalMutation = useMutation({
     mutationFn: () => {
@@ -181,15 +230,17 @@ export function WorkflowBuilderPage() {
             <p className="text-slate-400">Loading stages…</p>
           ) : (
             <WorkflowBuilderCanvas
-              nodes={nodes}
+              nodes={canvasStageNodes}
               drafts={drafts}
               selectedEdgeId={selectedEdgeId}
               highlightedNodeId={focusNodeId ?? highlightedNodeId}
+              manualPositions={manualPositions}
               connectOnClick={connectOnClick}
               onConnectOnClickChange={setConnectOnClick}
               onSelectEdge={setSelectedEdgeId}
               onConnectStages={onConnectStages}
               onRemoveEdge={onRemoveEdge}
+              onDropStage={onDropStage}
               onSelectNode={setFocusNodeId}
               onConnectionFailed={onConnectionFailed}
             />
