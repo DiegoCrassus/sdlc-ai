@@ -47,8 +47,23 @@ export function studioApiBase(): string {
   return "/studio";
 }
 
+function studioAuthHeaders(): HeadersInit | undefined {
+  const token = import.meta.env.VITE_STUDIO_AUTH_TOKEN?.trim();
+  if (!token) {
+    return undefined;
+  }
+  return { Authorization: `Bearer ${token}` };
+}
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(`${studioApiBase()}${path}`, init);
+  const headers = new Headers(init?.headers);
+  const auth = studioAuthHeaders();
+  if (auth) {
+    for (const [key, value] of Object.entries(auth)) {
+      headers.set(key, value);
+    }
+  }
+  const response = await fetch(`${studioApiBase()}${path}`, { ...init, headers });
   if (!response.ok) {
     const detail = await response.text().catch(() => "");
     throw new Error(

@@ -74,6 +74,15 @@ export function formatEventTimestamp(iso: string): string {
   });
 }
 
+export function pickLastGatewayDeny(events: StudioEvent[]): StudioEvent | null {
+  for (let i = events.length - 1; i >= 0; i -= 1) {
+    if (events[i].event_type === "gateway.shell_denied") {
+      return events[i];
+    }
+  }
+  return null;
+}
+
 export function payloadSummary(event: StudioEvent): string {
   const p = event.payload;
   if (event.event_type === "gateway.shell_denied" && typeof p.command === "string") {

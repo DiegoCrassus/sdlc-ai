@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 
 import { studioApi } from "../api/client";
 import { DerivedBanner } from "../components/common/DerivedBanner";
+import { EnforcementWidget } from "../components/dashboard/EnforcementWidget";
 
 function StatusCard({
   title,
@@ -102,8 +103,8 @@ export function DashboardPage() {
             />
           </section>
 
-          <section className="grid gap-4 lg:grid-cols-2">
-            <div className="rounded-xl border border-slate-800 bg-surface-card p-5">
+          <section className="grid gap-4 lg:grid-cols-3">
+            <div className="rounded-xl border border-slate-800 bg-surface-card p-5 lg:col-span-1">
               <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-400">
                 Active work
               </h2>
@@ -137,6 +138,7 @@ export function DashboardPage() {
               </dl>
             </div>
 
+            <EnforcementWidget />
             <div className="rounded-xl border border-slate-800 bg-surface-card p-5">
               <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-400">
                 Service health

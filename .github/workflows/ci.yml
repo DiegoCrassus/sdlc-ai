@@ -38,15 +38,38 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+  studio-e2e:
+    name: Studio E2E Smoke
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - run: pip install -e ".[dev]"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: |
+            app/studio-frontend/package-lock.json
+            tests/e2e/package-lock.json
+      - name: Install Studio frontend deps
+        run: cd app/studio-frontend && npm ci
+      - name: Install Playwright deps
+        run: cd tests/e2e && npm ci && npx playwright install --with-deps chromium
+      - name: Run Studio Playwright smoke
+        run: make studio-e2e
+
   auto-merge-gate:
     name: Auto-Merge Gate
-    needs: [sdlc-doctor, secrets-scan]
+    needs: [sdlc-doctor, secrets-scan, studio-e2e]
     runs-on: ubuntu-latest
     if: always()
     steps:
       - name: Evaluate gates
         run: |
-          for result in "${{ needs.sdlc-doctor.result }}" "${{ needs.secrets-scan.result }}"; do
+          for result in "${{ needs.sdlc-doctor.result }}" "${{ needs.secrets-scan.result }}" "${{ needs.studio-e2e.result }}"; do
             if [ "$result" = "failure" ]; then
               echo "❌ Gate failed"
               exit 1
