@@ -126,12 +126,24 @@ def check_structural(report: AuditReport) -> None:
     fail_count = output.count("[FAIL]")
     warn_count = output.count("[WARN]")
 
+    compliance_path = REPO_ROOT / ".sdlc" / "memory" / "sdlc-compliance.json"
+    compliance_detail = ""
+    if compliance_path.is_file():
+        try:
+            payload = json.loads(compliance_path.read_text(encoding="utf-8"))
+            compliance_detail = (
+                f"; compliance {payload.get('compliance_pct')}% "
+                f"(health {payload.get('health_pct')}%)"
+            )
+        except json.JSONDecodeError:
+            compliance_detail = "; compliance metrics unreadable"
+
     if exit_code == 0:
         report.add(
             "Estrutura",
             "SDLC Doctor",
             "PASS",
-            f"{pass_count} checks passando, {warn_count} avisos",
+            f"{pass_count} checks passando, {warn_count} avisos{compliance_detail}",
         )
     else:
         report.add(

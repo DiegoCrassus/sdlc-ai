@@ -12,7 +12,6 @@ ROOT = Path(__file__).resolve().parents[2]
 def main() -> int:
     sys.path.insert(0, str(ROOT / ".sdlc" / "dsl"))
     import yaml  # noqa: E402
-
     from lifecycle_model import load_write_policy, model_path  # noqa: E402
 
     model_policy = load_write_policy(ROOT)

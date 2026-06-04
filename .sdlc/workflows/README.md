@@ -1,6 +1,7 @@
 # Workflows module
 
-> **Data:** [`transitions.yaml`](transitions.yaml) · **CLI:** `python3 .sdlc/dsl/cli.py workflow …`
+> **Canonical transitions:** [`../process/lifecycle-model.yaml`](../process/lifecycle-model.yaml)  
+> **Shim metadata:** [`transitions.yaml`](transitions.yaml) · **CLI:** `python3 .sdlc/dsl/cli.py workflow …`
 
 ## Purpose
 

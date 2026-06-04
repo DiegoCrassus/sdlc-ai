@@ -83,7 +83,7 @@ def check_lifecycle_shard_drift(root: Path) -> list[Finding]:
                 )
             )
 
-    for wid, edge in model_trans.items():
+    for wid in model_trans:
         if wid not in {str(w.get("id")) for w in trans.get("workflows") or []}:
             findings.append(
                 (

@@ -7,7 +7,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 
-from plane_html import build_plan_html, convert_legacy_description, document, heading  # noqa: E402
+from plane_html import build_plan_html, convert_legacy_description, heading  # noqa: E402
 
 
 def test_heading_has_editor_class():

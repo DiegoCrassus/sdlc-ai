@@ -139,7 +139,7 @@ Phase 5 ─ P2 polish           (docs sync, metrics, optional generator)
 | **M3 — Trustworthy pipeline** | After Phase 4 | One roster; evidence ephemeral; transitions enforced |
 | **M4 — SaaS-ready ops** | After Phase 5 | Metrics + optional sync; product greenfield unblocked |
 
-Dates: **TBD** until Phase 0 epic is scheduled on Plane. Update this file when M1 ships.
+Dates: **2026-06-04** — M1–M4 shipped (INVES-93–98): fail-closed, CI, lifecycle-model, integrity, ruff, compliance metrics, README index pass.
 
 ---
 

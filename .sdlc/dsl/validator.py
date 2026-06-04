@@ -1,16 +1,15 @@
 """Schema-level consistency validation for SDLC configuration."""
 
-from typing import List, Tuple
 
 from .models import SDLCConfig
 
 # (level, message)
-Finding = Tuple[str, str]
+Finding = tuple[str, str]
 
 
-def validate(config: SDLCConfig) -> List[Finding]:
+def validate(config: SDLCConfig) -> list[Finding]:
     """Run all consistency checks. Returns list of (level, message) findings."""
-    findings: List[Finding] = []
+    findings: list[Finding] = []
 
     lifecycle_ids = {s.id for s in config.lifecycle_stages}
     stage_def_ids = {s.id for s in config.stage_definitions}
@@ -116,7 +115,7 @@ def validate(config: SDLCConfig) -> List[Finding]:
     return findings
 
 
-def _validate_lifecycle_model(findings: List[Finding], lifecycle_ids: set[str]) -> None:
+def _validate_lifecycle_model(findings: list[Finding], lifecycle_ids: set[str]) -> None:
     try:
         from pathlib import Path
 

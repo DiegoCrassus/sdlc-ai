@@ -5,8 +5,6 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-import pytest
-
 DSL = Path(__file__).resolve().parent
 sys.path.insert(0, str(DSL))
 
@@ -14,7 +12,6 @@ from gate import load_gate_config, repo_root  # noqa: E402
 from lifecycle_model import (  # noqa: E402
     lifecycle_stage_ids,
     load_model,
-    load_write_policy,
     model_path,
 )
 

@@ -219,13 +219,13 @@ Before starting P0 work on `develop`:
 
 ## 9. Success Criteria (Planning Complete When)
 
-- [ ] `lifecycle-model.yaml` exists; Doctor fails on stage id mismatch across repo.
-- [ ] Hooks fail-closed; manual test: write to `app/backend/` with gate closed → deny.
-- [ ] CI runs pytest + validate + doctor on every PR.
-- [ ] `auto_merge_pr` refuses merge without green required checks + review.
-- [ ] `master-workflow.md` contains operational map table; no duplicate stage list prose.
-- [ ] Evidence files not committed under `templates/plane/`.
-- [ ] Single agent roster validated by `sdlc-validate`.
+- [x] `lifecycle-model.yaml` exists; Doctor fails on stage id mismatch across repo.
+- [x] Hooks fail-closed; manual test: write to `app/backend/` with gate closed → deny.
+- [x] CI runs pytest + validate + doctor + ruff on every PR.
+- [x] `auto_merge_pr` refuses merge without green required checks + review.
+- [x] `master-workflow.md` contains operational map table; legacy shards deprecated.
+- [x] Evidence files not committed under `templates/plane/`.
+- [x] Single agent roster validated by `sdlc-validate` / Doctor roster sync.
 
 ---
 

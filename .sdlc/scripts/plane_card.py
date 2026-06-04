@@ -19,7 +19,7 @@ if str(SCRIPTS) not in sys.path:
 if str(DSL) not in sys.path:
     sys.path.insert(0, str(DSL))
 
-from plane_evidence import build_completion_evidence, build_start_comment  # noqa: E402
+from plane_evidence import build_completion_evidence  # noqa: E402
 from plane_granularity import detect_intent_from_handoff, validate_granularity  # noqa: E402
 from plane_html import convert_legacy_description  # noqa: E402
 
@@ -264,7 +264,7 @@ def main() -> None:
         help="Also append evidence block to card description",
     )
 
-    b = sub.add_parser("reformat-all", help="Reformat INVES-19..24 descriptions")
+    sub.add_parser("reformat-all", help="Reformat INVES-19..24 descriptions")
 
     v = sub.add_parser("validate-plan", help="Validate card plan completeness")
     v.add_argument("--card", required=True)

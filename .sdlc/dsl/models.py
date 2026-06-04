@@ -1,7 +1,6 @@
 """Dataclass models for SDLC YAML structures."""
 
 from dataclasses import dataclass, field
-from typing import List, Optional
 
 
 @dataclass
@@ -17,10 +16,10 @@ class StageDefinition:
     id: str
     name: str
     objective: str
-    inputs: List[str] = field(default_factory=list)
-    outputs: List[str] = field(default_factory=list)
-    required_evidence: List[str] = field(default_factory=list)
-    gates: List[str] = field(default_factory=list)
+    inputs: list[str] = field(default_factory=list)
+    outputs: list[str] = field(default_factory=list)
+    required_evidence: list[str] = field(default_factory=list)
+    gates: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -30,28 +29,28 @@ class Workflow:
     from_stage: str
     to_stage: str
     description: str
-    agent: Optional[str] = None
-    skill: Optional[str] = None
-    preconditions: List[str] = field(default_factory=list)
-    outputs: List[str] = field(default_factory=list)
+    agent: str | None = None
+    skill: str | None = None
+    preconditions: list[str] = field(default_factory=list)
+    outputs: list[str] = field(default_factory=list)
 
 
 @dataclass
 class Agent:
     id: str
     name: str
-    stages: List[str]
+    stages: list[str]
     description: str
-    primary_skill: Optional[str] = None
+    primary_skill: str | None = None
 
 
 @dataclass
 class Skill:
     id: str
     name: str
-    stages: List[str]
+    stages: list[str]
     description: str
-    expected_outputs: List[str] = field(default_factory=list)
+    expected_outputs: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -60,7 +59,7 @@ class Rule:
     name: str
     severity: str  # required | warning
     description: str
-    enforced_at: List[str] = field(default_factory=list)
+    enforced_at: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -69,9 +68,9 @@ class Integration:
     name: str
     status: str  # placeholder | not_configured | active
     description: str
-    config_env: Optional[str] = None
-    capabilities: List[str] = field(default_factory=list)
-    notes: Optional[str] = None
+    config_env: str | None = None
+    capabilities: list[str] = field(default_factory=list)
+    notes: str | None = None
 
 
 @dataclass
@@ -79,10 +78,10 @@ class SDLCConfig:
     version: str
     name: str
     description: str
-    lifecycle_stages: List[LifecycleStage] = field(default_factory=list)
-    stage_definitions: List[StageDefinition] = field(default_factory=list)
-    workflows: List[Workflow] = field(default_factory=list)
-    agents: List[Agent] = field(default_factory=list)
-    skills: List[Skill] = field(default_factory=list)
-    rules: List[Rule] = field(default_factory=list)
-    integrations: List[Integration] = field(default_factory=list)
+    lifecycle_stages: list[LifecycleStage] = field(default_factory=list)
+    stage_definitions: list[StageDefinition] = field(default_factory=list)
+    workflows: list[Workflow] = field(default_factory=list)
+    agents: list[Agent] = field(default_factory=list)
+    skills: list[Skill] = field(default_factory=list)
+    rules: list[Rule] = field(default_factory=list)
+    integrations: list[Integration] = field(default_factory=list)

@@ -5,15 +5,17 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-import pytest
-
 DSL = Path(__file__).resolve().parent
 SDLC_ROOT = DSL.parent
 sys.path.insert(0, str(SDLC_ROOT))
 sys.path.insert(0, str(DSL))
 
 from gate import repo_root  # noqa: E402
-from lifecycle_shard_drift import check_committed_plane_evidence, check_lifecycle_shard_drift  # noqa: E402
+from lifecycle_shard_drift import (  # noqa: E402
+    check_committed_plane_evidence,
+    check_lifecycle_shard_drift,
+)
+
 from dsl import loader  # noqa: E402
 
 

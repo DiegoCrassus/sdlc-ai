@@ -12,6 +12,8 @@ Own the human-readable SDLC process authority. Keep this module small: one workf
 |-----------|------------|
 | Any new request or pipeline doubt | [`master-workflow.md`](master-workflow.md) |
 | Branch, PR, merge, Plane state, or lifecycle authority | [`change-lifecycle.md`](change-lifecycle.md) |
+| Stage graph, transitions, write policy | [`lifecycle-model.yaml`](lifecycle-model.yaml) |
+| Emergency enforcement bypass | [`break-glass.md`](break-glass.md) |
 
 ## Classification
 

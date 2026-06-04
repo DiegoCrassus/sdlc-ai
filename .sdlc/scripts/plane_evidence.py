@@ -11,10 +11,8 @@ from plane_html import (
     horizontal_rule,
     inline_code,
     link,
-    paragraph,
     paragraph_text,
     table,
-    task_list,
 )
 
 

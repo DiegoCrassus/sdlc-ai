@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import html
 import re
-from typing import Iterable
+from collections.abc import Iterable
 
 
 def _esc(text: str) -> str:
