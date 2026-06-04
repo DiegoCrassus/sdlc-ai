@@ -7,6 +7,10 @@ from typing import Any
 
 from studio.compiler_core import CompilerInputError, compile_studio_sources
 from studio.mvp_test_skeleton import build_mvp_test_skeleton
+from studio.publish_evidence import (
+    PublishEvidenceInputError,
+    build_publish_evidence_from_sources,
+)
 from studio.simulation_preview import (
     SimulationPreviewInputError,
     build_simulation_preview_from_sources,
@@ -145,3 +149,23 @@ def build_workflow_assistance(root: Path, *, kind: str | None = None) -> dict[st
 
 def list_test_skeleton() -> dict[str, Any]:
     return build_mvp_test_skeleton()
+
+
+def build_evidence_draft(
+    root: Path,
+    *,
+    card: str | None = None,
+    title: str | None = None,
+    branch: str | None = None,
+) -> dict[str, Any]:
+    try:
+        return build_publish_evidence_from_sources(
+            root,
+            card=card,
+            title=title,
+            branch=branch,
+        )
+    except CompilerInputError as exc:
+        raise _compiler_input_error(exc) from exc
+    except PublishEvidenceInputError as exc:
+        raise StudioApiError(400, "INVALID_EVIDENCE_FILTER", str(exc)) from exc

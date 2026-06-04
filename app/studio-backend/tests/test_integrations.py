@@ -4,7 +4,6 @@ from unittest.mock import MagicMock, patch
 
 import httpx
 import pytest
-
 from studio_service.services.integrations import env as integration_env
 
 
