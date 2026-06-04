@@ -8,13 +8,13 @@ import { ConfigBuilderPage } from "./pages/ConfigBuilderPage";
 import { RegistryPage } from "./pages/RegistryPage";
 import { RulesSkillsBuilderPage } from "./pages/RulesSkillsBuilderPage";
 import { SimulationPage } from "./pages/SimulationPage";
+import { EvidencePage } from "./pages/EvidencePage";
 import { StubPage } from "./pages/StubPage";
 import { ValidationPage } from "./pages/ValidationPage";
 import { WorkflowBuilderPage } from "./pages/WorkflowBuilderPage";
 import { WorkflowsPage } from "./pages/WorkflowsPage";
 
 const stubs: { path: string; title: string; phase: string }[] = [
-  { path: "evidence", title: "Evidence & Delivery", phase: "S6" },
   { path: "settings", title: "Settings", phase: "meta" },
 ];
 
@@ -51,6 +51,7 @@ export default function App() {
         <Route path="validation" element={<ValidationPage />} />
         <Route path="simulation" element={<SimulationPage />} />
         <Route path="assistance" element={<AssistancePage />} />
+        <Route path="evidence" element={<EvidencePage />} />
         {stubs.map((s) => (
           <Route
             key={s.path}
