@@ -223,6 +223,19 @@ def run_doctor(root: str) -> list[Finding]:
     except Exception as exc:
         findings.append(("WARN", f"roster sync check skipped: {exc}"))
 
+    try:
+        sys.path.insert(0, os.path.join(root, ".sdlc", "dsl"))
+        from lifecycle_shard_drift import (  # noqa: WPS433
+            check_committed_plane_evidence,
+            check_lifecycle_shard_drift,
+        )
+
+        for level, message in check_lifecycle_shard_drift(Path(root)):
+            findings.append((level, message))
+        findings.append(check_committed_plane_evidence(Path(root)))
+    except Exception as exc:
+        findings.append(("WARN", f"lifecycle shard drift check skipped: {exc}"))
+
     return findings
 
 

@@ -18,6 +18,20 @@
 
 Operational steps map to lifecycle stages in `lifecycle-model.yaml` (`operational_map` section). Legacy `gates/paths.yaml` and `workflows/transitions.yaml` are shims during migration.
 
+### Operational map (canonical)
+
+| Step | Lifecycle stages | Agent | Gate stage |
+|------|------------------|-------|------------|
+| intent_routing | — | intent-analyst | — |
+| plan | ticket, requirements | planner | planning |
+| architecture | architecture | architect | architecture |
+| implement | implementation, autofix | implementer | implementation |
+| validate | validation | qa | validation |
+| review | review | reviewer | review |
+| deploy | deployment, observability | devops | — |
+
+Full machine-readable map: `.sdlc/process/lifecycle-model.yaml` → `operational_map`.
+
 ---
 
 ## Agreed principles

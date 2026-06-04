@@ -54,9 +54,20 @@ def _qa_evidence_ok(card: str) -> tuple[bool, str]:
                 data = json.loads(path.read_text(encoding="utf-8"))
             except json.JSONDecodeError:
                 return False, f"invalid JSON: {path}"
-            val = (data.get("validation") or {}).get("tests", "")
-            if val and "fail" in str(val).lower():
+            validation = data.get("validation") or {}
+            val = str(validation.get("tests", ""))
+            exit_code = validation.get("exit_code")
+            if exit_code is not None and int(exit_code) != 0:
+                return False, f"QA evidence exit_code={exit_code} in {path.name}"
+            if val and "fail" in val.lower():
                 return False, f"QA evidence reports failures in {path.name}"
+            if val and "error" in val.lower() and "passed" not in val.lower():
+                return False, f"QA evidence reports errors in {path.name}"
+            if val and "passed" not in val.lower():
+                return (
+                    False,
+                    f"QA evidence must include passing pytest summary in {path.name}",
+                )
             return True, path.name
     return False, "no qa-evidence or .evidence JSON under .sdlc/memory/"
 

@@ -94,15 +94,22 @@ def load_merged_manifest(root: str) -> dict[str, Any]:
 
 
 def load_lifecycle(root: str) -> list[LifecycleStage]:
-    data = _load_yaml(os.path.join(root, ".sdlc", "stages", "lifecycle.yaml"))
+    from .lifecycle_model import load_model
+
+    model = load_model(Path(root))
+    raw = model.get("stages") or []
+    if not raw:
+        raise LoadError(
+            "lifecycle-model.yaml must define stages (legacy lifecycle.yaml is deprecated)"
+        )
     stages = []
-    for s in data.get("stages", []):
+    for s in raw:
         stages.append(
             LifecycleStage(
                 id=s["id"],
                 name=s["name"],
                 order=s["order"],
-                description=s.get("description", s["name"]),
+                description=s.get("description", s.get("name", s["id"])),
             )
         )
     return stages
@@ -127,20 +134,29 @@ def load_stages(root: str) -> list[StageDefinition]:
 
 
 def load_workflows(root: str) -> list[Workflow]:
-    data = _load_yaml(os.path.join(root, ".sdlc", "workflows", "transitions.yaml"))
+    from .lifecycle_model import load_model, transition_overlay
+
+    model = load_model(Path(root))
+    transitions = model.get("transitions") or []
+    if not transitions:
+        raise LoadError("lifecycle-model.yaml must define transitions")
+    overlay = transition_overlay(Path(root))
     workflows = []
-    for w in data.get("workflows", []):
+    for tr in transitions:
+        tid = tr["id"]
+        extra = overlay.get(tid, {})
+        name = extra.get("name") or tr.get("name") or tid.replace("_", " → ")
         workflows.append(
             Workflow(
-                id=w["id"],
-                name=w["name"],
-                from_stage=w["from_stage"],
-                to_stage=w["to_stage"],
-                description=w["description"],
-                agent=w.get("agent"),
-                skill=w.get("skill"),
-                preconditions=w.get("preconditions", []),
-                outputs=w.get("outputs", []),
+                id=tid,
+                name=name,
+                from_stage=tr["from_stage"],
+                to_stage=tr["to_stage"],
+                description=extra.get("description", tr.get("description", "")),
+                agent=extra.get("agent") or tr.get("agent"),
+                skill=extra.get("skill") or tr.get("skill"),
+                preconditions=extra.get("preconditions", tr.get("preconditions", [])),
+                outputs=extra.get("outputs", tr.get("outputs", [])),
             )
         )
     return workflows

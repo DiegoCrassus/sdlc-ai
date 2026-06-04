@@ -1,6 +1,15 @@
 version: '1.0'
-description: Executable workflows linking SDLC stages.
+description: DEPRECATED shim — graph from lifecycle-model.yaml; metadata overlay for loader.
 workflows:
+- id: ticket_to_requirements
+  name: Ticket → Requirements
+  from_stage: ticket
+  to_stage: requirements
+  description: Refine ticket into requirements on Plane.
+  agent: planner
+  skill: plane-task-creation
+  outputs:
+  - Plane work item with requirements
 - id: requirements_to_architecture
   name: Requirements → Architecture
   from_stage: requirements

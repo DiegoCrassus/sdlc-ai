@@ -135,8 +135,29 @@ def _validate_lifecycle_model(findings: List[Finding], lifecycle_ids: set[str]) 
     for lid in lifecycle_ids:
         if lid not in model_ids:
             findings.append(
-                ("WARN", f"lifecycle.yaml stage '{lid}' not in lifecycle-model.yaml")
+                (
+                    "FAIL",
+                    f"Loaded lifecycle stage '{lid}' not in lifecycle-model.yaml",
+                )
             )
+    if lifecycle_ids != model_ids and lifecycle_ids and model_ids:
+        findings.append(
+            (
+                "FAIL",
+                "Lifecycle stage set must match lifecycle-model.yaml exactly",
+            )
+        )
+
+    try:
+        from pathlib import Path
+
+        from .lifecycle_shard_drift import check_lifecycle_shard_drift
+
+        for level, message in check_lifecycle_shard_drift(Path(root)):
+            if level in ("FAIL", "WARN"):
+                findings.append((level, message))
+    except ImportError:
+        pass
 
     aliases = gate_stage_aliases(root)
     policy = load_write_policy(root)
