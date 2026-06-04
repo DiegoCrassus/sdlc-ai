@@ -1,3 +1,4 @@
+# DEPRECATED shim — canonical write_policy lives in process/lifecycle-model.yaml
 gate_paths:
   protected_prefixes:
   - app/backend/

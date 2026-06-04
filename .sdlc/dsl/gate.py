@@ -70,11 +70,22 @@ def session_gate_path(root: Path | None = None) -> Path:
 
 
 def load_gate_config(root: Path | None = None) -> dict[str, Any]:
-    path = gate_config_path(root)
     if yaml is None:
         raise RuntimeError("PyYAML required for gate config")
+    base = root or repo_root()
+    try:
+        from lifecycle_model import load_write_policy  # noqa: PLC0415
+
+        policy = load_write_policy(base)
+        if policy:
+            return policy
+    except ImportError:
+        pass
+    path = gate_config_path(base)
     if not path.is_file():
-        raise FileNotFoundError(f"Missing gate config: {path}")
+        raise FileNotFoundError(
+            f"Missing gate config: {path} and no lifecycle-model write_policy"
+        )
     with path.open(encoding="utf-8") as f:
         data = yaml.safe_load(f) or {}
     return data.get("gate_paths") or {}

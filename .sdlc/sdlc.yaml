@@ -81,6 +81,7 @@ contract:
       data:
         - process/master-workflow.md
         - process/change-lifecycle.md
+        - process/lifecycle-model.yaml
 
 core:
   schema: sdlc-core/v1
