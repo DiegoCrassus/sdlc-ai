@@ -12,7 +12,7 @@ from sdlc_gateway_lib import (
     deny,
     extract_command,
     extract_subagent,
-    load_policy,
+    require_policy,
     routing,
 )
 
@@ -82,11 +82,9 @@ def main() -> None:
         if not isinstance(payload, dict):
             payload = {}
     except json.JSONDecodeError:
-        allow()
+        deny('SDLC gateway: invalid hook payload.', 'Non-JSON stdin.')
 
-    policy = load_policy()
-    if not policy:
-        allow()
+    policy = require_policy()
 
     deny_unsafe_shell(extract_command(payload), policy)
     enforce_next_subagent(payload, policy)

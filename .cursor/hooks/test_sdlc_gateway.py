@@ -178,7 +178,7 @@ def test_pre_gateway_blocks_unsafe_shell_command(capsys) -> None:
 
 def test_post_gateway_blocks_incomplete_stage(capsys, monkeypatch) -> None:
     handoff = handoff_markdown(stage_complete="no")
-    monkeypatch.setattr(post_gateway, "load_policy", lambda: POLICY)
+    monkeypatch.setattr(post_gateway, "require_policy", lambda: POLICY)
     monkeypatch.setattr(post_gateway, "validate_handoff", lambda policy: [])
     monkeypatch.setattr(
         post_gateway,
@@ -204,7 +204,7 @@ def test_post_gateway_blocks_incomplete_stage(capsys, monkeypatch) -> None:
 
 def test_post_gateway_blocks_unresolved_blockers(capsys, monkeypatch) -> None:
     handoff = handoff_markdown(blockers="- Reviewer requested more tests")
-    monkeypatch.setattr(post_gateway, "load_policy", lambda: POLICY)
+    monkeypatch.setattr(post_gateway, "require_policy", lambda: POLICY)
     monkeypatch.setattr(post_gateway, "validate_handoff", lambda policy: [])
     monkeypatch.setattr(
         post_gateway,

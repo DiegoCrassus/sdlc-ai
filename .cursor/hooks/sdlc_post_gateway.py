@@ -10,7 +10,7 @@ from sdlc_gateway_lib import (
     emit_studio_event,
     fallback_for,
     handoff_value,
-    load_policy,
+    require_policy,
     normalize_agent,
     parse_handoff,
     read_handoff,
@@ -70,9 +70,7 @@ def main() -> None:
     # deterministic source for routing after subagents stop.
     sys.stdin.read()
 
-    policy = load_policy()
-    if not policy:
-        sys.exit(0)
+    policy = require_policy()
 
     problems = validate_handoff(policy)
     route = routing(policy)

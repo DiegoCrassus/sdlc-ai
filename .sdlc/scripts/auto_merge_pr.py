@@ -1,17 +1,19 @@
 #!/usr/bin/env python3
-"""Autonomous squash-merge of a PR into develop when CI is green.
+"""Autonomous squash-merge of a PR into develop when CI and review gates pass.
 
-No human approval required when all gates pass (see auto-merge-policy.md).
+Requires green check-runs on the PR head SHA and an APPROVED review (GitHub or
+handoff from Reviewer). See auto-merge-policy.md.
 
 Usage:
   python3 .sdlc/scripts/auto_merge_pr.py --pr 32
   python3 .sdlc/scripts/auto_merge_pr.py --branch feature/INVES-20-market-data
-  python3 .sdlc/scripts/auto_merge_pr.py --pr 32 --card INVES-20 --plane-comment --evidence-file .sdlc/templates/plane/evidence-template.json
+  python3 .sdlc/scripts/auto_merge_pr.py --pr 32 --card INVES-20 --plane-comment
 """
 
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import re
 import sys
@@ -23,6 +25,19 @@ import httpx
 ROOT = Path(__file__).resolve().parents[2]
 GITHUB_API = "https://api.github.com"
 CARD_RE = re.compile(r"^INVES-\d+$", re.IGNORECASE)
+HANDOFF_PATH = ROOT / ".sdlc" / "memory" / "orchestrator-handoff.md"
+
+REQUIRED_CHECK_NAMES = frozenset(
+    {
+        "SDLC Doctor",
+        "Secrets Scan (gitleaks)",
+        "Studio E2E Smoke",
+        "SDLC Pytest",
+        "SDLC Validate",
+    }
+)
+
+FAIL_CONCLUSIONS = frozenset({"failure", "cancelled", "timed_out", "action_required"})
 
 
 def _load_dotenv() -> None:
@@ -59,6 +74,13 @@ def _gh_headers(token: str) -> dict[str, str]:
     }
 
 
+def _require_break_glass(flag_name: str) -> bool:
+    sys.path.insert(0, str(ROOT / ".sdlc" / "dsl"))
+    from break_glass import require_break_glass  # noqa: E402
+
+    return require_break_glass(flag_name)
+
+
 def find_pr_by_branch(token: str, repo: str, branch: str) -> int:
     owner, name = repo.split("/", 1)
     url = f"{GITHUB_API}/repos/{repo}/pulls"
@@ -84,30 +106,135 @@ def get_pr(token: str, repo: str, pr_number: int) -> dict:
         return resp.json()
 
 
-def wait_for_ci(token: str, repo: str, branch: str, timeout_sec: int, poll_sec: int) -> bool:
-    deadline = time.time() + timeout_sec
-    url = f"{GITHUB_API}/repos/{repo}/actions/runs"
+def _fetch_check_runs(token: str, repo: str, sha: str) -> list[dict]:
+    url = f"{GITHUB_API}/repos/{repo}/commits/{sha}/check-runs"
+    runs: list[dict] = []
+    page = 1
     with httpx.Client(timeout=30.0) as client:
-        while time.time() < deadline:
+        while True:
             resp = client.get(
                 url,
                 headers=_gh_headers(token),
-                params={"branch": branch, "per_page": 5},
+                params={"per_page": 100, "page": page},
             )
             resp.raise_for_status()
-            runs = resp.json().get("workflow_runs", [])
-            if not runs:
-                time.sleep(poll_sec)
-                continue
-            latest = runs[0]
-            status = latest.get("status")
-            conclusion = latest.get("conclusion")
-            print(f"CI: {latest.get('name')} status={status} conclusion={conclusion}")
-            if status == "completed":
-                return conclusion == "success"
+            data = resp.json()
+            runs.extend(data.get("check_runs") or [])
+            if page >= (data.get("total_count", 0) // 100) + 1:
+                break
+            if not data.get("check_runs"):
+                break
+            page += 1
+    return runs
+
+
+def wait_for_checks_at_head(
+    token: str,
+    repo: str,
+    sha: str,
+    timeout_sec: int,
+    poll_sec: int,
+) -> bool:
+    deadline = time.time() + timeout_sec
+    while time.time() < deadline:
+        runs = _fetch_check_runs(token, repo, sha)
+        if not runs:
+            print(f"CI: no check-runs yet for {sha[:7]}…")
             time.sleep(poll_sec)
+            continue
+
+        by_name: dict[str, dict] = {}
+        pending = 0
+        for run in runs:
+            name = run.get("name") or ""
+            by_name[name] = run
+            status = run.get("status")
+            conclusion = run.get("conclusion")
+            print(f"CI: {name} status={status} conclusion={conclusion}")
+            if status != "completed":
+                pending += 1
+            elif conclusion in FAIL_CONCLUSIONS:
+                print(f"ERROR: check failed — {name} ({conclusion})", file=sys.stderr)
+                return False
+
+        if pending:
+            time.sleep(poll_sec)
+            continue
+
+        missing = REQUIRED_CHECK_NAMES - set(by_name)
+        if missing:
+            print(f"CI: waiting for required checks: {', '.join(sorted(missing))}")
+            time.sleep(poll_sec)
+            continue
+
+        for name in REQUIRED_CHECK_NAMES:
+            run = by_name[name]
+            if run.get("conclusion") not in ("success", "skipped"):
+                print(
+                    f"ERROR: required check not green — {name} ({run.get('conclusion')})",
+                    file=sys.stderr,
+                )
+                return False
+
+        print(f"OK: all required checks green on {sha[:7]}")
+        return True
+
     print("ERROR: CI wait timeout", file=sys.stderr)
     return False
+
+
+def _handoff_reviewer_approved() -> bool:
+    if not HANDOFF_PATH.is_file():
+        return False
+    text = HANDOFF_PATH.read_text(encoding="utf-8")
+    row_re = re.compile(r"^\|\s*(?:\*\*)?([^|*]+?)(?:\*\*)?\s*\|\s*([^|]+?)\s*\|$")
+    routing: dict[str, str] = {}
+    in_routing = False
+    for line in text.splitlines():
+        if line.startswith("## Routing"):
+            in_routing = True
+            continue
+        if line.startswith("## ") and in_routing:
+            break
+        if not in_routing:
+            continue
+        if set(line.strip()) <= {"|", "-", " "}:
+            continue
+        match = row_re.match(line.strip())
+        if match:
+            routing[match.group(1).strip().strip("*").lower()] = (
+                match.group(2).strip().strip("*").lower()
+            )
+    previous = routing.get("previous agent", "")
+    stage_complete = routing.get("stage complete", "")
+    return previous in ("reviewer", "devops") and stage_complete == "yes"
+
+
+def has_github_review_approval(token: str, repo: str, pr_number: int) -> bool:
+    url = f"{GITHUB_API}/repos/{repo}/pulls/{pr_number}/reviews"
+    with httpx.Client(timeout=30.0) as client:
+        resp = client.get(url, headers=_gh_headers(token))
+        resp.raise_for_status()
+        reviews = resp.json()
+    for review in reviews:
+        if review.get("state") == "APPROVED":
+            return True
+    return False
+
+
+def assert_review_gate(token: str, repo: str, pr_number: int) -> None:
+    github_ok = has_github_review_approval(token, repo, pr_number)
+    handoff_ok = _handoff_reviewer_approved()
+    if github_ok or handoff_ok:
+        source = "GitHub APPROVED" if github_ok else "handoff Reviewer→DevOps"
+        print(f"OK: review gate — {source}")
+        return
+    print(
+        "ERROR: merge blocked — need GitHub review APPROVED or handoff "
+        "(Previous agent=reviewer|devops, Stage complete=yes)",
+        file=sys.stderr,
+    )
+    sys.exit(1)
 
 
 def merge_pr(token: str, repo: str, pr_number: int, title: str | None) -> dict:
@@ -136,18 +263,26 @@ def delete_branch(token: str, repo: str, branch: str) -> None:
             print(f"WARN: could not delete branch {branch}: {resp.status_code}", file=sys.stderr)
 
 
+def _resolve_evidence_path(card: str, explicit: str | None) -> str | None:
+    if explicit and Path(explicit).is_file():
+        return explicit
+    for candidate in (
+        ROOT / ".sdlc" / "memory" / f".evidence-{card.upper()}.json",
+        ROOT / ".sdlc" / "memory" / f"qa-evidence-{card.upper()}.json",
+        ROOT / ".sdlc" / "templates" / "plane" / f"evidence-{card.upper()}.json",
+    ):
+        if candidate.is_file():
+            return str(candidate)
+    return None
+
+
 def plane_done(card: str, pr_url: str, pr_number: int, evidence_file: str | None = None) -> None:
-    import json
     import subprocess
 
-    script = ROOT / ".sdlc/scripts/plane_state.py"
-    ev_path = evidence_file
-    if not ev_path:
-        default = ROOT / ".sdlc/templates/plane" / f"evidence-{card.upper()}.json"
-        if default.is_file():
-            ev_path = str(default)
+    script = ROOT / ".sdlc" / "scripts" / "plane_state.py"
+    ev_path = _resolve_evidence_path(card, evidence_file)
 
-    if ev_path and Path(ev_path).is_file():
+    if ev_path:
         data = json.loads(Path(ev_path).read_text(encoding="utf-8"))
         art = data.setdefault("artifacts", {})
         art.setdefault("pr", str(pr_number))
@@ -199,7 +334,17 @@ def main() -> None:
     parser.add_argument("--timeout", type=int, default=600, help="CI wait seconds")
     parser.add_argument("--poll", type=int, default=15, help="CI poll interval")
     parser.add_argument("--skip-ci-wait", action="store_true", help="Merge immediately (dangerous)")
+    parser.add_argument(
+        "--skip-review-check",
+        action="store_true",
+        help="Skip GitHub/handoff review gate (requires SDLC_BREAK_GLASS)",
+    )
     args = parser.parse_args()
+
+    if args.skip_ci_wait and not _require_break_glass("--skip-ci-wait"):
+        sys.exit(1)
+    if args.skip_review_check and not _require_break_glass("--skip-review-check"):
+        sys.exit(1)
 
     token, repo = _github_token()
     if not args.pr and not args.branch:
@@ -209,26 +354,25 @@ def main() -> None:
     pr_number = args.pr or find_pr_by_branch(token, repo, args.branch)
     pr = get_pr(token, repo, pr_number)
     branch = pr["head"]["ref"]
+    head_sha = pr["head"]["sha"]
     pr_url = pr["html_url"]
 
     if pr.get("merged"):
         print(f"Already merged: {pr_url}")
         if args.plane_comment and args.card:
-            plane_done(
-                args.card,
-                pr_url,
-                pr_number,
-                args.evidence_file or None,
-            )
+            plane_done(args.card, pr_url, pr_number, args.evidence_file or None)
         sys.exit(0)
 
     if pr.get("mergeable") is False and pr.get("mergeable_state") == "dirty":
         print("ERROR: PR has merge conflicts", file=sys.stderr)
         sys.exit(1)
 
+    if not args.skip_review_check:
+        assert_review_gate(token, repo, pr_number)
+
     if not args.skip_ci_wait:
-        if not wait_for_ci(token, repo, branch, args.timeout, args.poll):
-            print("ERROR: CI not green — merge blocked", file=sys.stderr)
+        if not wait_for_checks_at_head(token, repo, head_sha, args.timeout, args.poll):
+            print("ERROR: CI not green on PR head — merge blocked", file=sys.stderr)
             sys.exit(1)
 
     title = pr.get("title")
@@ -242,12 +386,7 @@ def main() -> None:
 
     if args.card and CARD_RE.match(args.card):
         if args.plane_comment:
-            plane_done(
-                args.card,
-                pr_url,
-                pr_number,
-                args.evidence_file or None,
-            )
+            plane_done(args.card, pr_url, pr_number, args.evidence_file or None)
         else:
             print(f"Hint: run plane_state.py done --card {args.card}")
 

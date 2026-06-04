@@ -11,11 +11,18 @@ from typing import Any
 
 try:
     import yaml
-except ImportError:  # pragma: no cover - hook fails open when yaml is unavailable
+except ImportError:  # pragma: no cover
     yaml = None  # type: ignore[assignment]
 
 REPO = Path(__file__).resolve().parents[2]
 POLICY_PATH = REPO / ".sdlc" / "gateways" / "policy.yaml"
+POLICY_LOAD_DENY_USER = (
+    "SDLC gateway could not load policy — interaction blocked (fail-closed)."
+)
+POLICY_LOAD_DENY_AGENT = (
+    "Install PyYAML (`pip install pyyaml`) and ensure "
+    f"{POLICY_PATH.relative_to(REPO)} exists, then retry."
+)
 HANDOFF_PATH = REPO / ".sdlc" / "memory" / "orchestrator-handoff.md"
 OBS_STATE_PATH = REPO / ".sdlc_obs_state.json"
 SESSION_GATE_PATH = REPO / ".sdlc" / "memory" / "session-gate.json"
@@ -89,6 +96,17 @@ def load_policy() -> dict[str, Any]:
     with POLICY_PATH.open(encoding="utf-8") as f:
         data = yaml.safe_load(f) or {}
     return data if isinstance(data, dict) else {}
+
+
+def require_policy() -> dict[str, Any]:
+    """Load gateway policy or deny the interaction (fail-closed)."""
+    policy = load_policy()
+    if policy:
+        return policy
+    if yaml is None:
+        deny(POLICY_LOAD_DENY_USER, "PyYAML is not installed in the hook Python environment.")
+    deny(POLICY_LOAD_DENY_USER, POLICY_LOAD_DENY_AGENT)
+    return {}
 
 
 def allow(extra: dict[str, Any] | None = None) -> None:
