@@ -22,7 +22,6 @@ import sqlite3
 import time
 import uuid
 from pathlib import Path
-from typing import Optional
 
 _DEFAULT_DB = Path(__file__).parent / "data" / "sdlc_obs.db"
 _SCHEMA = Path(__file__).parent / "schema.sql"
@@ -41,7 +40,7 @@ VALID_STATUSES = {"completed", "failed", "escalated", "abandoned", "unknown"}
 
 
 class Collector:
-    def __init__(self, db_path: Optional[Path] = None) -> None:
+    def __init__(self, db_path: Path | None = None) -> None:
         self.db_path = Path(db_path) if db_path else _DEFAULT_DB
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
         self._init_db()
@@ -53,7 +52,7 @@ class Collector:
         task_name: str,
         stage: str,
         agent: str,
-        task_tags: Optional[list] = None,
+        task_tags: list | None = None,
         notes: str = "",
     ) -> str:
         """Open a new run. Returns the run_id to pass to end_run()."""
@@ -85,7 +84,7 @@ class Collector:
         tool_calls_total: int = 0,
         tool_calls_success: int = 0,
         tool_calls_failed: int = 0,
-        doctor_exit_code: Optional[int] = None,
+        doctor_exit_code: int | None = None,
         tests_passed: int = 0,
         tests_failed: int = 0,
         hallucination_flag: bool = False,
@@ -155,7 +154,7 @@ class Collector:
             rows = db.execute("SELECT * FROM sdlc_metrics").fetchall()
         return [dict(row) for row in rows]
 
-    def get_runs(self, limit: int = 100, stage: Optional[str] = None) -> list:
+    def get_runs(self, limit: int = 100, stage: str | None = None) -> list:
         """Return recent runs, optionally filtered by stage."""
         with self._conn() as db:
             if stage:

@@ -7,7 +7,6 @@ Usage:
 """
 from __future__ import annotations
 
-import os
 import subprocess
 import sys
 from pathlib import Path
@@ -314,7 +313,7 @@ def main() -> None:
         "file://" + str(html_path),
     ]
 
-    print(f"  Executando Chrome headless...")
+    print("  Executando Chrome headless...")
     result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
 
     if abs_output.exists() and abs_output.stat().st_size > 1000:

@@ -1,16 +1,15 @@
 """Schema-level consistency validation for SDLC configuration."""
 
-from typing import List, Tuple
 
 from .models import SDLCConfig
 
 # (level, message)
-Finding = Tuple[str, str]
+Finding = tuple[str, str]
 
 
-def validate(config: SDLCConfig) -> List[Finding]:
+def validate(config: SDLCConfig) -> list[Finding]:
     """Run all consistency checks. Returns list of (level, message) findings."""
-    findings: List[Finding] = []
+    findings: list[Finding] = []
 
     lifecycle_ids = {s.id for s in config.lifecycle_stages}
     stage_def_ids = {s.id for s in config.stage_definitions}
@@ -116,7 +115,7 @@ def validate(config: SDLCConfig) -> List[Finding]:
     return findings
 
 
-def _validate_lifecycle_model(findings: List[Finding], lifecycle_ids: set[str]) -> None:
+def _validate_lifecycle_model(findings: list[Finding], lifecycle_ids: set[str]) -> None:
     try:
         from pathlib import Path
 
@@ -135,8 +134,29 @@ def _validate_lifecycle_model(findings: List[Finding], lifecycle_ids: set[str]) 
     for lid in lifecycle_ids:
         if lid not in model_ids:
             findings.append(
-                ("WARN", f"lifecycle.yaml stage '{lid}' not in lifecycle-model.yaml")
+                (
+                    "FAIL",
+                    f"Loaded lifecycle stage '{lid}' not in lifecycle-model.yaml",
+                )
             )
+    if lifecycle_ids != model_ids and lifecycle_ids and model_ids:
+        findings.append(
+            (
+                "FAIL",
+                "Lifecycle stage set must match lifecycle-model.yaml exactly",
+            )
+        )
+
+    try:
+        from pathlib import Path
+
+        from .lifecycle_shard_drift import check_lifecycle_shard_drift
+
+        for level, message in check_lifecycle_shard_drift(Path(root)):
+            if level in ("FAIL", "WARN"):
+                findings.append((level, message))
+    except ImportError:
+        pass
 
     aliases = gate_stage_aliases(root)
     policy = load_write_policy(root)

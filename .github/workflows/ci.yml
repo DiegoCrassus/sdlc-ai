@@ -40,6 +40,24 @@ jobs:
           python3 -m pytest .sdlc/dsl -q --tb=short
           python3 -m pytest .cursor/hooks/test_sdlc_gateway.py -q --tb=short
 
+  sdlc-ruff:
+    name: SDLC Ruff
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - run: pip install ruff
+      - name: Lint SDLC Python paths
+        run: |
+          ruff check .sdlc/dsl .sdlc/scripts \
+            .cursor/hooks/sdlc_gateway_lib.py \
+            .cursor/hooks/sdlc_gate_hook.py \
+            .cursor/hooks/sdlc_pre_gateway.py \
+            .cursor/hooks/sdlc_post_gateway.py \
+            app/infra/sdlc_obs
+
   sdlc-validate:
     name: SDLC Validate
     runs-on: ubuntu-latest

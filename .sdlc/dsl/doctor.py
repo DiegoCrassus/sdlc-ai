@@ -5,6 +5,7 @@ from __future__ import annotations
 import os
 import subprocess
 import sys
+from datetime import UTC
 from pathlib import Path
 from typing import Any
 
@@ -223,7 +224,43 @@ def run_doctor(root: str) -> list[Finding]:
     except Exception as exc:
         findings.append(("WARN", f"roster sync check skipped: {exc}"))
 
+    try:
+        sys.path.insert(0, os.path.join(root, ".sdlc", "dsl"))
+        from lifecycle_shard_drift import (  # noqa: WPS433
+            check_committed_plane_evidence,
+            check_lifecycle_shard_drift,
+        )
+
+        for level, message in check_lifecycle_shard_drift(Path(root)):
+            findings.append((level, message))
+        findings.append(check_committed_plane_evidence(Path(root)))
+    except Exception as exc:
+        findings.append(("WARN", f"lifecycle shard drift check skipped: {exc}"))
+
     return findings
+
+
+def _write_compliance_metrics(findings: list[Finding], root: Path) -> None:
+    """Persist Doctor health for obs/auditor (P2.2 compliance metrics)."""
+    import json
+    from datetime import datetime
+
+    pass_count = sum(1 for lvl, _ in findings if lvl == "PASS")
+    warn_count = sum(1 for lvl, _ in findings if lvl == "WARN")
+    fail_count = sum(1 for lvl, _ in findings if lvl == "FAIL")
+    total = max(len(findings), 1)
+    payload = {
+        "source": "sdlc-doctor",
+        "updated_at": datetime.now(UTC).isoformat(),
+        "pass": pass_count,
+        "warn": warn_count,
+        "fail": fail_count,
+        "health_pct": round(pass_count / total * 100),
+        "compliance_pct": round((pass_count + warn_count * 0.5) / total * 100),
+    }
+    out = root / ".sdlc" / "memory" / "sdlc-compliance.json"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
 
 
 def print_report(findings: list[Finding], root: str | None = None) -> int:
@@ -246,6 +283,11 @@ def print_report(findings: list[Finding], root: str | None = None) -> int:
     print(f"Doctor summary: {pass_count} passed, {warn_count} warnings, {fail_count} failed")
 
     repo = Path(root or os.getcwd())
+    try:
+        _write_compliance_metrics(findings, repo)
+    except Exception as exc:
+        print(f"[WARN] Could not write compliance metrics: {exc}")
+
     try:
         from doctor_health_canvas import write_health_canvas  # noqa: WPS433
 

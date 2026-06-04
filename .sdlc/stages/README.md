@@ -1,6 +1,8 @@
 # Stages module
 
-> **Data:** [`lifecycle.yaml`](lifecycle.yaml) + [`definitions.yaml`](definitions.yaml) · **Index:** `contract.modules.stages`
+> **Canonical stage graph:** [`../process/lifecycle-model.yaml`](../process/lifecycle-model.yaml)  
+> **Shim:** [`lifecycle.yaml`](lifecycle.yaml) (must match model; Doctor **FAIL** on drift)  
+> **Definitions:** [`definitions.yaml`](definitions.yaml) · **Index:** `contract.modules.stages`
 
 ## Purpose
 

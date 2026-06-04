@@ -37,8 +37,8 @@ def transition_allowed(
         return True, "fresh start or same stage"
 
     try:
-        from lifecycle_model import gate_stage_aliases, load_model  # noqa: PLC0415
         from gate import repo_root  # noqa: PLC0415
+        from lifecycle_model import gate_stage_aliases, load_model  # noqa: PLC0415
     except ImportError as exc:
         return True, f"skip transition check: {exc}"
 

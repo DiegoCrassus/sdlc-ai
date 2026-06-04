@@ -1,6 +1,7 @@
 # Pipeline module
 
-> **Data:** [`agents.yaml`](agents.yaml) · **Catalog:** [`../manifest/catalog.yaml`](../manifest/catalog.yaml)
+> **Canonical roster:** [`../manifest/catalog.yaml`](../manifest/catalog.yaml) (Doctor syncs with `gateways/policy.yaml`)  
+> **Runtime bindings:** [`agents.yaml`](agents.yaml) · **Stages:** [`../process/lifecycle-model.yaml`](../process/lifecycle-model.yaml)
 
 ## Purpose
 

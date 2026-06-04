@@ -55,3 +55,19 @@ def gate_stage_aliases(root: Path | None = None) -> dict[str, list[str]]:
     model = load_model(root)
     raw = model.get("gate_stage_aliases") or {}
     return {str(k): list(v) for k, v in raw.items() if isinstance(v, list)}
+
+
+def transition_overlay(root: Path | None = None) -> dict[str, dict[str, Any]]:
+    """Legacy workflows/transitions.yaml metadata keyed by transition id (graph from model)."""
+    if yaml is None:
+        return {}
+    from gate import repo_root  # noqa: PLC0415
+
+    base = root or repo_root()
+    path = base / ".sdlc" / "workflows" / "transitions.yaml"
+    if not path.is_file():
+        return {}
+    with path.open(encoding="utf-8") as fh:
+        data = yaml.safe_load(fh) or {}
+    workflows = data.get("workflows") if isinstance(data, dict) else []
+    return {str(w["id"]): w for w in workflows or [] if w.get("id")}
