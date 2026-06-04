@@ -69,7 +69,7 @@ jobs:
     steps:
       - name: Evaluate gates
         run: |
-          for result in "${{ needs.sdlc-doctor.result }}" "${{ needs.secrets-scan.result }}"; do
+          for result in "${{ needs.sdlc-doctor.result }}" "${{ needs.secrets-scan.result }}" "${{ needs.studio-e2e.result }}"; do
             if [ "$result" = "failure" ]; then
               echo "❌ Gate failed"
               exit 1
