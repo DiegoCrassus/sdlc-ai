@@ -3,13 +3,13 @@
 from __future__ import annotations
 
 import json
+import os
 import re
 import sqlite3
 import uuid
-import os
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 _DEFAULT_DB = Path(__file__).parent / "data" / "sdlc_obs.db"
 _SCHEMA = Path(__file__).parent / "schema.sql"
@@ -60,7 +60,7 @@ def utc_now_iso() -> str:
 class EventStore:
     """Append-only store for unified timeline events."""
 
-    def __init__(self, db_path: Optional[Path] = None) -> None:
+    def __init__(self, db_path: Path | None = None) -> None:
         if db_path is not None:
             resolved = Path(db_path)
         elif env_db := os.environ.get("SDLC_OBS_DB"):
