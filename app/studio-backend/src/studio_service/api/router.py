@@ -7,7 +7,9 @@ from studio_service.api.routes import (
     config,
     dashboard,
     engine,
+    evidence,
     health,
+    integrations,
     obs,
     proposals,
     readiness,
@@ -28,3 +30,5 @@ router.include_router(proposals.router)
 router.include_router(config.router)
 router.include_router(registry.router)
 router.include_router(validation_suite.router)
+router.include_router(integrations.router)
+router.include_router(evidence.router)
