@@ -24,6 +24,12 @@ import type {
   WorkflowAssistanceParams,
   WorkflowAssistanceResponse,
 } from "../types/foundation";
+import type { EvidenceDraftParams, EvidenceDraftResponse } from "../types/evidence";
+import type {
+  GitHubChecksResponse,
+  GitHubPullsResponse,
+  PlaneCardDetail,
+} from "../types/integrations";
 import type {
   DashboardSummary,
   ReadinessResponse,
@@ -146,4 +152,20 @@ export const studioApi = {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(params ?? {}),
     }),
+  evidenceDraft: (params?: EvidenceDraftParams) =>
+    request<EvidenceDraftResponse>("/evidence/draft", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(params ?? {}),
+    }),
+  planeCard: (card: string) =>
+    request<PlaneCardDetail>(`/integrations/plane/cards/${encodeURIComponent(card)}`),
+  githubPulls: (base = "develop") =>
+    request<GitHubPullsResponse>(
+      `/integrations/github/pulls?${new URLSearchParams({ base })}`,
+    ),
+  githubChecks: (ref: string) =>
+    request<GitHubChecksResponse>(
+      `/integrations/github/checks?${new URLSearchParams({ ref })}`,
+    ),
 };

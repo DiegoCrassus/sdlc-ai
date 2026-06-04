@@ -65,6 +65,7 @@ npm run smoke         # optional; requires API on :8100
 | `/builder` | Workflow builder (propose-only) | S4 |
 | `/observability` | Live timeline + SSE | S3 |
 | `/agents`, `/rules`, `/registry`, … | Builders & explorers | S4–S5 |
+| `/evidence` | Evidence draft, PR/CI panel, Plane copy helper | S6 |
 
 ## React Flow boundaries
 
