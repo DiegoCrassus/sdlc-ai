@@ -7,7 +7,7 @@ type BuilderShellProps = {
   inspector: ReactNode;
 };
 
-/** Three-panel builder layout: toolbox (240–480px), canvas (flex), inspector (~320px). */
+/** Three-panel builder layout: toolbox (280–480px), canvas (flex), inspector (~320px). */
 export function BuilderShell({ toolbox, canvas, inspector }: BuilderShellProps) {
   return (
     <PanelGroup
@@ -17,10 +17,10 @@ export function BuilderShell({ toolbox, canvas, inspector }: BuilderShellProps) 
     >
       <Panel
         id="builder-toolbox-panel"
-        defaultSize={18}
-        minSize={15}
+        defaultSize={22}
+        minSize={22}
         maxSize={32}
-        className="min-w-[240px] max-w-[480px]"
+        className="min-w-[280px] max-w-[480px]"
       >
         <div className="flex h-full flex-col overflow-hidden p-3" data-testid="builder-toolbox">
           {toolbox}
