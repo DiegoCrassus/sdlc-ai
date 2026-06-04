@@ -78,6 +78,7 @@ post_gateway:
   reroute_on_missing_handoff: true
   reroute_on_incomplete_stage: true
   reroute_on_blockers: true
+  verify_handoff_evidence: true
   max_autofix_cycles: 2
 
 # Studio S4 propose-only mutations (INVES-84). Reference for gateway-check simulation;

@@ -82,6 +82,7 @@ contract:
         - process/master-workflow.md
         - process/change-lifecycle.md
         - process/lifecycle-model.yaml
+        - process/intent_rules.yaml
 
 core:
   schema: sdlc-core/v1

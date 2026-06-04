@@ -110,6 +110,32 @@ def main() -> None:
             [line for line in blockers.splitlines() if line.strip()],
         )
 
+    if stage_complete == "yes" and (policy.get("post_gateway") or {}).get(
+        "verify_handoff_evidence", True
+    ):
+        try:
+            import subprocess
+            from pathlib import Path
+
+            repo = Path(__file__).resolve().parents[2]
+            script = repo / ".sdlc" / "scripts" / "handoff_evidence_verify.py"
+            if script.is_file():
+                proc = subprocess.run(
+                    [sys.executable, str(script)],
+                    cwd=repo,
+                    capture_output=True,
+                    text=True,
+                )
+                if proc.returncode != 0:
+                    detail = (proc.stderr or proc.stdout or "verification failed").strip()
+                    followup(
+                        previous or "qa",
+                        "handoff evidence verification failed",
+                        detail.splitlines()[:8],
+                    )
+        except Exception as exc:
+            followup(previous, "handoff evidence verifier error", [str(exc)])
+
     sys.exit(0)
 
 
