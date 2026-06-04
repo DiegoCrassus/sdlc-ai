@@ -1,10 +1,5 @@
 #!/usr/bin/env python3
-"""
-Cursor preToolUse hook — block Write to protected paths when SDLC gate is closed.
-
-Hook event: preToolUse (matcher: Write)
-Exit 0 + permission deny JSON = block write
-"""
+"""Cursor preToolUse — block Write when SDLC gate is closed."""
 
 from __future__ import annotations
 
@@ -18,15 +13,17 @@ DSL = REPO / ".sdlc" / "dsl"
 if str(DSL) not in sys.path:
     sys.path.insert(0, str(DSL))
 
-import importlib.util
+try:
+    import gate as _gate  # noqa: E402
+except Exception as _gate_exc:
+    _GATE_LOAD_FAILED = _gate_exc
+else:
+    _GATE_LOAD_FAILED = None
 
-_spec = importlib.util.spec_from_file_location("_gate", DSL / "gate.py")
-if _spec is None or _spec.loader is None:
-    print(json.dumps({"permission": "allow"}))
+
+def _deny(user: str, agent: str) -> None:
+    print(json.dumps({"permission": "deny", "user_message": user, "agent_message": agent}))
     sys.exit(0)
-
-_gate = importlib.util.module_from_spec(_spec)
-_spec.loader.exec_module(_gate)
 
 
 def _extract_write_path(payload: dict) -> str:
@@ -55,52 +52,42 @@ def _emit_gate_event(event_type: str, payload: dict) -> None:
 
 
 def main() -> None:
+    if _GATE_LOAD_FAILED is not None:
+        _deny(
+            "SDLC gate module failed to load — write blocked.",
+            f"Fix .sdlc/dsl/gate.py import error: {_GATE_LOAD_FAILED}",
+        )
+
     raw = sys.stdin.read()
     if not raw.strip():
         print(json.dumps({"permission": "allow"}))
-        sys.exit(0)
+        return
 
     try:
         payload = json.loads(raw)
     except json.JSONDecodeError:
-        print(json.dumps({"permission": "allow"}))
-        sys.exit(0)
+        _deny("SDLC gate: invalid payload.", "Non-JSON stdin on Write hook.")
 
-    rel_path = _extract_write_path(payload)
-    if not rel_path:
+    rel = _extract_write_path(payload)
+    if not rel:
         print(json.dumps({"permission": "allow"}))
-        sys.exit(0)
+        return
 
-    ok, msg = _gate.check_write(rel_path, REPO)
+    ok, msg = _gate.check_write(rel, REPO)
     if ok:
-        _emit_gate_event("gate.write_allowed", {"path": rel_path, "tool": "Write"})
+        _emit_gate_event("gate.write_allowed", {"path": rel, "tool": "Write"})
         print(json.dumps({"permission": "allow"}))
-        sys.exit(0)
+        return
 
     card = _gate.load_session_gate(REPO).card or "INVES-N"
     _emit_gate_event(
         "gate.write_denied",
-        {
-            "path": rel_path,
-            "reason": msg,
-            "card_required": card,
-        },
+        {"path": rel, "reason": msg, "card_required": card},
     )
-    agent_msg = (
-        f"SDLC gate blocked write to '{rel_path}'. {msg} "
-        f"Auto-fix: python3 .sdlc/dsl/cli.py workflow start --card {card} --stage sdlc_meta "
-        f"(product impl: --stage implementation)"
+    _deny(
+        "SDLC gate: write blocked on protected path.",
+        f"Blocked '{rel}'. {msg} Run: workflow start --card {card} --stage sdlc_meta",
     )
-    print(
-        json.dumps(
-            {
-                "permission": "deny",
-                "user_message": "SDLC gate: write blocked on protected path.",
-                "agent_message": agent_msg,
-            }
-        )
-    )
-    sys.exit(0)
 
 
 if __name__ == "__main__":

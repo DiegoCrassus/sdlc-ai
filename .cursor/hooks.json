@@ -10,18 +10,18 @@
       {
         "command": "python3 .cursor/hooks/sdlc_gate_hook.py",
         "matcher": "Write",
-        "failClosed": false
+        "failClosed": true
       },
       {
         "command": "python3 .cursor/hooks/sdlc_pre_gateway.py",
         "matcher": "Task|Subagent|Shell",
-        "failClosed": false
+        "failClosed": true
       }
     ],
     "beforeShellExecution": [
       {
         "command": "python3 .cursor/hooks/sdlc_pre_gateway.py",
-        "failClosed": false
+        "failClosed": true
       }
     ],
     "postToolUse": [
@@ -33,13 +33,13 @@
     "subagentStart": [
       {
         "command": "python3 .cursor/hooks/sdlc_pre_gateway.py",
-        "failClosed": false
+        "failClosed": true
       }
     ],
     "subagentStop": [
       {
         "command": "python3 .cursor/hooks/sdlc_post_gateway.py",
-        "failClosed": false,
+        "failClosed": true,
         "loop_limit": 2
       }
     ],

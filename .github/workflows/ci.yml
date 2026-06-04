@@ -26,6 +26,32 @@ jobs:
         run: python3 app/infra/sdlc_obs/auditor.py
         continue-on-error: true
 
+  sdlc-pytest:
+    name: SDLC Pytest
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - run: pip install pyyaml pytest httpx
+      - name: Run SDLC DSL and gateway tests
+        run: |
+          python3 -m pytest .sdlc/dsl -q --tb=short
+          python3 -m pytest .cursor/hooks/test_sdlc_gateway.py -q --tb=short
+
+  sdlc-validate:
+    name: SDLC Validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - run: pip install pyyaml
+      - name: Run SDLC validate
+        run: make sdlc-validate
+
   secrets-scan:
     name: Secrets Scan (gitleaks)
     runs-on: ubuntu-latest
@@ -63,13 +89,18 @@ jobs:
 
   auto-merge-gate:
     name: Auto-Merge Gate
-    needs: [sdlc-doctor, secrets-scan, studio-e2e]
+    needs: [sdlc-doctor, sdlc-pytest, sdlc-validate, secrets-scan, studio-e2e]
     runs-on: ubuntu-latest
     if: always()
     steps:
       - name: Evaluate gates
         run: |
-          for result in "${{ needs.sdlc-doctor.result }}" "${{ needs.secrets-scan.result }}" "${{ needs.studio-e2e.result }}"; do
+          for result in \
+            "${{ needs.sdlc-doctor.result }}" \
+            "${{ needs.sdlc-pytest.result }}" \
+            "${{ needs.sdlc-validate.result }}" \
+            "${{ needs.secrets-scan.result }}" \
+            "${{ needs.studio-e2e.result }}"; do
             if [ "$result" = "failure" ]; then
               echo "❌ Gate failed"
               exit 1

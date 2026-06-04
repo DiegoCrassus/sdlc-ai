@@ -230,14 +230,22 @@ def cmd_arch(args: argparse.Namespace) -> int:
 
 
 def cmd_start(args: argparse.Namespace) -> int:
+    from break_glass import require_break_glass  # noqa: E402
+
     card = args.card
     if not card:
         print("ERROR: --card INVES-N required", file=sys.stderr)
         return 1
 
+    if args.force and not require_break_glass("--force"):
+        return 1
+    if args.skip_plane and not require_break_glass("--skip-plane"):
+        return 1
+    if args.skip_validate and not require_break_glass("--skip-validate"):
+        return 1
+
     # Block workflow start on epic — use child implementable card
     try:
-
         sys.path.insert(0, str(ROOT / ".sdlc" / "scripts"))
         from plane_card import _api, find_issue_uuid, get_issue, parse_card  # noqa: E402
 
@@ -254,9 +262,12 @@ def cmd_start(args: argparse.Namespace) -> int:
             )
             return 1
     except SystemExit:
-        pass
+        raise
     except Exception as exc:
-        print(f"WARN: could not verify epic/child: {exc}")
+        if not args.force:
+            print(f"ERROR: could not verify epic/child (Plane API): {exc}", file=sys.stderr)
+            return 1
+        print(f"WARN: could not verify epic/child: {exc}", file=sys.stderr)
 
     stage = args.stage or "implementation"
     branch = args.branch or f"feature/{card}-{args.slug or 'work'}"
@@ -277,7 +288,8 @@ def cmd_start(args: argparse.Namespace) -> int:
                 cwd=ROOT,
             )
             if proc.returncode != 0 and not args.force:
-                print("WARN: plane_state in-progress failed (use --force to open gate anyway)")
+                print("ERROR: plane_state in-progress failed — gate stays closed", file=sys.stderr)
+                return proc.returncode
 
     if not args.skip_validate and stage != "sdlc_meta":
         plan_rc = cmd_plan(argparse.Namespace(card=card))

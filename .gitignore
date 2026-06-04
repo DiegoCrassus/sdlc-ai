@@ -118,5 +118,9 @@ simulacao-end-to-end-sdlc.pdf
 .sdlc_obs_state.json
 .sdlc/memory/session-gate.json
 .sdlc/memory/doctor-health.json
+.sdlc/memory/.evidence-*.json
+.sdlc/memory/qa-evidence-*.json
+.sdlc/memory/.plane-evidence-tmp.json
+.sdlc/templates/plane/evidence-INVES-*.json
 app/infra/sdlc_obs/data/
 tests/e2e/test-results/
