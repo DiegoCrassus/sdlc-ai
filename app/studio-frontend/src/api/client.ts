@@ -30,6 +30,7 @@ import type {
   GitHubPullsResponse,
   PlaneCardDetail,
 } from "../types/integrations";
+import type { PipelineMetadataResponse } from "../types/pipeline";
 import type {
   DashboardSummary,
   ReadinessResponse,
@@ -90,6 +91,9 @@ export const studioApi = {
   dashboardSummary: () => request<DashboardSummary>("/dashboard/summary"),
   canvasFull: (filters?: CanvasFilterParams) =>
     request<CanvasFullResponse>(`/canvas/full${canvasQueryString(filters)}`),
+  canvasWorkflowBuilder: () =>
+    request<CanvasFullResponse>("/canvas/workflow-builder"),
+  pipelineMetadata: () => request<PipelineMetadataResponse>("/metadata/pipeline"),
   canvasNode: (displayId: string) =>
     request<CanvasNodeDetailResponse>(`/canvas/nodes/${encodeURIComponent(displayId)}`),
   obsTimeline: (filters?: ObsFilterParams) =>

@@ -9,8 +9,21 @@ from studio_service.config import Settings, get_settings
 from studio_service.deps import EngineSvc, RepoRoot, resolve_repo_root
 from studio_service.schemas.canvas import CanvasFullResponse, CanvasNodeDetailResponse
 from studio_service.services.canvas import apply_canvas_filters, canvas_etag, node_detail
+from studio_service.services.workflow_builder_canvas import build_workflow_builder_canvas
 
 router = APIRouter(prefix="/canvas", tags=["s2-canvas"])
+
+
+@router.get("/workflow-builder", response_model=CanvasFullResponse)
+def canvas_workflow_builder(
+    repo_root: RepoRoot,
+    settings: Annotated[Settings, Depends(get_settings)],
+    root: str | None = Query(default=None, description="Repository root override"),
+) -> dict:
+    """Lifecycle stages and workflow transitions for the propose-only builder."""
+
+    target = resolve_repo_root(root, settings) if root else repo_root
+    return build_workflow_builder_canvas(target)
 
 
 @router.get("/full", response_model=CanvasFullResponse)

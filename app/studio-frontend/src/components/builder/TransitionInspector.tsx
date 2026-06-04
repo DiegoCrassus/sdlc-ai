@@ -1,7 +1,10 @@
+import type { PipelineAgentMeta, PipelineSkillMeta } from "../../types/pipeline";
 import type { WorkflowTransitionDraft } from "../../types/builder";
 
 type TransitionInspectorProps = {
   draft: WorkflowTransitionDraft | null;
+  agents: PipelineAgentMeta[];
+  skills: PipelineSkillMeta[];
   onChange: (draft: WorkflowTransitionDraft) => void;
   onRemove: (edgeDisplayId: string) => void;
   onClose: () => void;
@@ -18,16 +21,33 @@ function joinList(items: string[]): string {
   return items.join("\n");
 }
 
+function skillOptionsForAgent(agentId: string, agents: PipelineAgentMeta[], skills: PipelineSkillMeta[]) {
+  const agent = agents.find((item) => item.id === agentId);
+  const primary = agent?.skill.id;
+  const ids = new Set(skills.map((skill) => skill.id));
+  if (primary) {
+    ids.add(primary);
+  }
+  return [...ids].sort();
+}
+
 export function TransitionInspector({
   draft,
+  agents,
+  skills,
   onChange,
   onRemove,
   onClose,
 }: TransitionInspectorProps) {
   if (!draft) {
     return (
-      <div className="rounded-xl border border-dashed border-slate-700 bg-surface-card/40 p-4 text-sm text-slate-500">
-        Select a transition edge to edit agent, skill, and preconditions.
+      <div
+        data-testid="builder-inspector"
+        className="rounded-xl border border-dashed border-slate-700 bg-surface-card/40 p-4 text-sm text-slate-500"
+      >
+        Drag from the <strong className="text-slate-300">bottom handle</strong> of one stage to the{" "}
+        <strong className="text-slate-300">top handle</strong> of another to create a transition.
+        Then set agent and skill (Cursor subagents).
       </div>
     );
   }
@@ -36,8 +56,13 @@ export function TransitionInspector({
     onChange({ ...draft, ...patch });
   };
 
+  const skillChoices = skillOptionsForAgent(draft.agent, agents, skills);
+
   return (
-    <div className="flex flex-col gap-4 rounded-xl border border-slate-800 bg-surface-card p-4">
+    <div
+      data-testid="builder-inspector"
+      className="flex flex-col gap-4 rounded-xl border border-slate-800 bg-surface-card p-4"
+    >
       <div className="flex items-start justify-between gap-2">
         <div>
           <p className="text-xs uppercase tracking-wide text-slate-500">Transition</p>
@@ -92,20 +117,41 @@ export function TransitionInspector({
 
       <div className="grid grid-cols-2 gap-3 text-sm">
         <label className="block">
-          <span className="text-slate-400">Agent</span>
-          <input
+          <span className="text-slate-400">Cursor subagent</span>
+          <select
+            data-testid="builder-inspector-agent"
             className="mt-1 w-full rounded-md border border-slate-700 bg-slate-900 px-3 py-2 font-mono text-xs text-white"
             value={draft.agent}
-            onChange={(event) => update({ agent: event.target.value })}
-          />
+            onChange={(event) => {
+              const agent = event.target.value;
+              const linked = agents.find((item) => item.id === agent);
+              update({
+                agent,
+                skill: linked?.skill.id ?? draft.skill,
+              });
+            }}
+          >
+            {agents.map((agent) => (
+              <option key={agent.id} value={agent.id}>
+                {agent.name}
+              </option>
+            ))}
+          </select>
         </label>
         <label className="block">
           <span className="text-slate-400">Skill</span>
-          <input
+          <select
+            data-testid="builder-inspector-skill"
             className="mt-1 w-full rounded-md border border-slate-700 bg-slate-900 px-3 py-2 font-mono text-xs text-white"
             value={draft.skill}
             onChange={(event) => update({ skill: event.target.value })}
-          />
+          >
+            {skillChoices.map((skillId) => (
+              <option key={skillId} value={skillId}>
+                {skills.find((skill) => skill.id === skillId)?.name ?? skillId}
+              </option>
+            ))}
+          </select>
         </label>
       </div>
 

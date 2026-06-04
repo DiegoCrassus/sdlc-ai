@@ -3,6 +3,9 @@ import { Link, useSearchParams } from "react-router-dom";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
 import { studioApi } from "../api/client";
+import { AssetPalette } from "../components/builder/AssetPalette";
+import { BuilderShell } from "../components/builder/BuilderShell";
+import { BuilderToast } from "../components/builder/BuilderToast";
 import { ProposalPanel } from "../components/builder/ProposalPanel";
 import { ProposedBanner } from "../components/builder/ProposedBanner";
 import { TransitionInspector } from "../components/builder/TransitionInspector";
@@ -25,11 +28,19 @@ export function WorkflowBuilderPage() {
   const [simulatedCard, setSimulatedCard] = useState("INVES-N");
   const [proposal, setProposal] = useState<ProposalResponse | null>(null);
   const [initialized, setInitialized] = useState(false);
+  const [focusNodeId, setFocusNodeId] = useState<string | null>(highlightedNodeId);
+  const [connectOnClick, setConnectOnClick] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const canvasQuery = useQuery({
-    queryKey: ["studio", "canvas", "full", "builder"],
-    queryFn: () => studioApi.canvasFull({ entity_type: "stage" }),
+    queryKey: ["studio", "canvas", "workflow-builder"],
+    queryFn: () => studioApi.canvasWorkflowBuilder(),
     refetchInterval: 60_000,
+  });
+
+  const pipelineQuery = useQuery({
+    queryKey: ["studio", "metadata", "pipeline"],
+    queryFn: () => studioApi.pipelineMetadata(),
   });
 
   const sessionQuery = useQuery({
@@ -50,6 +61,14 @@ export function WorkflowBuilderPage() {
       setInitialized(true);
     }
   }, [canvasQuery.data, initialized]);
+
+  useEffect(() => {
+    if (!toastMessage) {
+      return undefined;
+    }
+    const timer = window.setTimeout(() => setToastMessage(null), 5000);
+    return () => window.clearTimeout(timer);
+  }, [toastMessage]);
 
   const nodes = canvasQuery.data?.nodes ?? [];
   const nodesById = useMemo(() => new Map(nodes.map((node) => [node.id, node])), [nodes]);
@@ -79,6 +98,7 @@ export function WorkflowBuilderPage() {
 
       const created = createTransitionDraft(sourceDisplayId, targetDisplayId, nodesById);
       if (!created) {
+        setToastMessage("Could not create transition between these stages.");
         return;
       }
 
@@ -95,6 +115,10 @@ export function WorkflowBuilderPage() {
     setProposal(null);
   }, []);
 
+  const onConnectionFailed = useCallback((message: string) => {
+    setToastMessage(message);
+  }, []);
+
   const createProposalMutation = useMutation({
     mutationFn: () => {
       const body = buildWorkflowProposalRequest(drafts, proposalTitle.trim(), simulatedCard.trim());
@@ -105,7 +129,7 @@ export function WorkflowBuilderPage() {
 
   if (canvasQuery.isError) {
     return (
-      <div className="mx-auto max-w-3xl space-y-4">
+      <div className="mx-auto max-w-3xl space-y-4" data-testid="builder-page">
         <ProposedBanner />
         <div className="rounded-lg border border-studio-fail/40 bg-red-950/40 p-4 text-red-200">
           <p className="font-medium">Cannot load workflow builder</p>
@@ -120,15 +144,16 @@ export function WorkflowBuilderPage() {
   }
 
   return (
-    <div className="mx-auto flex max-w-[1600px] flex-col gap-4">
+    <div className="mx-auto flex max-w-[1600px] flex-col gap-4" data-testid="builder-page">
       <ProposedBanner />
+      <BuilderToast message={toastMessage} onDismiss={() => setToastMessage(null)} />
 
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-white">Workflow Builder</h1>
           <p className="mt-1 text-sm text-slate-400">
-            Connect stage nodes to draft transitions, then export a propose-only patch via{" "}
-            <code className="text-slate-300">POST /studio/proposals</code>.
+            Author SDLC lifecycle transitions (10 stages). Assign a Cursor subagent per edge, then
+            export a propose-only patch — apply via git/Plane; agents run in Cursor, not here.
           </p>
         </div>
         <Link
@@ -139,71 +164,84 @@ export function WorkflowBuilderPage() {
         </Link>
       </div>
 
-      <div className="grid gap-4 rounded-xl border border-slate-800 bg-surface-card/30 p-4 lg:grid-cols-[1fr_320px]">
-        <div className="space-y-3">
-          <p className="text-xs text-slate-500">
-            Drag from one stage handle to another to add a transition. Select an edge to edit
-            metadata. Press Delete to remove.
-          </p>
-          {canvasQuery.isLoading ? (
+      <BuilderShell
+        toolbox={
+          pipelineQuery.data ? (
+            <AssetPalette
+              stages={pipelineQuery.data.stages}
+              agents={pipelineQuery.data.agents}
+              onFocusStage={(id) => setFocusNodeId(id)}
+            />
+          ) : (
+            <p className="text-xs text-slate-500">Loading SDLC assets…</p>
+          )
+        }
+        canvas={
+          canvasQuery.isLoading ? (
             <p className="text-slate-400">Loading stages…</p>
           ) : (
-            <div className="h-[calc(100vh-22rem)] min-h-[420px]">
-              <WorkflowBuilderCanvas
-                nodes={nodes}
-                drafts={drafts}
-                selectedEdgeId={selectedEdgeId}
-                highlightedNodeId={highlightedNodeId}
-                onSelectEdge={setSelectedEdgeId}
-                onConnectStages={onConnectStages}
-                onRemoveEdge={onRemoveEdge}
-              />
+            <WorkflowBuilderCanvas
+              nodes={nodes}
+              drafts={drafts}
+              selectedEdgeId={selectedEdgeId}
+              highlightedNodeId={focusNodeId ?? highlightedNodeId}
+              connectOnClick={connectOnClick}
+              onConnectOnClickChange={setConnectOnClick}
+              onSelectEdge={setSelectedEdgeId}
+              onConnectStages={onConnectStages}
+              onRemoveEdge={onRemoveEdge}
+              onSelectNode={setFocusNodeId}
+              onConnectionFailed={onConnectionFailed}
+            />
+          )
+        }
+        inspector={
+          <>
+            <TransitionInspector
+              draft={selectedDraft}
+              agents={pipelineQuery.data?.agents ?? []}
+              skills={pipelineQuery.data?.skills ?? []}
+              onChange={updateDraft}
+              onRemove={onRemoveEdge}
+              onClose={() => setSelectedEdgeId(null)}
+            />
+
+            <div className="rounded-xl border border-slate-800 bg-surface-card p-4">
+              <p className="text-xs uppercase tracking-wide text-slate-500">Export proposal</p>
+              <label className="mt-3 block text-sm">
+                <span className="text-slate-400">Title</span>
+                <input
+                  className="mt-1 w-full rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-white"
+                  value={proposalTitle}
+                  onChange={(event) => setProposalTitle(event.target.value)}
+                />
+              </label>
+              <label className="mt-3 block text-sm">
+                <span className="text-slate-400">Simulated gate card</span>
+                <input
+                  className="mt-1 w-full rounded-md border border-slate-700 bg-slate-900 px-3 py-2 font-mono text-xs text-white"
+                  value={simulatedCard}
+                  onChange={(event) => setSimulatedCard(event.target.value)}
+                />
+              </label>
+              <button
+                type="button"
+                data-testid="builder-create-proposal"
+                disabled={createProposalMutation.isPending || drafts.length === 0}
+                onClick={() => createProposalMutation.mutate()}
+                className="mt-4 w-full rounded-md bg-studio-accent px-4 py-2 text-sm font-medium text-slate-950 hover:bg-sky-300 disabled:opacity-50"
+              >
+                {createProposalMutation.isPending ? "Creating proposal…" : "Create proposal"}
+              </button>
+              {createProposalMutation.error ? (
+                <p className="mt-2 text-sm text-red-300">
+                  {(createProposalMutation.error as Error).message}
+                </p>
+              ) : null}
             </div>
-          )}
-        </div>
-
-        <div className="space-y-4">
-          <TransitionInspector
-            draft={selectedDraft}
-            onChange={updateDraft}
-            onRemove={onRemoveEdge}
-            onClose={() => setSelectedEdgeId(null)}
-          />
-
-          <div className="rounded-xl border border-slate-800 bg-surface-card p-4">
-            <p className="text-xs uppercase tracking-wide text-slate-500">Export proposal</p>
-            <label className="mt-3 block text-sm">
-              <span className="text-slate-400">Title</span>
-              <input
-                className="mt-1 w-full rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-white"
-                value={proposalTitle}
-                onChange={(event) => setProposalTitle(event.target.value)}
-              />
-            </label>
-            <label className="mt-3 block text-sm">
-              <span className="text-slate-400">Simulated gate card</span>
-              <input
-                className="mt-1 w-full rounded-md border border-slate-700 bg-slate-900 px-3 py-2 font-mono text-xs text-white"
-                value={simulatedCard}
-                onChange={(event) => setSimulatedCard(event.target.value)}
-              />
-            </label>
-            <button
-              type="button"
-              disabled={createProposalMutation.isPending || drafts.length === 0}
-              onClick={() => createProposalMutation.mutate()}
-              className="mt-4 w-full rounded-md bg-studio-accent px-4 py-2 text-sm font-medium text-slate-950 hover:bg-sky-300 disabled:opacity-50"
-            >
-              {createProposalMutation.isPending ? "Creating proposal…" : "Create proposal"}
-            </button>
-            {createProposalMutation.error ? (
-              <p className="mt-2 text-sm text-red-300">
-                {(createProposalMutation.error as Error).message}
-              </p>
-            ) : null}
-          </div>
-        </div>
-      </div>
+          </>
+        }
+      />
 
       {proposal ? (
         <ProposalPanel

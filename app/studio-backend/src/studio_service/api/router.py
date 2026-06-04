@@ -10,6 +10,7 @@ from studio_service.api.routes import (
     evidence,
     health,
     integrations,
+    metadata,
     obs,
     proposals,
     readiness,
@@ -32,3 +33,4 @@ router.include_router(registry.router)
 router.include_router(validation_suite.router)
 router.include_router(integrations.router)
 router.include_router(evidence.router)
+router.include_router(metadata.router)
