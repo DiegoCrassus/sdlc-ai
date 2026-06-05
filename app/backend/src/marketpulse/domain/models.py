@@ -296,3 +296,45 @@ class PortfolioHistoryResponse(BaseModel):
 class CreateSnapshotResponse(BaseModel):
     snapshot: PortfolioSnapshot
     created: bool
+
+
+class ComparePoint(BaseModel):
+    date: date
+    normalized_close: float
+    open: float
+    high: float
+    low: float
+    volume: float
+
+
+class CompareSeries(BaseModel):
+    symbol: str
+    asset_id: str
+    points: list[ComparePoint]
+
+
+class CompareCorrelation(BaseModel):
+    symbols: list[str]
+    values: list[list[float]]
+
+
+class CompareMetric(BaseModel):
+    symbol: str
+    volatility: float
+    max_drawdown: float
+
+
+class CompareDateRange(BaseModel):
+    start: date
+    end: date
+    aligned_points: int
+
+
+class CompareResponse(BaseModel):
+    symbols: list[str]
+    days: int
+    series: list[CompareSeries]
+    correlation: CompareCorrelation
+    metrics: list[CompareMetric]
+    date_range: CompareDateRange
+    meta: SourceMeta
