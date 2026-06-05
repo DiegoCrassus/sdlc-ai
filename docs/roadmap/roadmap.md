@@ -6,6 +6,8 @@
 |-------|----------|--------|
 | **Studio Foundation** (engine + CLI) | [`sdlc-studio-mvp-roadmap.md`](sdlc-studio-mvp-roadmap.md) | Delivered (INVES-53) — historical name “MVP” |
 | **Studio Service** (backend + UI + observability) | [`sdlc-studio-service-roadmap.md`](sdlc-studio-service-roadmap.md) | **Active** — next implementation |
+| **Workflow Builder UX** (manual + E2E gates) | [`sdlc-studio-workflow-builder-ux-plan.md`](sdlc-studio-workflow-builder-ux-plan.md) | Active — INVES-100 epic |
+| **Builder manual test script** | [`../operations/studio-workflow-builder-manual-test.md`](../operations/studio-workflow-builder-manual-test.md) | Required for WB QA |
 | **SDLC enforcement** (hooks, CI, fail-closed) | [`sdlc-enforcement-roadmap.md`](sdlc-enforcement-roadmap.md) | Planned / in progress |
 | **Investment product** (`app/`) | Phases 2–4 below | Separate from Studio |
 

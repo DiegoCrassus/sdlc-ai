@@ -31,7 +31,7 @@ REQUIRED_CHECK_NAMES = frozenset(
     {
         "SDLC Doctor",
         "Secrets Scan (gitleaks)",
-        "Studio E2E Smoke",
+        "Studio E2E (smoke + builder)",
         "SDLC Pytest",
         "SDLC Validate",
     }
