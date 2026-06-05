@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from decimal import Decimal
 
-from marketpulse.domain.models import WatchlistAllocationSummary
 from marketpulse.services import watchlist_rebalance as rebalance
 
 
