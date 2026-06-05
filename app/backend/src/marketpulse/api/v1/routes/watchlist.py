@@ -11,14 +11,18 @@ from marketpulse.api.errors import AlertApiError
 from marketpulse.db.session import get_db_session
 from marketpulse.deps import get_market_provider_dep
 from marketpulse.domain.models import (
+    RebalanceSummary,
     UpdateWatchlistAllocationRequest,
     UpdateWatchlistAllocationResponse,
+    UpdateWatchlistInvestedRequest,
+    UpdateWatchlistInvestedResponse,
     Watchlist,
     WatchlistItem,
 )
 from marketpulse.domain.watchlist import DEFAULT_WATCHLIST, is_watchlist_symbol
 from marketpulse.providers.base import MarketDataProvider
 from marketpulse.services import watchlist_allocations as allocation_service
+from marketpulse.services import watchlist_rebalance as rebalance_service
 
 router = APIRouter(prefix="/watchlist", tags=["watchlist"])
 
@@ -48,6 +52,8 @@ async def _build_watchlist_item(
     provider: MarketDataProvider,
     symbol: str,
     targets_by_symbol: dict[str, int],
+    invested_cents_by_symbol: dict[str, int],
+    rebalance_fields: rebalance_service.ItemRebalanceFields,
 ) -> WatchlistItem:
     try:
         quote = await provider.get_quote(symbol)
@@ -65,7 +71,32 @@ async def _build_watchlist_item(
             if target_bps is not None
             else None
         ),
+        invested_amount=rebalance_fields.invested_amount,
+        current_weight_percent=rebalance_fields.current_weight_percent,
+        drift_percent=rebalance_fields.drift_percent,
+        suggestion_amount=rebalance_fields.suggestion_amount,
+        drift_band=rebalance_fields.drift_band,
     )
+
+
+async def _load_rebalance_context(
+    session: AsyncSession,
+) -> tuple[
+    dict[str, int],
+    dict[str, int],
+    dict[str, rebalance_service.ItemRebalanceFields],
+    RebalanceSummary,
+]:
+    targets_by_symbol = await allocation_service.list_targets(session)
+    invested_cents_by_symbol = await allocation_service.list_invested(session)
+    allocation_summary = allocation_service.build_allocation_summary(targets_by_symbol)
+    item_rebalances, rebalance_summary = rebalance_service.compute_all_item_rebalances(
+        symbols=list(DEFAULT_WATCHLIST),
+        targets_by_symbol=targets_by_symbol,
+        invested_cents_by_symbol=invested_cents_by_symbol,
+        allocation_summary=allocation_summary,
+    )
+    return targets_by_symbol, invested_cents_by_symbol, item_rebalances, rebalance_summary
 
 
 @router.get("", response_model=Watchlist)
@@ -73,14 +104,24 @@ async def get_watchlist(
     provider: Annotated[MarketDataProvider, Depends(get_market_provider_dep)],
     session: Annotated[AsyncSession, Depends(get_db_session)],
 ) -> Watchlist:
-    targets_by_symbol = await allocation_service.list_targets(session)
+    targets_by_symbol, invested_cents_by_symbol, item_rebalances, rebalance_summary = (
+        await _load_rebalance_context(session)
+    )
+    allocation_summary = allocation_service.build_allocation_summary(targets_by_symbol)
     items = [
-        await _build_watchlist_item(provider, symbol, targets_by_symbol)
+        await _build_watchlist_item(
+            provider,
+            symbol,
+            targets_by_symbol,
+            invested_cents_by_symbol,
+            item_rebalances[symbol],
+        )
         for symbol in DEFAULT_WATCHLIST
     ]
     return Watchlist(
         items=items,
-        allocation_summary=allocation_service.build_allocation_summary(targets_by_symbol),
+        allocation_summary=allocation_summary,
+        rebalance_summary=rebalance_summary,
     )
 
 
@@ -111,7 +152,70 @@ async def update_watchlist_allocation(
         symbol=normalized,
         target_bps=target_bps,
     )
+    invested_cents_by_symbol = await allocation_service.list_invested(session)
+    allocation_summary = allocation_service.build_allocation_summary(targets_by_symbol)
+    item_rebalances, rebalance_summary = rebalance_service.compute_all_item_rebalances(
+        symbols=list(DEFAULT_WATCHLIST),
+        targets_by_symbol=targets_by_symbol,
+        invested_cents_by_symbol=invested_cents_by_symbol,
+        allocation_summary=allocation_summary,
+    )
     return UpdateWatchlistAllocationResponse(
-        item=await _build_watchlist_item(provider, normalized, targets_by_symbol),
-        allocation_summary=allocation_service.build_allocation_summary(targets_by_symbol),
+        item=await _build_watchlist_item(
+            provider,
+            normalized,
+            targets_by_symbol,
+            invested_cents_by_symbol,
+            item_rebalances[normalized],
+        ),
+        allocation_summary=allocation_summary,
+        rebalance_summary=rebalance_summary,
+    )
+
+
+@router.patch(
+    "/items/{symbol:path}/invested",
+    response_model=UpdateWatchlistInvestedResponse,
+)
+async def update_watchlist_invested(
+    symbol: str,
+    payload: UpdateWatchlistInvestedRequest,
+    provider: Annotated[MarketDataProvider, Depends(get_market_provider_dep)],
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+) -> UpdateWatchlistInvestedResponse:
+    normalized = _normalize_symbol(symbol)
+    if not is_watchlist_symbol(normalized):
+        raise _validation_error(
+            f"Symbol '{normalized}' is not on the watchlist",
+            details={"symbol": normalized},
+        )
+
+    amount_cents = (
+        allocation_service.invested_amount_to_cents(payload.invested_amount)
+        if payload.invested_amount is not None
+        else None
+    )
+    invested_cents_by_symbol = await allocation_service.set_invested(
+        session,
+        symbol=normalized,
+        amount_cents=amount_cents,
+    )
+    targets_by_symbol = await allocation_service.list_targets(session)
+    allocation_summary = allocation_service.build_allocation_summary(targets_by_symbol)
+    item_rebalances, rebalance_summary = rebalance_service.compute_all_item_rebalances(
+        symbols=list(DEFAULT_WATCHLIST),
+        targets_by_symbol=targets_by_symbol,
+        invested_cents_by_symbol=invested_cents_by_symbol,
+        allocation_summary=allocation_summary,
+    )
+    return UpdateWatchlistInvestedResponse(
+        item=await _build_watchlist_item(
+            provider,
+            normalized,
+            targets_by_symbol,
+            invested_cents_by_symbol,
+            item_rebalances[normalized],
+        ),
+        allocation_summary=allocation_summary,
+        rebalance_summary=rebalance_summary,
     )

@@ -31,3 +31,13 @@ class WatchlistAllocationTargetRow(Base):
     symbol: Mapped[str] = mapped_column(String(32), primary_key=True)
     target_bps: Mapped[int] = mapped_column(Integer, nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+
+class WatchlistInvestedAmountRow(Base):
+    """Persisted manual invested amount keyed by normalized watchlist symbol (ADR-012)."""
+
+    __tablename__ = "watchlist_invested_amounts"
+
+    symbol: Mapped[str] = mapped_column(String(32), primary_key=True)
+    amount_cents: Mapped[int] = mapped_column(Integer, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)

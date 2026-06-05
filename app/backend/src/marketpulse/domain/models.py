@@ -143,6 +143,11 @@ class WatchlistItem(BaseModel):
     price: float
     change_percent: float
     target_percent: float | None = None
+    invested_amount: float | None = None
+    current_weight_percent: float | None = None
+    drift_percent: float | None = None
+    suggestion_amount: float | None = None
+    drift_band: Literal["on_target", "warning", "off_target"] | None = None
 
 
 class WatchlistAllocationSummary(BaseModel):
@@ -150,9 +155,16 @@ class WatchlistAllocationSummary(BaseModel):
     status: Literal["under_allocated", "balanced", "over_allocated"]
 
 
+class RebalanceSummary(BaseModel):
+    total_invested: float
+    suggestions_ready: bool
+    max_drift_percent: float | None = None
+
+
 class Watchlist(BaseModel):
     items: list[WatchlistItem]
     allocation_summary: WatchlistAllocationSummary
+    rebalance_summary: RebalanceSummary
 
 
 class UpdateWatchlistAllocationRequest(BaseModel):
@@ -183,6 +195,38 @@ class UpdateWatchlistAllocationRequest(BaseModel):
 class UpdateWatchlistAllocationResponse(BaseModel):
     item: WatchlistItem
     allocation_summary: WatchlistAllocationSummary
+    rebalance_summary: RebalanceSummary
+
+
+class UpdateWatchlistInvestedRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    invested_amount: Decimal | None
+
+    @field_validator("invested_amount", mode="before")
+    @classmethod
+    def validate_invested_amount(cls, value: object) -> Decimal | None:
+        if value is None:
+            return None
+        if isinstance(value, bool) or not isinstance(value, int | float | Decimal):
+            raise ValueError("invested_amount must be a decimal amount")
+        try:
+            decimal_value = Decimal(str(value))
+        except (InvalidOperation, ValueError) as exc:
+            raise ValueError("invested_amount must be a decimal amount") from exc
+        if not decimal_value.is_finite():
+            raise ValueError("invested_amount must be finite")
+        if decimal_value < 0:
+            raise ValueError("invested_amount must be >= 0")
+        if decimal_value.as_tuple().exponent < -2:
+            raise ValueError("invested_amount must have at most two decimal places")
+        return decimal_value
+
+
+class UpdateWatchlistInvestedResponse(BaseModel):
+    item: WatchlistItem
+    allocation_summary: WatchlistAllocationSummary
+    rebalance_summary: RebalanceSummary
 
 
 class HealthResponse(BaseModel):
