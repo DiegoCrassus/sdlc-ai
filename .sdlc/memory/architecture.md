@@ -191,6 +191,31 @@ Studio may deep-link to Plane card and show read-only gate/handoff after apply; 
 - `app/frontend/` — Vite SPA, port 5173
 - ADRs: ADR-004..008, `docs/architecture/marketpulse-api-providers.md`
 
+## Workflow Builder WB-3 — edge-primary visual model (INVES-103)
+
+> **Status:** Accepted (spike INVES-103, epic INVES-100 §5). Implemented in INVES-104 (WB-3b).  
+> **Plan:** `docs/roadmap/sdlc-studio-workflow-builder-ux-plan.md`
+
+### Principle
+
+YAML truth stays **edge-centric**: agent and skill bind to **transitions** (`transitionEdge`), not connectable workflow nodes. `TransitionInspector` is the authoritative edit surface; canvas shows agent badges on edges and optional read-only annotation overlays.
+
+### Node types
+
+| Type | Role | Connectable | Export |
+|------|------|-------------|--------|
+| `stageNode` | Lifecycle stage | Yes | via transition from/to |
+| `transitionEdge` | Edge + agent badge | N/A | Yes — `drafts[]` |
+| `agentAnnotationNode` | Visual anchor near edge | No | Stripped from proposal |
+| `gateAnnotationNode` | Read-only `paths.yaml` badge | No | None |
+
+Gate metadata: optional `gates[]` on `GET /studio/metadata/pipeline` (read-only, from `.sdlc/gates/paths.yaml`).
+
+### Rejected
+
+- Agent as connectable node between stages — orphan validation + compiler changes
+- Gate nodes in transition path — gates are write-policy, not workflow steps
+
 ## Known Constraints
 
 - Python primary backend language
