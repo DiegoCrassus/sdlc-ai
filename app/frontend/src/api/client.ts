@@ -16,6 +16,11 @@ import type {
   User,
 } from "@shared/types/auth";
 import type {
+  CreateSnapshotResponse,
+  HistoryDays,
+  PortfolioHistoryResponse,
+} from "@shared/types/portfolio";
+import type {
   AssetProjection,
   MarketOverview,
   PriceHistory,
@@ -100,6 +105,12 @@ export const api = {
         body: JSON.stringify(payload),
       },
     ),
+  portfolio: {
+    history: (days: HistoryDays = 30) =>
+      request<PortfolioHistoryResponse>(`/portfolio/history?days=${days}`),
+    createSnapshot: () =>
+      request<CreateSnapshotResponse>("/portfolio/snapshots", { method: "POST" }),
+  },
   alerts: {
     list: (symbol?: string) => {
       const query = symbol ? `?symbol=${encodeURIComponent(symbol)}` : "";

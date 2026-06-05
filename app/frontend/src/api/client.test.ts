@@ -83,4 +83,44 @@ describe("api client", () => {
       expect.objectContaining({ credentials: "include" }),
     );
   });
+
+  it("sends credentials include on portfolio history requests", async () => {
+    fetchMock.mockResolvedValue(
+      mockJsonResponse({
+        days: 30,
+        points: [],
+      }),
+    );
+
+    await api.portfolio.history(30);
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/v1/portfolio/history?days=30",
+      expect.objectContaining({ credentials: "include" }),
+    );
+  });
+
+  it("sends credentials include on portfolio snapshot POST", async () => {
+    fetchMock.mockResolvedValue(
+      mockJsonResponse({
+        snapshot: {
+          snapshot_date: "2026-06-05",
+          total_value: 10000,
+          created_at: "2026-06-05T12:00:00Z",
+          updated_at: "2026-06-05T12:00:00Z",
+        },
+        created: true,
+      }),
+    );
+
+    await api.portfolio.createSnapshot();
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/v1/portfolio/snapshots",
+      expect.objectContaining({
+        credentials: "include",
+        method: "POST",
+      }),
+    );
+  });
 });
