@@ -1,5 +1,5 @@
 version: '5.2-minimal'
-description: Minimal Doctor validation rules for the SDLC repository.
+description: Minimal Doctor validation rules for the SDLC repository (includes Studio Service).
 checks:
   directories:
     severity: required
@@ -33,6 +33,12 @@ checks:
     - app/frontend
     - app/infra
     - app/shared
+    - app/studio-backend
+    - app/studio-backend/src/studio_service
+    - app/studio-frontend
+    - studio
+    - tests/e2e
+    - tests/e2e/studio
     - docs
     - docs/architecture
     - docs/handoff
@@ -93,6 +99,19 @@ checks:
     - .cursor/hooks.json
     - Makefile
     - README.md
+    - app/studio-backend/README.md
+    - app/studio-frontend/README.md
+    - studio/README.md
+    - app/studio-backend/src/studio_service/main.py
+    - app/studio-backend/src/studio_service/api/router.py
+    - app/studio-frontend/package.json
+    - app/studio-frontend/vite.config.ts
+    - tests/e2e/playwright.config.ts
+    - tests/e2e/studio/smoke.spec.ts
+    - tests/e2e/studio/builder.spec.ts
+    - tests/e2e/run-studio-e2e.sh
+    - docs/studio-service-operator-guide.md
+    - docs/architecture/studio-service-platform.md
   forbidden_paths:
     severity: required
     items:
@@ -179,6 +198,8 @@ checks:
     - docs/operations/observability.md
     - docs/operations/incident-response.md
     - docs/operations/maintenance.md
+    - docs/studio-service-operator-guide.md
+    - docs/architecture/studio-service-platform.md
   yaml_validity:
     severity: required
     files:
@@ -229,6 +250,22 @@ checks:
       contains:
       - "## Purpose"
       - "## When to use"
+    - path: app/studio-backend/README.md
+      contains:
+      - "studio-dev"
+      - "/studio"
+    - path: app/studio-frontend/README.md
+      contains:
+      - "studio-frontend"
+      - "5174"
+    - path: studio/README.md
+      contains:
+      - "Studio Service"
+      - ".sdlc/"
+    - path: docs/studio-service-operator-guide.md
+      contains:
+      - "studio-dev"
+      - "STUDIO_AUTH_TOKEN"
   forbidden_content:
     severity: required
     items:
@@ -281,6 +318,13 @@ checks:
     - docs-check
     - workflow-status
     - workflow-discover
+    - studio-dev
+    - studio-api
+    - studio-smoke
+    - studio-e2e
+  studio:
+    severity: required
+    import_app: studio_service.main
   python_dsl:
     severity: required
     importable: .sdlc/dsl/cli.py

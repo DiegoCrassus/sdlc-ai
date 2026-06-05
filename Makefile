@@ -33,7 +33,7 @@ help:
 	@echo "  studio-dev        Studio API :8100 + UI :5174 (install npm in app/studio-frontend first)"
 	@echo "  studio-api        Studio API only on :8100"
 	@echo "  studio-smoke      HTTP smoke (API must be running; honors STUDIO_AUTH_TOKEN)"
-	@echo "  studio-e2e        Playwright smoke — dashboard, workflows, observability"
+	@echo "  studio-e2e        Playwright E2E — smoke routes + workflow builder"
 	@echo ""
 	@echo "Workflow: .sdlc/process/change-lifecycle.md"
 
