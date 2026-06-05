@@ -10,6 +10,12 @@ import type {
   UpdateWatchlistInvestedResponse,
 } from "@shared/types/allocation";
 import type {
+  AuthMeResponse,
+  IdentifyRequest,
+  IdentifyResponse,
+  User,
+} from "@shared/types/auth";
+import type {
   AssetProjection,
   MarketOverview,
   PriceHistory,
@@ -21,7 +27,10 @@ import type {
 const API_BASE = import.meta.env.VITE_API_BASE ?? "/api/v1";
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(`${API_BASE}${path}`, init);
+  const response = await fetch(`${API_BASE}${path}`, {
+    credentials: "include",
+    ...init,
+  });
   if (!response.ok) {
     throw new Error(`API ${response.status}: ${response.statusText}`);
   }
@@ -32,6 +41,26 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 export const api = {
+  auth: {
+    me: async (): Promise<User | null> => {
+      const response = await fetch(`${API_BASE}/auth/me`, { credentials: "include" });
+      if (response.status === 401) {
+        return null;
+      }
+      if (!response.ok) {
+        throw new Error(`API ${response.status}: ${response.statusText}`);
+      }
+      const data = (await response.json()) as AuthMeResponse;
+      return data.user;
+    },
+    identify: (email: string) =>
+      request<IdentifyResponse>("/auth/identify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email } satisfies IdentifyRequest),
+      }),
+    logout: () => request<void>("/auth/logout", { method: "POST" }),
+  },
   health: () => request<{ status: string; provider: string }>("/health"),
   overview: () => request<MarketOverview>("/markets/overview"),
   quotes: (symbols: string[]) =>
