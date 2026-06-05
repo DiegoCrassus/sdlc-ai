@@ -22,6 +22,7 @@ import type {
 } from "@shared/types/portfolio";
 import type {
   AssetProjection,
+  CompareResponse,
   MarketOverview,
   PriceHistory,
   Quote,
@@ -76,6 +77,10 @@ export const api = {
     ),
   search: (query: string) =>
     request<SearchHit[]>(`/markets/search?q=${encodeURIComponent(query)}`),
+  compare: (symbols: string[], days = 90) =>
+    request<CompareResponse>(
+      `/markets/compare?symbols=${encodeURIComponent(symbols.join(","))}&days=${days}`,
+    ),
   projection: (symbol: string, horizonDays = 7) =>
     request<AssetProjection>(
       `/projections/${encodeURIComponent(symbol)}?horizon_days=${horizonDays}`,
