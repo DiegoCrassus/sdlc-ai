@@ -5,50 +5,41 @@
 | Field | Value |
 |-------|-------|
 | **Next agent** | qa |
-| **Stage complete** | no |
-| **Previous agent** | auto-fixer |
+| **Stage complete** | yes |
+| **Previous agent** | implementer |
 
 ## Session
 
 | Field | Value |
 |-------|-------|
-| **Card** | INVES-109 |
-| **Epic** | INVES-107 |
-| **Branch** | `feature/INVES-109-watchlist-rebalance-ui` |
-| **Stage** | auto-fixer → qa |
+| **Card** | INVES-118 |
+| **Epic** | INVES-116 |
+| **Branch** | feature/INVES-118-portfolio-api |
+| **Stage** | qa |
 
-## Auto-fixer summary
+## Implementation (INVES-118)
 
-Fixed AC-5 QA gap: added vitest stack and `WatchlistTable.test.tsx`.
+| Field | Value |
+|-------|-------|
+| **Scope** | ORM `PortfolioSnapshotRow`, `portfolio_snapshots` service, `/portfolio/snapshots` + `/portfolio/history` routes, watchlist GET hook, domain models, pytest |
+| **Commits** | (pending commit) |
 
-| Change | Detail |
-|--------|--------|
-| Dev deps | `vitest`, `@testing-library/react`, `jsdom` |
-| Script | `"test": "vitest run"` in `package.json` |
-| Config | `vitest.config.ts` (jsdom, `@shared` alias) |
-| Tests | `WatchlistTable.test.tsx` — 7 tests |
+### Deliverables
 
-## Validation (auto-fixer)
+- `app/backend/src/marketpulse/db/models.py` — `portfolio_snapshots` table with unique `(user_id, snapshot_date)`
+- `app/backend/src/marketpulse/services/portfolio_snapshots.py` — compute, record, ensure_daily_snapshot, get_history with pct enrichment
+- `app/backend/src/marketpulse/api/v1/routes/portfolio.py` — POST snapshots (upsert), GET history (days=30|90|365)
+- `app/backend/src/marketpulse/api/v1/routes/watchlist.py` — best-effort `ensure_daily_snapshot` on GET
+- `app/backend/src/marketpulse/domain/models.py` — PortfolioSnapshot, PortfolioHistoryPoint/Response, CreateSnapshotResponse
+- `app/backend/tests/test_portfolio.py` — 5 tests, jsonschema validation
 
-| Check | Result | Evidence |
-|-------|--------|----------|
-| `npm run build` (app/frontend) | **PASS** | exit 0 — tsc + vite build |
-| `npm test` (app/frontend) | **PASS** | 7 passed in 1 file |
+### Local test evidence (implementer)
 
-## Test coverage (AC-5)
+```bash
+PYTHONPATH=app/backend/src .venv/bin/python -m pytest app/backend/tests/test_portfolio.py -v
+# 5 passed
+```
 
-- Drift band badges: `on_target`, `warning`, `off_target`
-- Signed drift percentages in Drift column
-- Null weight/drift/suggestion em dashes (zero invested)
-- Buy suggestion: `+$1,500.50` with emerald styling
-- Sell suggestion: `$750.00` with rose styling
+## Next orchestrator action
 
-## QA re-run scope
-
-1. Full QA minimum checklist on feature branch
-2. Confirm AC-5 mapping to 7 vitest cases
-3. Route to Reviewer if PASS
-
-## Blockers
-
-None.
+Spawn **Task(QA)** on INVES-118 — run full backend test suite, validate acceptance criteria, post evidence to Plane card.
