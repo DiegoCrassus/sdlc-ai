@@ -48,4 +48,4 @@ Run checklist: `docs/operations/studio-workflow-builder-manual-test.md` (M1–M8
 
 ## Commits
 
-- `beed5b1` on `feature/INVES-104-wb3b-multi-type-nodes`
+- `c23f459` on `feature/INVES-104-wb3b-multi-type-nodes`
