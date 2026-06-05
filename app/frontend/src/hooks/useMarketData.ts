@@ -64,6 +64,23 @@ export function useUpdateWatchlistAllocation() {
   });
 }
 
+export function useUpdateWatchlistInvested() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      symbol,
+      invested_amount,
+    }: {
+      symbol: string;
+      invested_amount: number | null;
+    }) => api.updateWatchlistInvested(symbol, { invested_amount }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: WATCHLIST_QUERY_KEY });
+    },
+  });
+}
+
 export function useAssetSearch(query: string) {
   return useQuery({
     queryKey: ["search", query],

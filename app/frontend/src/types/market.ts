@@ -65,6 +65,9 @@ export type {
   TrendDirection,
 } from "@shared/types/forecast";
 export type {
+  AllocationStatus,
+  DriftBand,
+  RebalanceSummary,
   WatchlistAllocationSummary,
   WatchlistItem,
   WatchlistResponse as Watchlist,

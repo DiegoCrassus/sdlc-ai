@@ -1,13 +1,20 @@
 import { useEffect, useMemo, useState } from "react";
 
 import type { PriceAlert } from "@shared/types/alerts";
+import type { DriftBand } from "@shared/types/allocation";
 
 import { AlertModal } from "./AlertModal";
-import type { WatchlistAllocationSummary, WatchlistItem } from "../types/market";
+import { RebalanceSummaryPanel } from "./RebalanceSummaryPanel";
+import type {
+  RebalanceSummary,
+  WatchlistAllocationSummary,
+  WatchlistItem,
+} from "../types/market";
 
 interface Props {
   items: WatchlistItem[];
   allocationSummary?: WatchlistAllocationSummary;
+  rebalanceSummary?: RebalanceSummary;
   selectedSymbol: string;
   onSelect: (symbol: string) => void;
   isLoading: boolean;
@@ -17,6 +24,12 @@ interface Props {
   }) => Promise<unknown>;
   isUpdatingAllocation: boolean;
   updateAllocationError: Error | null;
+  onUpdateInvested: (payload: {
+    symbol: string;
+    invested_amount: number | null;
+  }) => Promise<unknown>;
+  isUpdatingInvested: boolean;
+  updateInvestedError: Error | null;
   alerts: PriceAlert[];
   onCreateAlert: (payload: {
     symbol: string;
@@ -30,12 +43,16 @@ interface Props {
 export function WatchlistTable({
   items,
   allocationSummary,
+  rebalanceSummary,
   selectedSymbol,
   onSelect,
   isLoading,
   onUpdateAllocation,
   isUpdatingAllocation,
   updateAllocationError,
+  onUpdateInvested,
+  isUpdatingInvested,
+  updateInvestedError,
   alerts,
   onCreateAlert,
   isCreatingAlert,
@@ -43,18 +60,27 @@ export function WatchlistTable({
 }: Props) {
   const [modalSymbol, setModalSymbol] = useState<string | null>(null);
   const [draftTargets, setDraftTargets] = useState<Record<string, string>>({});
-  const [savingSymbol, setSavingSymbol] = useState<string | null>(null);
+  const [draftInvested, setDraftInvested] = useState<Record<string, string>>({});
+  const [savingTargetSymbol, setSavingTargetSymbol] = useState<string | null>(null);
+  const [savingInvestedSymbol, setSavingInvestedSymbol] = useState<string | null>(null);
   const [allocationError, setAllocationError] = useState<string | null>(null);
+  const [investedError, setInvestedError] = useState<string | null>(null);
 
   useEffect(() => {
-    const nextDrafts: Record<string, string> = {};
+    const nextTargets: Record<string, string> = {};
+    const nextInvested: Record<string, string> = {};
     for (const item of items) {
-      nextDrafts[item.symbol] =
+      nextTargets[item.symbol] =
         item.target_percent === null || item.target_percent === undefined
           ? ""
-          : formatTargetInput(item.target_percent);
+          : formatDecimalInput(item.target_percent);
+      nextInvested[item.symbol] =
+        item.invested_amount === null || item.invested_amount === undefined
+          ? ""
+          : formatDecimalInput(item.invested_amount);
     }
-    setDraftTargets(nextDrafts);
+    setDraftTargets(nextTargets);
+    setDraftInvested(nextInvested);
   }, [items]);
 
   const triggeredSymbols = useMemo(() => {
@@ -69,9 +95,11 @@ export function WatchlistTable({
 
   const modalItem = items.find((item) => item.symbol === modalSymbol);
   const summary = allocationSummary ?? buildFallbackAllocationSummary(items);
-  const summaryCopy = getSummaryCopy(summary);
+  const summaryCopy = getAllocationSummaryCopy(summary);
   const displayedAllocationError =
     allocationError ?? updateAllocationError?.message ?? null;
+  const displayedInvestedError = investedError ?? updateInvestedError?.message ?? null;
+  const isMutating = isUpdatingAllocation || isUpdatingInvested;
 
   async function saveAllocation(item: WatchlistItem) {
     const rawTarget = draftTargets[item.symbol]?.trim() ?? "";
@@ -83,26 +111,59 @@ export function WatchlistTable({
     }
 
     setAllocationError(null);
-    setSavingSymbol(item.symbol);
+    setSavingTargetSymbol(item.symbol);
     try {
       await onUpdateAllocation({ symbol: item.symbol, target_percent });
     } catch (error) {
       setAllocationError(error instanceof Error ? error.message : "Unable to update allocation.");
     } finally {
-      setSavingSymbol(null);
+      setSavingTargetSymbol(null);
     }
   }
 
   async function clearAllocation(item: WatchlistItem) {
     setDraftTargets((current) => ({ ...current, [item.symbol]: "" }));
     setAllocationError(null);
-    setSavingSymbol(item.symbol);
+    setSavingTargetSymbol(item.symbol);
     try {
       await onUpdateAllocation({ symbol: item.symbol, target_percent: null });
     } catch (error) {
       setAllocationError(error instanceof Error ? error.message : "Unable to clear allocation.");
     } finally {
-      setSavingSymbol(null);
+      setSavingTargetSymbol(null);
+    }
+  }
+
+  async function saveInvested(item: WatchlistItem) {
+    const rawInvested = draftInvested[item.symbol]?.trim() ?? "";
+    const invested_amount = parseInvestedAmount(rawInvested);
+
+    if (invested_amount === "invalid") {
+      setInvestedError("Enter a non-negative amount with up to 2 decimals, or clear it.");
+      return;
+    }
+
+    setInvestedError(null);
+    setSavingInvestedSymbol(item.symbol);
+    try {
+      await onUpdateInvested({ symbol: item.symbol, invested_amount });
+    } catch (error) {
+      setInvestedError(error instanceof Error ? error.message : "Unable to update invested amount.");
+    } finally {
+      setSavingInvestedSymbol(null);
+    }
+  }
+
+  async function clearInvested(item: WatchlistItem) {
+    setDraftInvested((current) => ({ ...current, [item.symbol]: "" }));
+    setInvestedError(null);
+    setSavingInvestedSymbol(item.symbol);
+    try {
+      await onUpdateInvested({ symbol: item.symbol, invested_amount: null });
+    } catch (error) {
+      setInvestedError(error instanceof Error ? error.message : "Unable to clear invested amount.");
+    } finally {
+      setSavingInvestedSymbol(null);
     }
   }
 
@@ -117,22 +178,33 @@ export function WatchlistTable({
           <div>
             <h2 className="text-lg font-semibold text-white">Watchlist</h2>
             <p className="mt-1 text-sm text-slate-400">
-              Set target allocation percentages for each watchlist asset.
+              Set target allocations and invested amounts to track drift and rebalance suggestions.
             </p>
           </div>
-          <div
-            className={`rounded-lg border px-4 py-3 text-sm ${summaryCopy.className}`}
-            role={summary.status === "over_allocated" ? "alert" : "status"}
-          >
-            <p className="font-medium">
-              Total allocated: {formatPercent(summary.target_percent_total)}
-            </p>
-            <p className="mt-1">{summaryCopy.message}</p>
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <div
+              className={`rounded-lg border px-4 py-3 text-sm ${summaryCopy.className}`}
+              role={summary.status === "over_allocated" ? "alert" : "status"}
+            >
+              <p className="font-medium">
+                Total allocated: {formatPercent(summary.target_percent_total)}
+              </p>
+              <p className="mt-1">{summaryCopy.message}</p>
+            </div>
+            <RebalanceSummaryPanel
+              rebalanceSummary={rebalanceSummary}
+              allocationStatus={summary.status}
+            />
           </div>
         </div>
         {displayedAllocationError && (
           <div className="mb-3 rounded-lg border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-sm text-rose-300">
             {displayedAllocationError}
+          </div>
+        )}
+        {displayedInvestedError && (
+          <div className="mb-3 rounded-lg border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-sm text-rose-300">
+            {displayedInvestedError}
           </div>
         )}
         <div className="overflow-x-auto">
@@ -144,6 +216,11 @@ export function WatchlistTable({
                 <th className="pb-2 pr-4">Price</th>
                 <th className="pb-2 pr-4">Change</th>
                 <th className="pb-2 pr-4">Target</th>
+                <th className="pb-2 pr-4">Invested</th>
+                <th className="pb-2 pr-4">Weight</th>
+                <th className="pb-2 pr-4">Drift</th>
+                <th className="pb-2 pr-4">Suggestion</th>
+                <th className="pb-2 pr-4">Status</th>
                 <th className="pb-2">Alert</th>
               </tr>
             </thead>
@@ -152,7 +229,8 @@ export function WatchlistTable({
                 const active = item.symbol === selectedSymbol;
                 const positive = item.change_percent >= 0;
                 const hasTriggered = triggeredSymbols.has(item.symbol);
-                const isSaving = savingSymbol === item.symbol;
+                const isSavingTarget = savingTargetSymbol === item.symbol;
+                const isSavingInvested = savingInvestedSymbol === item.symbol;
                 return (
                   <tr
                     key={item.symbol}
@@ -192,7 +270,7 @@ export function WatchlistTable({
                     </td>
                     <td className="py-2 pr-4">
                       <form
-                        className="flex min-w-64 flex-wrap items-center gap-2"
+                        className="flex min-w-56 flex-wrap items-center gap-2"
                         onSubmit={(event) => {
                           event.preventDefault();
                           void saveAllocation(item);
@@ -208,7 +286,7 @@ export function WatchlistTable({
                             inputMode="decimal"
                             placeholder="0.00"
                             value={draftTargets[item.symbol] ?? ""}
-                            disabled={isUpdatingAllocation}
+                            disabled={isMutating}
                             onChange={(event) => {
                               setDraftTargets((current) => ({
                                 ...current,
@@ -223,14 +301,14 @@ export function WatchlistTable({
                         </div>
                         <button
                           type="submit"
-                          disabled={isUpdatingAllocation}
+                          disabled={isMutating}
                           className="rounded-lg border border-emerald-500/40 px-3 py-1 text-xs font-medium text-emerald-400 transition-colors hover:bg-emerald-500/10 disabled:cursor-not-allowed disabled:opacity-60"
                         >
-                          {isSaving ? "Saving..." : "Save"}
+                          {isSavingTarget ? "Saving..." : "Save"}
                         </button>
                         <button
                           type="button"
-                          disabled={isUpdatingAllocation}
+                          disabled={isMutating}
                           onClick={() => {
                             void clearAllocation(item);
                           }}
@@ -239,6 +317,67 @@ export function WatchlistTable({
                           Clear
                         </button>
                       </form>
+                    </td>
+                    <td className="py-2 pr-4">
+                      <form
+                        className="flex min-w-56 flex-wrap items-center gap-2"
+                        onSubmit={(event) => {
+                          event.preventDefault();
+                          void saveInvested(item);
+                        }}
+                      >
+                        <div className="relative">
+                          <input
+                            aria-label={`Invested amount for ${item.symbol}`}
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            inputMode="decimal"
+                            placeholder="0.00"
+                            value={draftInvested[item.symbol] ?? ""}
+                            disabled={isMutating}
+                            onChange={(event) => {
+                              setDraftInvested((current) => ({
+                                ...current,
+                                [item.symbol]: event.target.value,
+                              }));
+                            }}
+                            className="w-28 rounded-lg border border-slate-600 bg-slate-950/60 px-3 py-1 pr-7 text-sm text-slate-100 outline-none transition-colors placeholder:text-slate-600 focus:border-emerald-500 disabled:cursor-not-allowed disabled:opacity-60"
+                          />
+                          <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-500">
+                            $
+                          </span>
+                        </div>
+                        <button
+                          type="submit"
+                          disabled={isMutating}
+                          className="rounded-lg border border-emerald-500/40 px-3 py-1 text-xs font-medium text-emerald-400 transition-colors hover:bg-emerald-500/10 disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          {isSavingInvested ? "Saving..." : "Save"}
+                        </button>
+                        <button
+                          type="button"
+                          disabled={isMutating}
+                          onClick={() => {
+                            void clearInvested(item);
+                          }}
+                          className="rounded-lg border border-slate-600 px-3 py-1 text-xs text-slate-300 transition-colors hover:border-rose-500/50 hover:text-rose-300 disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          Clear
+                        </button>
+                      </form>
+                    </td>
+                    <td className="py-2 pr-4 text-slate-300">
+                      {formatNullablePercent(item.current_weight_percent)}
+                    </td>
+                    <td className="py-2 pr-4 text-slate-300">
+                      {formatNullableSignedPercent(item.drift_percent)}
+                    </td>
+                    <td className="py-2 pr-4">
+                      {formatSuggestion(item.suggestion_amount)}
+                    </td>
+                    <td className="py-2 pr-4">
+                      <DriftBandBadge band={item.drift_band} />
                     </td>
                     <td className="py-2">
                       <button
@@ -274,6 +413,36 @@ export function WatchlistTable({
   );
 }
 
+function DriftBandBadge({ band }: { band?: DriftBand | null }) {
+  if (band == null) {
+    return <span className="text-slate-500">—</span>;
+  }
+
+  const styles: Record<DriftBand, { className: string; label: string }> = {
+    on_target: {
+      className: "border-emerald-500/40 bg-emerald-500/10 text-emerald-300",
+      label: "On target",
+    },
+    warning: {
+      className: "border-amber-500/40 bg-amber-500/10 text-amber-300",
+      label: "Warning",
+    },
+    off_target: {
+      className: "border-rose-500/40 bg-rose-500/10 text-rose-300",
+      label: "Off target",
+    },
+  };
+
+  const style = styles[band];
+  return (
+    <span
+      className={`inline-flex rounded-full border px-2 py-0.5 text-xs font-medium ${style.className}`}
+    >
+      {style.label}
+    </span>
+  );
+}
+
 function parseTargetPercent(rawTarget: string): number | null | "invalid" {
   if (rawTarget === "") {
     return null;
@@ -284,15 +453,75 @@ function parseTargetPercent(rawTarget: string): number | null | "invalid" {
     return "invalid";
   }
 
+  if (!hasAtMostTwoDecimals(rawTarget)) {
+    return "invalid";
+  }
+
   return Math.round(target * 100) / 100;
 }
 
-function formatTargetInput(target: number) {
-  return target.toFixed(2).replace(/\.?0+$/, "");
+function parseInvestedAmount(rawInvested: string): number | null | "invalid" {
+  if (rawInvested === "") {
+    return null;
+  }
+
+  const amount = Number(rawInvested);
+  if (!Number.isFinite(amount) || amount < 0) {
+    return "invalid";
+  }
+
+  if (!hasAtMostTwoDecimals(rawInvested)) {
+    return "invalid";
+  }
+
+  return Math.round(amount * 100) / 100;
+}
+
+function hasAtMostTwoDecimals(raw: string) {
+  const trimmed = raw.trim();
+  const parts = trimmed.split(".");
+  if (parts.length === 1) {
+    return true;
+  }
+  return parts[1]?.length <= 2;
+}
+
+function formatDecimalInput(value: number) {
+  return value.toFixed(2).replace(/\.?0+$/, "");
 }
 
 function formatPercent(target: number) {
   return `${target.toFixed(2)}%`;
+}
+
+function formatNullablePercent(value?: number | null) {
+  if (value == null) {
+    return "—";
+  }
+  return formatPercent(value);
+}
+
+function formatNullableSignedPercent(value?: number | null) {
+  if (value == null) {
+    return "—";
+  }
+  const sign = value >= 0 ? "+" : "";
+  return `${sign}${value.toFixed(2)}%`;
+}
+
+function formatSuggestion(value?: number | null) {
+  if (value == null) {
+    return <span className="text-slate-500">—</span>;
+  }
+
+  const positive = value >= 0;
+  const sign = positive ? "+" : "";
+  const className = positive ? "text-emerald-400" : "text-rose-400";
+  return (
+    <span className={className}>
+      {sign}${Math.abs(value).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+    </span>
+  );
 }
 
 function buildFallbackAllocationSummary(items: WatchlistItem[]): WatchlistAllocationSummary {
@@ -311,7 +540,7 @@ function buildFallbackAllocationSummary(items: WatchlistItem[]): WatchlistAlloca
   };
 }
 
-function getSummaryCopy(summary: WatchlistAllocationSummary) {
+function getAllocationSummaryCopy(summary: WatchlistAllocationSummary) {
   if (summary.status === "balanced") {
     return {
       className: "border-emerald-500/40 bg-emerald-500/10 text-emerald-300",
