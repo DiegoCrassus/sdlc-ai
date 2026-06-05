@@ -22,7 +22,7 @@
 | Field | Value |
 |-------|-------|
 | **Scope** | ORM `PortfolioSnapshotRow`, `portfolio_snapshots` service, `/portfolio/snapshots` + `/portfolio/history` routes, watchlist GET hook, domain models, pytest |
-| **Commits** | (pending commit) |
+| **Commits** | `e6a50c1` |
 
 ### Deliverables
 
