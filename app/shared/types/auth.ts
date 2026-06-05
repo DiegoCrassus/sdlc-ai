@@ -1,5 +1,5 @@
 /**
- * Auth identity types — canonical contract for email-only sessions (ADR-010).
+ * Auth identity types — MarketPulse email session auth contract (INVES-37).
  *
  * Endpoints (prefix `/api/v1`):
  * - POST `/auth/identify` — body IdentifyRequest → IdentifyResponse + Set-Cookie
@@ -12,7 +12,7 @@
 /** Default cookie name; override via backend `SESSION_COOKIE_NAME`. */
 export const SESSION_COOKIE_NAME = "mp_session";
 
-/** Fixed session TTL (seconds); rotation on each successful identify (ADR-010). */
+/** Fixed session TTL (seconds); rotation on each successful identify (INVES-37). */
 export const SESSION_TTL_SECONDS = 604800;
 
 /**
@@ -44,8 +44,11 @@ export interface AuthMeResponse {
   user: User;
 }
 
-/** ADR-010 alias for GET /auth/me success body. */
+/** Alias for GET /auth/me success body. */
 export type MeResponse = AuthMeResponse;
+
+/** POST /api/v1/auth/logout — 204 No Content (no body; cookie cleared out-of-band). */
+export type LogoutSuccess = null;
 
 export type AuthErrorCode = "UNAUTHORIZED" | "VALIDATION_ERROR";
 
