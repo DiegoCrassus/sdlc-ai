@@ -46,6 +46,7 @@ python -m pytest app/backend/tests/ -v
 | GET | `/api/v1/health` | Health + active provider |
 | GET | `/api/v1/markets/overview` | Market overview cards |
 | GET | `/api/v1/markets/quotes?symbols=AAPL,BTC` | Batch quotes |
+| GET | `/api/v1/markets/compare?symbols=BTC,ETH&days=90` | Aligned multi-asset compare |
 | GET | `/api/v1/markets/{symbol}/ohlcv` | OHLCV series |
 | GET | `/api/v1/markets/search?q=bit` | Symbol search |
 | GET | `/api/v1/projections/{symbol}` | Linear trend projection |

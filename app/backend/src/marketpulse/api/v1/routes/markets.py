@@ -6,8 +6,19 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 
 from marketpulse.deps import get_market_provider_dep
 from marketpulse.domain.enums import Interval
-from marketpulse.domain.models import MarketOverview, PriceHistory, Quote, SearchHit
+from marketpulse.domain.models import (
+    CompareResponse,
+    MarketOverview,
+    PriceHistory,
+    Quote,
+    SearchHit,
+)
 from marketpulse.providers.base import MarketDataProvider
+from marketpulse.services.compare import (
+    InsufficientAlignedDataError,
+    build_compare_response,
+    parse_compare_symbols,
+)
 
 router = APIRouter(prefix="/markets", tags=["markets"])
 
@@ -42,6 +53,23 @@ async def markets_search(
     provider: MarketDataProvider = Depends(get_market_provider_dep),
 ) -> list[SearchHit]:
     return await provider.search(q)
+
+
+@router.get("/compare", response_model=CompareResponse)
+async def markets_compare(
+    symbols: str = Query(..., description="Comma-separated symbols, 2-4 unique"),
+    days: int = Query(default=90, ge=7, le=365),
+    provider: MarketDataProvider = Depends(get_market_provider_dep),
+) -> CompareResponse:
+    parsed = parse_compare_symbols(symbols)
+    if len(parsed) < 2 or len(parsed) > 4:
+        raise HTTPException(status_code=422, detail="invalid_symbol_count")
+    try:
+        return await build_compare_response(provider, parsed, days)
+    except InsufficientAlignedDataError as exc:
+        raise HTTPException(status_code=422, detail="insufficient_aligned_data") from exc
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
 @router.get("/{symbol}/ohlcv", response_model=PriceHistory)
