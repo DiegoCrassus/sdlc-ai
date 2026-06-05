@@ -1,0 +1,140 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sdlc-ai.local/schemas/portfolio/contract.json",
+  "title": "PortfolioContract",
+  "description": "Canonical JSON Schema for portfolio snapshot and history endpoints under /api/v1/portfolio. Snapshots record daily total watchlist value per authenticated user; return percentages are computed at read time.",
+  "$defs": {
+    "HistoryDays": {
+      "type": "integer",
+      "enum": [30, 90, 365],
+      "description": "History window length in calendar days for GET /api/v1/portfolio/history."
+    },
+    "TotalValue": {
+      "type": "number",
+      "minimum": 0,
+      "multipleOf": 0.01,
+      "description": "Portfolio total value in base currency with up to two fractional digits. Backend persists as integer cents."
+    },
+    "PortfolioSnapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["snapshot_date", "total_value", "created_at", "updated_at"],
+      "properties": {
+        "snapshot_date": {
+          "type": "string",
+          "format": "date",
+          "description": "UTC calendar date for this snapshot (YYYY-MM-DD)."
+        },
+        "total_value": {
+          "$ref": "#/$defs/TotalValue"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 UTC when the snapshot row was first inserted."
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 UTC when total_value was last recomputed."
+        }
+      },
+      "description": "One daily portfolio value snapshot for the authenticated user."
+    },
+    "PortfolioHistoryPoint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "snapshot_date",
+        "total_value",
+        "daily_change_pct",
+        "cumulative_return_pct"
+      ],
+      "properties": {
+        "snapshot_date": {
+          "type": "string",
+          "format": "date",
+          "description": "UTC calendar date for this history point."
+        },
+        "total_value": {
+          "$ref": "#/$defs/TotalValue"
+        },
+        "daily_change_pct": {
+          "type": "number",
+          "multipleOf": 0.01,
+          "description": "Day-over-day percent change. First point in the series is 0; later points use (value/previous_value - 1) × 100."
+        },
+        "cumulative_return_pct": {
+          "type": "number",
+          "multipleOf": 0.01,
+          "description": "Return since the first point in the returned series. First point is 0; later points use (value/first_value - 1) × 100."
+        }
+      },
+      "description": "Single point in a portfolio history time series with server-computed return percentages."
+    },
+    "PortfolioHistorySummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "pnl_today": {
+          "type": "number",
+          "multipleOf": 0.01,
+          "description": "Absolute PnL versus the previous snapshot day."
+        },
+        "pnl_7d": {
+          "type": "number",
+          "multipleOf": 0.01,
+          "description": "Absolute PnL versus the snapshot closest to seven calendar days ago."
+        },
+        "pnl_30d": {
+          "type": "number",
+          "multipleOf": 0.01,
+          "description": "Absolute PnL versus the snapshot closest to thirty calendar days ago."
+        },
+        "pnl_ytd": {
+          "type": "number",
+          "multipleOf": 0.01,
+          "description": "Absolute PnL versus the first snapshot on or after January 1 UTC of the current year."
+        }
+      },
+      "description": "Optional headline PnL summary cards for dashboard UI."
+    },
+    "PortfolioHistoryResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["days", "points"],
+      "properties": {
+        "days": {
+          "$ref": "#/$defs/HistoryDays"
+        },
+        "points": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/PortfolioHistoryPoint"
+          },
+          "description": "Ascending series of history points within the requested window."
+        },
+        "summary": {
+          "$ref": "#/$defs/PortfolioHistorySummary",
+          "description": "Optional PnL summary when enough history exists to compute headline cards."
+        }
+      },
+      "description": "GET /api/v1/portfolio/history success body (default days=30)."
+    },
+    "CreateSnapshotResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["snapshot", "created"],
+      "properties": {
+        "snapshot": {
+          "$ref": "#/$defs/PortfolioSnapshot"
+        },
+        "created": {
+          "type": "boolean",
+          "description": "True when a new row was inserted; false when today's snapshot was upserted."
+        }
+      },
+      "description": "POST /api/v1/portfolio/snapshots success body."
+    }
+  }
+}
