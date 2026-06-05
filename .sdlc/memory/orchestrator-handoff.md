@@ -6,57 +6,49 @@
 |-------|-------|
 | **Next agent** | qa |
 | **Stage complete** | no |
-| **Previous agent** | implementer |
+| **Previous agent** | auto-fixer |
 
 ## Session
 
 | Field | Value |
 |-------|-------|
-| **Card** | INVES-108 |
+| **Card** | INVES-109 |
 | **Epic** | INVES-107 |
-| **Branch** | `feature/INVES-108-watchlist-rebalance-api` |
-| **Stage** | implementation |
+| **Branch** | `feature/INVES-109-watchlist-rebalance-ui` |
+| **Stage** | auto-fixer → qa |
 
-## Implementation summary (INVES-108)
+## Auto-fixer summary
 
-Per ADR-012:
+Fixed AC-5 QA gap: added vitest stack and `WatchlistTable.test.tsx`.
 
-- New ORM table `watchlist_invested_amounts` (`WatchlistInvestedAmountRow`) via `init_db()` / `create_all`
-- `watchlist_rebalance.py` — pure Decimal rebalance math (weights, drift, suggestions, bands)
-- `watchlist_allocations.py` — `list_invested`, `set_invested`, `invested_amount_to_cents`
-- `domain/models.py` — `RebalanceSummary`, extended `WatchlistItem`, invested request/response types
-- `PATCH /api/v1/watchlist/items/{symbol}/invested`
-- GET watchlist + allocation PATCH responses enriched with rebalance fields + `rebalance_summary`
-- Shared contract: `allocation.ts`, `allocation.schema.json`
+| Change | Detail |
+|--------|--------|
+| Dev deps | `vitest`, `@testing-library/react`, `jsdom` |
+| Script | `"test": "vitest run"` in `package.json` |
+| Config | `vitest.config.ts` (jsdom, `@shared` alias) |
+| Tests | `WatchlistTable.test.tsx` — 7 tests |
 
-## Commits
+## Validation (auto-fixer)
 
-| Hash | Message |
-|------|---------|
-| `6028bc4` | `[INVES-108] Add watchlist rebalance API and persistence.` |
+| Check | Result | Evidence |
+|-------|--------|----------|
+| `npm run build` (app/frontend) | **PASS** | exit 0 — tsc + vite build |
+| `npm test` (app/frontend) | **PASS** | 7 passed in 1 file |
 
-## Test evidence
+## Test coverage (AC-5)
 
-```text
-PYTHONPATH=app/backend/src python3 -m pytest app/backend/tests/test_watchlist.py app/backend/tests/test_watchlist_rebalance.py -v
-21 passed in 0.70s
-```
+- Drift band badges: `on_target`, `warning`, `off_target`
+- Signed drift percentages in Drift column
+- Null weight/drift/suggestion em dashes (zero invested)
+- Buy suggestion: `+$1,500.50` with emerald styling
+- Sell suggestion: `$750.00` with rose styling
 
-Coverage includes: jsonschema validation, zero-total null weights, balanced suggestions + penny tolerance, ROUND_HALF_UP rounding, drift bands (on_target/warning/off_target), invested persistence survives target clear.
+## QA re-run scope
 
-## QA checklist
-
-1. Run full backend test suite (`make -C app test-backend` or equivalent)
-2. Validate jsonschema contract against live API responses
-3. Map acceptance criteria on Plane card INVES-108 to test results
-4. Contract-validator after merge (planner note)
+1. Full QA minimum checklist on feature branch
+2. Confirm AC-5 mapping to 7 vitest cases
+3. Route to Reviewer if PASS
 
 ## Blockers
 
 None.
-
-## Notes
-
-- No Alembic in repo; table created via SQLAlchemy `create_all` (per architecture)
-- INVES-109 (frontend) blocked until INVES-108 merged or contract frozen on branch
-- Do not merge or open PR from QA — Reviewer → DevOps after QA pass

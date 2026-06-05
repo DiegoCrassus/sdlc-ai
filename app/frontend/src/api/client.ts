@@ -6,6 +6,8 @@ import type {
 import type {
   UpdateWatchlistAllocationRequest,
   UpdateWatchlistAllocationResponse,
+  UpdateWatchlistInvestedRequest,
+  UpdateWatchlistInvestedResponse,
 } from "@shared/types/allocation";
 import type {
   AssetProjection,
@@ -51,6 +53,18 @@ export const api = {
   ) =>
     request<UpdateWatchlistAllocationResponse>(
       `/watchlist/items/${encodeURIComponent(symbol)}/allocation`,
+      {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      },
+    ),
+  updateWatchlistInvested: (
+    symbol: string,
+    payload: UpdateWatchlistInvestedRequest,
+  ) =>
+    request<UpdateWatchlistInvestedResponse>(
+      `/watchlist/items/${encodeURIComponent(symbol)}/invested`,
       {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
