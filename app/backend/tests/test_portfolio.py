@@ -10,6 +10,7 @@ from typing import Any
 
 import jsonschema
 import pytest
+from auth_helpers import identify_as
 from httpx import AsyncClient
 from marketpulse.db.models import PortfolioSnapshotRow
 from marketpulse.db.session import get_session_factory
@@ -168,6 +169,7 @@ async def test_post_snapshot_creates_and_upserts(
         json={"invested_amount": 0.5},
     )
 
+    # POST returns 200 (not 201): upsert route consistent with watchlist PATCH, unlike alerts POST create.
     first = await authed_client.post("/api/v1/portfolio/snapshots")
     assert first.status_code == 200
     first_payload = first.json()
@@ -232,3 +234,42 @@ async def test_seven_snapshots_return_seven_points(
 async def test_portfolio_routes_require_auth(client: AsyncClient) -> None:
     assert (await client.post("/api/v1/portfolio/snapshots")).status_code == 401
     assert (await client.get("/api/v1/portfolio/history")).status_code == 401
+
+
+async def test_two_users_have_isolated_portfolio_history(
+    client: AsyncClient,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    today = date(2026, 6, 5)
+    monkeypatch.setattr(snapshot_service, "utc_today", lambda: today)
+
+    await identify_as(client, "alice@example.com")
+    alice_id = (await client.get("/api/v1/auth/me")).json()["user"]["id"]
+    await _seed_snapshots(alice_id, today=today, values_cents=[10_000, 12_000])
+
+    await identify_as(client, "bob@example.com")
+    bob_empty = await client.get("/api/v1/portfolio/history?days=30")
+    assert bob_empty.status_code == 200
+    assert bob_empty.json()["points"] == []
+
+    bob_id = (await client.get("/api/v1/auth/me")).json()["user"]["id"]
+    await _seed_snapshots(bob_id, today=today, values_cents=[50_000])
+
+    bob_history = await client.get("/api/v1/portfolio/history?days=30")
+    assert len(bob_history.json()["points"]) == 1
+    assert bob_history.json()["points"][0]["total_value"] == 500.0
+
+    await identify_as(client, "alice@example.com")
+    alice_history = await client.get("/api/v1/portfolio/history?days=30")
+    assert len(alice_history.json()["points"]) == 2
+    assert alice_history.json()["points"][0]["total_value"] == 100.0
+    assert alice_history.json()["points"][1]["total_value"] == 120.0
+
+
+async def test_history_rejects_invalid_days(authed_client: AsyncClient) -> None:
+    for invalid_days in (0, 7, 31, 100):
+        response = await authed_client.get(f"/api/v1/portfolio/history?days={invalid_days}")
+        assert response.status_code == 400
+        payload = response.json()
+        assert payload["error"]["code"] == "VALIDATION_ERROR"
+        assert "days" in payload["error"]["message"].lower()

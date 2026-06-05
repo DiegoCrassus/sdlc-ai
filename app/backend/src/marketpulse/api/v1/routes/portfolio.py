@@ -13,8 +13,8 @@ from marketpulse.deps import get_current_user, get_market_provider_dep
 from marketpulse.domain.auth import CurrentUser
 from marketpulse.domain.models import CreateSnapshotResponse, HistoryDays, PortfolioHistoryResponse
 from marketpulse.providers.base import MarketDataProvider
-from marketpulse.services import watchlist_allocations as allocation_service
 from marketpulse.services import portfolio_snapshots as snapshot_service
+from marketpulse.services import watchlist_allocations as allocation_service
 
 router = APIRouter(prefix="/portfolio", tags=["portfolio"])
 

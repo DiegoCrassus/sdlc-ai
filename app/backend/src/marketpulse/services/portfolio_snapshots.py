@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 import uuid
 from datetime import UTC, date, datetime, timedelta
-from decimal import ROUND_HALF_UP, Decimal
+from decimal import Decimal
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
