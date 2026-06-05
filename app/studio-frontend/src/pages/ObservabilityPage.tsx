@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { studioApi } from "../api/client";
 import { mergeTimelineEvents } from "../api/obsQuery";
 import { DerivedBanner } from "../components/common/DerivedBanner";
+import { CorrelationPanel } from "../components/observability/CorrelationPanel";
 import { ObsFiltersBar } from "../components/observability/ObsFiltersBar";
 import { TimelineEventRow } from "../components/observability/TimelineEventRow";
 import { useStudioObsStream } from "../hooks/useStudioObsStream";
@@ -24,49 +25,6 @@ function streamBadgeClass(status: ObsStreamStatus): string {
   if (status === "error") return "border-studio-fail/50 bg-red-950/40 text-red-200";
   if (status === "connecting") return "border-studio-accent/40 bg-studio-accent/10 text-sky-200";
   return "border-slate-600 bg-slate-800/60 text-slate-400";
-}
-
-function CorrelationPanel({ event }: { event: StudioEvent }) {
-  const corr = event.correlation;
-  const entries = [
-    ["correlation_id", event.correlation_id],
-    ["card", corr.card],
-    ["run_id", corr.run_id],
-    ["branch", corr.branch],
-    ["session_id", corr.session_id],
-  ].filter(([, value]) => value);
-
-  return (
-    <div className="space-y-4 rounded-xl border border-slate-800 bg-surface-card p-4">
-      <div>
-        <p className="text-xs uppercase tracking-wide text-slate-500">Selected event</p>
-        <p className="mt-1 font-mono text-sm text-studio-accent">{event.event_type}</p>
-        <p className="mt-1 font-mono text-xs text-slate-500">{event.event_id}</p>
-      </div>
-      {entries.length > 0 ? (
-        <dl className="space-y-2 text-sm">
-          {entries.map(([key, value]) => (
-            <div key={key}>
-              <dt className="text-xs uppercase text-slate-500">{key}</dt>
-              <dd className="mt-0.5 font-mono text-xs text-slate-200">{String(value)}</dd>
-            </div>
-          ))}
-        </dl>
-      ) : (
-        <p className="text-xs text-slate-500">No correlation fields on this event.</p>
-      )}
-      <div>
-        <p className="text-xs uppercase tracking-wide text-slate-500">Payload</p>
-        <pre className="mt-2 max-h-64 overflow-auto rounded-md border border-slate-700 bg-slate-900 p-3 font-mono text-[11px] text-slate-300">
-          {JSON.stringify(event.payload, null, 2)}
-        </pre>
-      </div>
-      <p className="text-xs text-slate-500">
-        Continue orchestration in Cursor — Studio does not embed chat. Source:{" "}
-        <span className="font-mono text-slate-400">{event.source}</span>
-      </p>
-    </div>
-  );
 }
 
 export function ObservabilityPage() {
@@ -143,38 +101,38 @@ export function ObservabilityPage() {
   }
 
   return (
-    <div className="mx-auto max-w-6xl space-y-6">
-      <DerivedBanner />
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-white">Observability</h1>
-          <p className="mt-1 text-sm text-slate-400">
-            Unified timeline from gateway, handoff, gate, and obs runs · SSE{" "}
-            <code className="text-slate-500">/studio/obs/events</code>
-          </p>
+    <div className="mx-auto flex h-[calc(100vh-7rem)] max-w-6xl flex-col gap-4 overflow-hidden">
+      <div className="shrink-0 space-y-4">
+        <DerivedBanner />
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-white">Observability</h1>
+            <p className="mt-1 text-sm text-slate-400">
+              Unified timeline from gateway, handoff, gate, and obs runs · SSE{" "}
+              <code className="text-slate-500">/studio/obs/events</code>
+            </p>
+          </div>
+          <span
+            className={`rounded-full border px-3 py-1 text-xs font-medium ${streamBadgeClass(streamStatus)}`}
+          >
+            {STREAM_LABEL[streamStatus]}
+          </span>
         </div>
-        <span
-          className={`rounded-full border px-3 py-1 text-xs font-medium ${streamBadgeClass(streamStatus)}`}
-        >
-          {STREAM_LABEL[streamStatus]}
-        </span>
+
+        <ObsFiltersBar
+          filters={filters}
+          onChange={(next) => setFilters({ limit: DEFAULT_LIMIT, ...next })}
+          onReset={() => setFilters({ limit: DEFAULT_LIMIT })}
+        />
       </div>
 
-      <ObsFiltersBar
-        filters={filters}
-        onChange={(next) => setFilters({ limit: DEFAULT_LIMIT, ...next })}
-        onReset={() => setFilters({ limit: DEFAULT_LIMIT })}
-      />
-
-      <div className="grid gap-6 lg:grid-cols-[1fr_280px]">
-        <section className="space-y-2" key={filterKey}>
-          <div className="flex items-center justify-between text-xs text-slate-500">
-            <span>
-              {timelineQuery.isLoading ? "Loading…" : `${events.length} event(s)`}
-              {timelineQuery.data?.count != null && !timelineQuery.isLoading
-                ? ` · API count ${timelineQuery.data.count}`
-                : null}
-            </span>
+      <div className="grid min-h-0 flex-1 gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
+        <section className="flex min-h-0 flex-col overflow-hidden" key={filterKey}>
+          <div className="mb-2 shrink-0 text-xs text-slate-500">
+            {timelineQuery.isLoading ? "Loading…" : `${events.length} event(s)`}
+            {timelineQuery.data?.count != null && !timelineQuery.isLoading
+              ? ` · API count ${timelineQuery.data.count}`
+              : null}
           </div>
           {timelineQuery.isLoading && events.length === 0 ? (
             <p className="text-slate-400">Loading timeline…</p>
@@ -183,7 +141,7 @@ export function ObservabilityPage() {
               No events match the current filters. Trigger gateway or handoff activity, then refresh.
             </div>
           ) : (
-            <ul className="space-y-2">
+            <ul className="min-h-0 flex-1 space-y-1 overflow-y-auto pr-1">
               {[...events].reverse().map((event) => (
                 <li key={event.event_id}>
                   <TimelineEventRow
@@ -197,11 +155,14 @@ export function ObservabilityPage() {
           )}
         </section>
 
-        <aside>
+        <aside className="flex min-h-0 flex-col overflow-hidden">
           {selectedEvent ? (
             <CorrelationPanel event={selectedEvent} />
           ) : (
-            <div className="rounded-xl border border-dashed border-slate-700 p-6 text-center text-sm text-slate-500">
+            <div
+              className="flex flex-1 items-center justify-center rounded-xl border border-dashed border-slate-700 p-6 text-center text-sm text-slate-500"
+              data-testid="obs-detail-panel"
+            >
               Select an event to inspect correlation and payload.
             </div>
           )}
