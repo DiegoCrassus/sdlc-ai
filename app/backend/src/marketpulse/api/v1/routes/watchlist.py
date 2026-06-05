@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, status
@@ -22,8 +23,11 @@ from marketpulse.domain.models import (
 )
 from marketpulse.domain.watchlist import DEFAULT_WATCHLIST, is_watchlist_symbol
 from marketpulse.providers.base import MarketDataProvider
+from marketpulse.services import portfolio_snapshots as snapshot_service
 from marketpulse.services import watchlist_allocations as allocation_service
 from marketpulse.services import watchlist_rebalance as rebalance_service
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/watchlist", tags=["watchlist"])
 
@@ -110,6 +114,15 @@ async def get_watchlist(
     targets_by_symbol, invested_cents_by_symbol, item_rebalances, rebalance_summary = (
         await _load_rebalance_context(session, current_user.id)
     )
+    try:
+        await snapshot_service.ensure_daily_snapshot(
+            session,
+            current_user.id,
+            provider,
+            invested_cents_by_symbol,
+        )
+    except Exception:
+        logger.exception("Failed to record daily portfolio snapshot for user %s", current_user.id)
     allocation_summary = allocation_service.build_allocation_summary(targets_by_symbol)
     items = [
         await _build_watchlist_item(

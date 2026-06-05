@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import date, datetime
 from decimal import Decimal, InvalidOperation
 from typing import Literal
 
@@ -261,3 +261,38 @@ class ApiErrorBody(BaseModel):
 
 class AlertErrorResponse(BaseModel):
     error: ApiErrorBody
+
+
+HistoryDays = Literal[30, 90, 365]
+
+
+class PortfolioSnapshot(BaseModel):
+    snapshot_date: date
+    total_value: float = Field(ge=0)
+    created_at: datetime
+    updated_at: datetime
+
+
+class PortfolioHistoryPoint(BaseModel):
+    snapshot_date: date
+    total_value: float = Field(ge=0)
+    daily_change_pct: float
+    cumulative_return_pct: float
+
+
+class PortfolioHistorySummary(BaseModel):
+    pnl_today: float | None = None
+    pnl_7d: float | None = None
+    pnl_30d: float | None = None
+    pnl_ytd: float | None = None
+
+
+class PortfolioHistoryResponse(BaseModel):
+    days: HistoryDays
+    points: list[PortfolioHistoryPoint]
+    summary: PortfolioHistorySummary | None = None
+
+
+class CreateSnapshotResponse(BaseModel):
+    snapshot: PortfolioSnapshot
+    created: bool

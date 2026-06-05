@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import date, datetime
 
-from sqlalchemy import DateTime, Float, ForeignKey, Integer, String
+from sqlalchemy import Date, DateTime, Float, ForeignKey, Integer, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
 from marketpulse.db.base import Base
@@ -64,4 +64,18 @@ class WatchlistInvestedAmountRow(Base):
     user_id: Mapped[str] = mapped_column(String(36), ForeignKey("users.id"), primary_key=True)
     symbol: Mapped[str] = mapped_column(String(32), primary_key=True)
     amount_cents: Mapped[int] = mapped_column(Integer, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+
+class PortfolioSnapshotRow(Base):
+    """Daily total watchlist value snapshot per user (INVES-118)."""
+
+    __tablename__ = "portfolio_snapshots"
+    __table_args__ = (UniqueConstraint("user_id", "snapshot_date", name="uq_portfolio_snapshots_user_date"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    user_id: Mapped[str] = mapped_column(String(36), ForeignKey("users.id"), nullable=False, index=True)
+    snapshot_date: Mapped[date] = mapped_column(Date, nullable=False)
+    total_value_cents: Mapped[int] = mapped_column(Integer, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
