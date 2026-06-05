@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Start Studio API + UI preview, run Playwright smoke, then tear down.
+# Start Studio API + UI preview, run Playwright smoke + builder E2E, then tear down.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
