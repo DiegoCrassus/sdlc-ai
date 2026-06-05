@@ -5,12 +5,15 @@ import type { XYPosition } from "@xyflow/react";
 
 import { studioApi } from "../api/client";
 import { AssetPalette } from "../components/builder/AssetPalette";
+import { BuilderInspector, type BuilderSelection } from "../components/builder/BuilderInspector";
 import { BuilderShell } from "../components/builder/BuilderShell";
 import { BuilderToast } from "../components/builder/BuilderToast";
 import { ProposalPanel } from "../components/builder/ProposalPanel";
 import { ProposedBanner } from "../components/builder/ProposedBanner";
-import { TransitionInspector } from "../components/builder/TransitionInspector";
-import { WorkflowBuilderCanvas } from "../components/builder/WorkflowBuilderCanvas";
+import {
+  WorkflowBuilderCanvas,
+  type BuilderCanvasSelection,
+} from "../components/builder/WorkflowBuilderCanvas";
 import {
   createStageCanvasNode,
   findStageOnCanvas,
@@ -28,19 +31,34 @@ import type { ProposalResponse } from "../types/proposals";
 
 export function WorkflowBuilderPage() {
   const [searchParams] = useSearchParams();
-  const highlightedNodeId = searchParams.get("node");
+  const urlNodeId = searchParams.get("node");
 
   const [drafts, setDrafts] = useState<WorkflowTransitionDraft[]>([]);
-  const [selectedEdgeId, setSelectedEdgeId] = useState<string | null>(null);
+  const [selection, setSelection] = useState<BuilderSelection>({ kind: "none" });
+  const [showAnnotations, setShowAnnotations] = useState(true);
   const [proposalTitle, setProposalTitle] = useState("Workflow transition update");
   const [simulatedCard, setSimulatedCard] = useState("INVES-N");
   const [proposal, setProposal] = useState<ProposalResponse | null>(null);
   const [initialized, setInitialized] = useState(false);
-  const [focusNodeId, setFocusNodeId] = useState<string | null>(highlightedNodeId);
+  const [focusNodeId, setFocusNodeId] = useState<string | null>(urlNodeId);
   const [connectOnClick, setConnectOnClick] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [placedStageNodes, setPlacedStageNodes] = useState<CanvasNode[]>([]);
   const [manualPositions, setManualPositions] = useState<Record<string, XYPosition>>({});
+
+  const selectedEdgeId = selection.kind === "edge" ? selection.edgeId : null;
+  const highlightedNodeId = useMemo(() => {
+    if (selection.kind === "stage") {
+      return selection.nodeId;
+    }
+    if (selection.kind === "agent") {
+      return `display.annotation.agent.${selection.agentId}`;
+    }
+    if (selection.kind === "gate") {
+      return `display.annotation.gate.${selection.gateId}`;
+    }
+    return focusNodeId;
+  }, [selection, focusNodeId]);
 
   const canvasQuery = useQuery({
     queryKey: ["studio", "canvas", "workflow-builder"],
@@ -97,6 +115,21 @@ export function WorkflowBuilderPage() {
     [canvasStageNodes],
   );
 
+  const selectedStage = useMemo(() => {
+    if (selection.kind !== "stage") {
+      return null;
+    }
+    return canvasStageNodes.find((node) => node.id === selection.nodeId) ?? null;
+  }, [canvasStageNodes, selection]);
+
+  const handleCanvasSelection = useCallback((next: BuilderCanvasSelection) => {
+    setSelection(next);
+  }, []);
+
+  const clearSelection = useCallback(() => {
+    setSelection({ kind: "none" });
+  }, []);
+
   const selectedDraft = useMemo(
     () => drafts.find((draft) => draft.edgeDisplayId === selectedEdgeId) ?? null,
     [drafts, selectedEdgeId],
@@ -116,7 +149,7 @@ export function WorkflowBuilderPage() {
           draft.sourceDisplayId === sourceDisplayId && draft.targetDisplayId === targetDisplayId,
       );
       if (existing) {
-        setSelectedEdgeId(existing.edgeDisplayId);
+        setSelection({ kind: "edge", edgeId: existing.edgeDisplayId });
         return;
       }
 
@@ -127,7 +160,7 @@ export function WorkflowBuilderPage() {
       }
 
       setDrafts((current) => [...current, created]);
-      setSelectedEdgeId(created.edgeDisplayId);
+      setSelection({ kind: "edge", edgeId: created.edgeDisplayId });
       setProposal(null);
     },
     [drafts, nodesById],
@@ -135,7 +168,9 @@ export function WorkflowBuilderPage() {
 
   const onRemoveEdge = useCallback((edgeDisplayId: string) => {
     setDrafts((current) => current.filter((draft) => draft.edgeDisplayId !== edgeDisplayId));
-    setSelectedEdgeId((current) => (current === edgeDisplayId ? null : current));
+    setSelection((current) =>
+      current.kind === "edge" && current.edgeId === edgeDisplayId ? { kind: "none" } : current,
+    );
     setProposal(null);
   }, []);
 
@@ -148,6 +183,7 @@ export function WorkflowBuilderPage() {
       const existing = findStageOnCanvas(canvasStageNodes, stageId);
       if (existing) {
         setFocusNodeId(existing.id);
+        setSelection({ kind: "stage", nodeId: existing.id });
         return;
       }
 
@@ -164,6 +200,7 @@ export function WorkflowBuilderPage() {
       setPlacedStageNodes((current) => [...current, node]);
       setManualPositions((current) => ({ ...current, [node.id]: position }));
       setFocusNodeId(node.id);
+      setSelection({ kind: "stage", nodeId: node.id });
     },
     [canvasStageNodes, pipelineQuery.data?.stages],
   );
@@ -219,7 +256,11 @@ export function WorkflowBuilderPage() {
             <AssetPalette
               stages={pipelineQuery.data.stages}
               agents={pipelineQuery.data.agents}
-              onFocusStage={(id) => setFocusNodeId(id)}
+              gates={pipelineQuery.data.gates ?? []}
+              onFocusStage={(id) => {
+                setFocusNodeId(id);
+                setSelection({ kind: "stage", nodeId: id });
+              }}
             />
           ) : (
             <p className="text-xs text-slate-500">Loading SDLC assets…</p>
@@ -232,29 +273,35 @@ export function WorkflowBuilderPage() {
             <WorkflowBuilderCanvas
               nodes={canvasStageNodes}
               drafts={drafts}
+              agents={pipelineQuery.data?.agents ?? []}
+              gates={pipelineQuery.data?.gates ?? []}
+              showAnnotations={showAnnotations}
               selectedEdgeId={selectedEdgeId}
-              highlightedNodeId={focusNodeId ?? highlightedNodeId}
+              highlightedNodeId={highlightedNodeId}
               manualPositions={manualPositions}
               connectOnClick={connectOnClick}
               onConnectOnClickChange={setConnectOnClick}
-              onSelectEdge={setSelectedEdgeId}
+              onSelectionChange={handleCanvasSelection}
               onConnectStages={onConnectStages}
               onRemoveEdge={onRemoveEdge}
               onDropStage={onDropStage}
-              onSelectNode={setFocusNodeId}
               onConnectionFailed={onConnectionFailed}
+              onShowAnnotationsChange={setShowAnnotations}
             />
           )
         }
         inspector={
           <>
-            <TransitionInspector
-              draft={selectedDraft}
+            <BuilderInspector
+              selection={selection}
+              selectedDraft={selectedDraft}
+              selectedStage={selectedStage}
               agents={pipelineQuery.data?.agents ?? []}
+              gates={pipelineQuery.data?.gates ?? []}
               skills={pipelineQuery.data?.skills ?? []}
-              onChange={updateDraft}
-              onRemove={onRemoveEdge}
-              onClose={() => setSelectedEdgeId(null)}
+              onDraftChange={updateDraft}
+              onRemoveEdge={onRemoveEdge}
+              onClearSelection={clearSelection}
             />
 
             <div className="rounded-xl border border-slate-800 bg-surface-card p-4">

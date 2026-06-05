@@ -16,9 +16,11 @@ def build_pipeline_metadata(root: Path) -> dict[str, Any]:
 
     lifecycle_path = root / ".sdlc" / "stages" / "lifecycle.yaml"
     pipeline_path = root / ".sdlc" / "pipeline" / "agents.yaml"
+    gates_path = root / ".sdlc" / "gates" / "paths.yaml"
 
     stages = _load_lifecycle_stages(lifecycle_path)
     agents = _load_pipeline_agents(pipeline_path)
+    gates = _load_gate_paths(gates_path, stages)
 
     skills: list[dict[str, str]] = []
     seen: set[str] = set()
@@ -45,15 +47,18 @@ def build_pipeline_metadata(root: Path) -> dict[str, Any]:
         "stages": stages,
         "agents": agents,
         "skills": sorted(skills, key=lambda item: item["id"]),
+        "gates": gates,
         "summary": {
             "stage_count": len(stages),
             "agent_count": len(agents),
             "skill_count": len(skills),
+            "gate_count": len(gates),
             "transition_count": transition_count,
         },
         "source_refs": [
             ".sdlc/stages/lifecycle.yaml",
             ".sdlc/pipeline/agents.yaml",
+            ".sdlc/gates/paths.yaml",
             ".sdlc/workflows/transitions.yaml",
         ],
     }
@@ -102,3 +107,34 @@ def _load_pipeline_agents(path: Path) -> list[dict[str, Any]]:
             }
         )
     return agents
+
+
+def _load_gate_paths(
+    path: Path,
+    stages: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Read-only gate path badges from paths.yaml for builder annotations."""
+
+    if not path.is_file():
+        return []
+
+    data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    gate_paths = data.get("gate_paths") or {}
+    stage_names = {str(item.get("id", "")): str(item.get("name", "")) for item in stages}
+    gates: list[dict[str, Any]] = []
+
+    for stage_id, config in (gate_paths.get("stages") or {}).items():
+        if not isinstance(config, dict):
+            continue
+        allowed = [str(prefix) for prefix in (config.get("allowed_prefixes") or [])]
+        gates.append(
+            {
+                "id": str(stage_id),
+                "name": stage_names.get(str(stage_id), str(stage_id)),
+                "stage": str(stage_id),
+                "allowed_prefixes": allowed,
+                "source_ref": ".sdlc/gates/paths.yaml",
+            }
+        )
+
+    return sorted(gates, key=lambda item: item["stage"])

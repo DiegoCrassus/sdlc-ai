@@ -60,7 +60,7 @@ export function TransitionInspector({
 
   return (
     <div
-      data-testid="builder-inspector"
+      data-testid="builder-inspector-edge"
       className="flex flex-col gap-4 rounded-xl border border-slate-800 bg-surface-card p-4"
     >
       <div className="flex items-start justify-between gap-2">

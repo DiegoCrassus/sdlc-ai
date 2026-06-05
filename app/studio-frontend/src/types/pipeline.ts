@@ -18,14 +18,24 @@ export type PipelineSkillMeta = {
   name: string;
 };
 
+export type PipelineGateMeta = {
+  id: string;
+  name: string;
+  stage: string;
+  allowed_prefixes: string[];
+  source_ref: string;
+};
+
 export type PipelineMetadataResponse = {
   stages: PipelineStageMeta[];
   agents: PipelineAgentMeta[];
   skills: PipelineSkillMeta[];
+  gates: PipelineGateMeta[];
   summary: {
     stage_count: number;
     agent_count: number;
     skill_count: number;
+    gate_count: number;
     transition_count: number;
   };
   source_refs: string[];

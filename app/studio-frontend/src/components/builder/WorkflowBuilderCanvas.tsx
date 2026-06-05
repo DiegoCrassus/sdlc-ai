@@ -15,43 +15,71 @@ import {
   type FinalConnectionState,
   type Node,
   type OnSelectionChangeParams,
+  type OnNodesChange,
   type XYPosition,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 
 import type { CanvasNode } from "../../types/canvas";
 import type { WorkflowTransitionDraft } from "../../types/builder";
+import type { PipelineAgentMeta, PipelineGateMeta } from "../../types/pipeline";
 import { StudioNode } from "../canvas/StudioNode";
 import { mapCanvasEdge, mapCanvasNode, type StudioNodeData } from "../canvas/mapViewModel";
 import { applyDagreLayout } from "../canvas/mapViewModel";
+import { AgentAnnotationNode } from "./AgentAnnotationNode";
+import { GateAnnotationNode } from "./GateAnnotationNode";
+import {
+  buildAgentAnnotationNodes,
+  buildGateAnnotationNodes,
+  type AgentAnnotationNodeData,
+  type GateAnnotationNodeData,
+} from "./annotationNodes";
 import { parseStageDragPayload, REACT_FLOW_DRAG_MIME } from "./builderDnD";
 import { draftsToCanvasEdges } from "./workflowDraft";
 import { TransitionEdge } from "./TransitionEdge";
 
-const nodeTypes = { studioNode: StudioNode };
+const nodeTypes = {
+  stageNode: StudioNode,
+  agentAnnotationNode: AgentAnnotationNode,
+  gateAnnotationNode: GateAnnotationNode,
+};
 const edgeTypes = { transitionEdge: TransitionEdge };
+
+type StageFlowNode = Node<StudioNodeData>;
+type AnnotationFlowNode = Node<AgentAnnotationNodeData | GateAnnotationNodeData>;
+type BuilderFlowNode = StageFlowNode | AnnotationFlowNode;
+
+export type BuilderCanvasSelection =
+  | { kind: "none" }
+  | { kind: "edge"; edgeId: string }
+  | { kind: "stage"; nodeId: string }
+  | { kind: "agent"; agentId: string }
+  | { kind: "gate"; gateId: string };
 
 type WorkflowBuilderCanvasProps = {
   nodes: CanvasNode[];
   drafts: WorkflowTransitionDraft[];
+  agents: PipelineAgentMeta[];
+  gates: PipelineGateMeta[];
+  showAnnotations: boolean;
   selectedEdgeId: string | null;
   highlightedNodeId: string | null;
   manualPositions: Record<string, XYPosition>;
   connectOnClick: boolean;
   onConnectOnClickChange: (enabled: boolean) => void;
-  onSelectEdge: (edgeDisplayId: string | null) => void;
+  onSelectionChange: (selection: BuilderCanvasSelection) => void;
   onConnectStages: (sourceDisplayId: string, targetDisplayId: string) => void;
   onRemoveEdge: (edgeDisplayId: string) => void;
   onDropStage: (stageId: string, position: XYPosition) => void;
-  onSelectNode?: (nodeId: string | null) => void;
   onConnectionFailed: (message: string) => void;
+  onShowAnnotationsChange: (enabled: boolean) => void;
 };
 
 function mergeNodeData(
-  current: Node<StudioNodeData>[],
-  mapped: Node<StudioNodeData>[],
+  current: StageFlowNode[],
+  mapped: StageFlowNode[],
   manualPositions: Record<string, XYPosition>,
-): Node<StudioNodeData>[] {
+): StageFlowNode[] {
   return mapped.map((node) => {
     const manual = manualPositions[node.id];
     const existing = current.find((item) => item.id === node.id);
@@ -70,46 +98,80 @@ function mergeNodeData(
 
 type WorkflowBuilderFlowProps = WorkflowBuilderCanvasProps;
 
+function selectionFromNode(node: BuilderFlowNode | undefined): BuilderCanvasSelection {
+  if (!node) {
+    return { kind: "none" };
+  }
+  if (node.type === "agentAnnotationNode") {
+    return { kind: "agent", agentId: (node.data as AgentAnnotationNodeData).agentId };
+  }
+  if (node.type === "gateAnnotationNode") {
+    return { kind: "gate", gateId: (node.data as GateAnnotationNodeData).gateId };
+  }
+  return { kind: "stage", nodeId: node.id };
+}
+
 function WorkflowBuilderFlow({
   nodes,
   drafts,
+  agents,
+  gates,
+  showAnnotations,
   selectedEdgeId,
   highlightedNodeId,
   manualPositions,
   connectOnClick,
   onConnectOnClickChange,
-  onSelectEdge,
+  onSelectionChange,
   onConnectStages,
   onRemoveEdge,
   onDropStage,
-  onSelectNode,
   onConnectionFailed,
+  onShowAnnotationsChange,
 }: WorkflowBuilderFlowProps) {
+  const agentsById = useMemo(() => new Map(agents.map((agent) => [agent.id, agent])), [agents]);
   const { screenToFlowPosition } = useReactFlow();
-  const mappedNodes = useMemo(() => nodes.map((node) => mapCanvasNode(node)), [nodes]);
+  const mappedStageNodes = useMemo(
+    () =>
+      nodes.map((node) => ({
+        ...mapCanvasNode(node),
+        type: "stageNode" as const,
+      })),
+    [nodes],
+  );
   const draftEdges = useMemo(() => draftsToCanvasEdges(drafts), [drafts]);
 
   const layoutAppliedRef = useRef(false);
-  const [flowNodes, setFlowNodes, onNodesChange] = useNodesState<Node<StudioNodeData>>([]);
+  const [flowNodes, setFlowNodes, onNodesChange] = useNodesState<StageFlowNode>([]);
   const flowEdgesStatic = useMemo(
     () =>
-      draftEdges.map((edge) => ({
-        ...mapCanvasEdge(edge),
-        type: "transitionEdge" as const,
-      })),
-    [draftEdges],
+      draftEdges.map((edge) => {
+        const agent = agentsById.get(edge.agent ?? "");
+        return {
+          ...mapCanvasEdge(edge),
+          type: "transitionEdge" as const,
+          data: {
+            relation: edge.relation,
+            graphEdgeId: edge.graph_edge_id,
+            agent: edge.agent,
+            skill: edge.skill,
+            agentName: agent?.name ?? edge.agent,
+          },
+        };
+      }),
+    [draftEdges, agentsById],
   );
   const [flowEdges, setFlowEdges, onEdgesChange] = useEdgesState<Edge>(flowEdgesStatic);
 
   useEffect(() => {
-    if (mappedNodes.length === 0) {
+    if (mappedStageNodes.length === 0) {
       setFlowNodes([]);
       layoutAppliedRef.current = false;
       return;
     }
 
     if (!layoutAppliedRef.current) {
-      const withManual = mergeNodeData([], mappedNodes, manualPositions);
+      const withManual = mergeNodeData([], mappedStageNodes, manualPositions);
       const hasManualOnly = withManual.some((node) => manualPositions[node.id]);
       if (hasManualOnly) {
         setFlowNodes(withManual);
@@ -121,8 +183,45 @@ function WorkflowBuilderFlow({
       return;
     }
 
-    setFlowNodes((current) => mergeNodeData(current, mappedNodes, manualPositions));
-  }, [mappedNodes, flowEdgesStatic, manualPositions, setFlowNodes]);
+    setFlowNodes((current) => mergeNodeData(current, mappedStageNodes, manualPositions));
+  }, [mappedStageNodes, flowEdgesStatic, manualPositions, setFlowNodes]);
+
+  const annotationNodes = useMemo(() => {
+    if (!showAnnotations) {
+      return [];
+    }
+    const agentNodes = buildAgentAnnotationNodes(agents, flowNodes);
+    const gateNodes = buildGateAnnotationNodes(gates, flowNodes);
+    return [...agentNodes, ...gateNodes];
+  }, [agents, gates, flowNodes, showAnnotations]);
+
+  const styledStageNodes = useMemo(
+    () =>
+      flowNodes.map((node) => ({
+        ...node,
+        selected: node.id === highlightedNodeId,
+        connectable: true,
+        data: {
+          ...node.data,
+          validationBorderVisible: false,
+        },
+      })),
+    [flowNodes, highlightedNodeId],
+  );
+
+  const styledAnnotationNodes = useMemo(
+    () =>
+      annotationNodes.map((node) => ({
+        ...node,
+        selected: node.id === highlightedNodeId,
+      })),
+    [annotationNodes, highlightedNodeId],
+  );
+
+  const allFlowNodes = useMemo(
+    () => [...styledStageNodes, ...styledAnnotationNodes] as BuilderFlowNode[],
+    [styledStageNodes, styledAnnotationNodes],
+  );
 
   useEffect(() => {
     setFlowEdges(
@@ -141,18 +240,20 @@ function WorkflowBuilderFlow({
     });
   }, [flowEdgesStatic, setFlowNodes]);
 
-  const styledNodes = useMemo(
-    () =>
-      flowNodes.map((node) => ({
-        ...node,
-        selected: node.id === highlightedNodeId,
-        connectable: true,
-        data: {
-          ...node.data,
-          validationBorderVisible: false,
-        },
-      })),
-    [flowNodes, highlightedNodeId],
+  const styledNodes = allFlowNodes;
+
+  const onCanvasSelectionChange = useCallback(
+    ({
+      edges: selectedEdges,
+      nodes: selectedNodes,
+    }: OnSelectionChangeParams<BuilderFlowNode, Edge>) => {
+      if (selectedEdges[0]) {
+        onSelectionChange({ kind: "edge", edgeId: selectedEdges[0].id });
+        return;
+      }
+      onSelectionChange(selectionFromNode(selectedNodes[0]));
+    },
+    [onSelectionChange],
   );
 
   const onDragOver = useCallback((event: DragEvent) => {
@@ -182,6 +283,13 @@ function WorkflowBuilderFlow({
       }
       if (connection.source === connection.target) {
         onConnectionFailed("Cannot connect a stage to itself.");
+        return;
+      }
+      if (
+        connection.source.startsWith("display.annotation.") ||
+        connection.target.startsWith("display.annotation.")
+      ) {
+        onConnectionFailed("Annotations are not connectable — connect lifecycle stages only.");
         return;
       }
       onConnectStages(connection.source, connection.target);
@@ -214,12 +322,21 @@ function WorkflowBuilderFlow({
     [onConnectionFailed],
   );
 
-  const onSelectionChange = useCallback(
-    ({ edges: selectedEdges, nodes: selectedNodes }: OnSelectionChangeParams<Node<StudioNodeData>, Edge>) => {
-      onSelectEdge(selectedEdges[0]?.id ?? null);
-      onSelectNode?.(selectedNodes[0]?.id ?? null);
+  const onSelectionChangeHandler = onCanvasSelectionChange;
+
+  const onCombinedNodesChange = useCallback<OnNodesChange<BuilderFlowNode>>(
+    (changes) => {
+      const stageOnly = changes.filter((change) => {
+        if ("id" in change && typeof change.id === "string") {
+          return !change.id.startsWith("display.annotation.");
+        }
+        return true;
+      }) as Parameters<typeof onNodesChange>[0];
+      if (stageOnly.length > 0) {
+        onNodesChange(stageOnly);
+      }
     },
-    [onSelectEdge, onSelectNode],
+    [onNodesChange],
   );
 
   const onEdgesDelete = useCallback(
@@ -255,6 +372,16 @@ function WorkflowBuilderFlow({
           />
           Connect on click
         </label>
+        <label className="flex cursor-pointer items-center gap-2 text-xs text-slate-400">
+          <input
+            type="checkbox"
+            data-testid="builder-show-annotations"
+            checked={showAnnotations}
+            onChange={(event) => onShowAnnotationsChange(event.target.checked)}
+            className="rounded border-slate-600"
+          />
+          Show agent &amp; gate annotations
+        </label>
         <span className="text-xs text-slate-500">
           Drag <span className="text-slate-300">bottom → top</span> handles, or enable click mode.
         </span>
@@ -269,7 +396,7 @@ function WorkflowBuilderFlow({
           edges={flowEdges}
           nodeTypes={nodeTypes}
           edgeTypes={edgeTypes}
-          onNodesChange={onNodesChange}
+          onNodesChange={onCombinedNodesChange}
           onEdgesChange={onEdgesChange}
           onDragOver={onDragOver}
           onDrop={onDrop}
@@ -284,7 +411,7 @@ function WorkflowBuilderFlow({
           deleteKeyCode={["Backspace", "Delete"]}
           onConnect={onConnect}
           onConnectEnd={onConnectEnd}
-          onSelectionChange={onSelectionChange}
+          onSelectionChange={onSelectionChangeHandler}
           onEdgesDelete={onEdgesDelete}
           proOptions={{ hideAttribution: true }}
         >

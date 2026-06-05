@@ -25,5 +25,7 @@ def test_metadata_pipeline_lists_agents_and_stages(client) -> None:
     body = response.json()
     assert body["summary"]["stage_count"] == 10
     assert body["summary"]["agent_count"] >= 6
+    assert body["summary"]["gate_count"] >= 1
     assert any(agent["id"] == "implementer" for agent in body["agents"])
     assert any(stage["id"] == "implementation" for stage in body["stages"])
+    assert any(gate["stage"] == "implementation" for gate in body["gates"])
