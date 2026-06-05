@@ -17,6 +17,7 @@ import {
   useUpdateWatchlistInvested,
   useWatchlist,
 } from "../hooks/useMarketData";
+import { useCreatePortfolioSnapshot } from "../hooks/usePortfolio";
 
 const TICKER_SYMBOLS = ["AAPL", "MSFT", "NVDA", "BTC", "ETH", "SOL", "EUR/USD"];
 
@@ -30,6 +31,7 @@ export function DashboardPage() {
   const alertsQuery = useAlerts();
   const ohlcvQuery = useOhlcv(selectedSymbol);
   const projectionQuery = useProjection(selectedSymbol, 7);
+  const snapshotMutation = useCreatePortfolioSnapshot();
 
   const gainersLosers = useMemo(() => {
     const overview = overviewQuery.data;
@@ -43,6 +45,40 @@ export function DashboardPage() {
 
       <main className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-6 lg:px-6">
         <MarketOverviewCards overview={overviewQuery.data} isLoading={overviewQuery.isLoading} />
+
+        <section className="flex flex-col gap-3 rounded-xl border border-slate-700/60 bg-surface-card p-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="text-sm font-semibold text-white">Snapshot diário</h2>
+            <p className="text-xs text-slate-500">
+              Registra o valor total da watchlist para o histórico do portfólio.
+            </p>
+          </div>
+          <div className="flex flex-col items-start gap-2 sm:items-end">
+            <button
+              type="button"
+              onClick={() => snapshotMutation.mutate()}
+              disabled={snapshotMutation.isPending}
+              className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {snapshotMutation.isPending ? "Registrando…" : "Registrar snapshot agora"}
+            </button>
+            {snapshotMutation.isSuccess && (
+              <p className="text-xs text-emerald-400" data-testid="snapshot-success">
+                Snapshot registrado — $
+                {snapshotMutation.data.snapshot.total_value.toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
+                {snapshotMutation.data.created ? " (novo)" : " (atualizado)"}
+              </p>
+            )}
+            {snapshotMutation.isError && (
+              <p className="text-xs text-rose-400" data-testid="snapshot-error">
+                Falha ao registrar snapshot. Verifique se está autenticado.
+              </p>
+            )}
+          </div>
+        </section>
 
         {gainersLosers && (
           <div className="grid gap-4 lg:grid-cols-2">
