@@ -14,6 +14,8 @@ Shared utilities, types, and constants used by both frontend and backend.
 
 **Implemented (INVES-48):** Watchlist allocation target/status JSON Schema + TypeScript types.
 
+**Implemented (INVES-117):** Portfolio snapshot/history JSON Schema + TypeScript types.
+
 ## Structure
 
 ```
@@ -22,12 +24,14 @@ app/shared/
 │   ├── forecast.schema.json   ← Canonical AssetProjection JSON Schema (ADR-009)
 │   ├── auth.schema.json       ← User, Identify*, AuthMeResponse, SessionError (ADR-010)
 │   ├── alerts.schema.json     ← PriceAlert, CreateAlertRequest, AlertListResponse (ADR-011)
-│   └── allocation.schema.json ← Watchlist allocation target/status contract
+│   ├── allocation.schema.json ← Watchlist allocation target/status contract
+│   └── portfolio.schema.json  ← Portfolio snapshot/history contract
 ├── types/
 │   ├── forecast.ts            ← TypeScript mirror for frontend (@shared alias)
 │   ├── auth.ts                ← TypeScript mirror + session cookie constants
 │   ├── alerts.ts              ← TypeScript mirror + ALERTS_API_PATHS
-│   └── allocation.ts          ← TypeScript mirror + WATCHLIST_API_PATHS
+│   ├── allocation.ts          ← TypeScript mirror + WATCHLIST_API_PATHS
+│   └── portfolio.ts           ← TypeScript mirror + PORTFOLIO_API_PATHS
 └── README.md
 ```
 
@@ -71,6 +75,17 @@ Paths: `ALERTS_API_PATHS.list`, `ALERTS_API_PATHS.detail(alertId)`.
 
 Paths: `WATCHLIST_API_PATHS.list`, `WATCHLIST_API_PATHS.itemAllocation(symbol)`.
 
+## Portfolio contract (INVES-117)
+
+| Type | Use |
+|------|-----|
+| `PortfolioSnapshot` | Daily `{ snapshot_date, total_value, created_at, updated_at }` |
+| `PortfolioHistoryPoint` | History row with `daily_change_pct` and `cumulative_return_pct` |
+| `PortfolioHistoryResponse` | GET `/api/v1/portfolio/history` success JSON `{ days, points, summary? }` |
+| `CreateSnapshotResponse` | POST `/api/v1/portfolio/snapshots` success JSON `{ snapshot, created }` |
+
+Paths: `PORTFOLIO_API_PATHS.snapshots`, `PORTFOLIO_API_PATHS.history(days)`.
+
 ## What Belongs Here
 
 - Shared type definitions (e.g., Pydantic models or JSON Schema)
@@ -103,4 +118,5 @@ Vite alias `@shared` → `app/shared` (see `app/frontend/vite.config.ts`). Re-ex
 import type { User, IdentifyRequest } from "@shared/types/auth";
 import type { PriceAlert, CreateAlertRequest } from "@shared/types/alerts";
 import type { WatchlistResponse, UpdateWatchlistAllocationRequest } from "@shared/types/allocation";
+import type { PortfolioHistoryResponse, CreateSnapshotResponse } from "@shared/types/portfolio";
 ```
