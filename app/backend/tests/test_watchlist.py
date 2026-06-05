@@ -27,8 +27,8 @@ def _def_schema(name: str) -> dict[str, Any]:
     }
 
 
-async def test_watchlist_includes_empty_allocation_summary(client: AsyncClient) -> None:
-    response = await client.get("/api/v1/watchlist")
+async def test_watchlist_includes_empty_allocation_summary(authed_client: AsyncClient) -> None:
+    response = await authed_client.get("/api/v1/watchlist")
 
     assert response.status_code == 200
     payload = response.json()
@@ -48,9 +48,9 @@ async def test_watchlist_includes_empty_allocation_summary(client: AsyncClient) 
 
 
 async def test_update_allocation_persists_target_and_balanced_summary(
-    client: AsyncClient,
+    authed_client: AsyncClient,
 ) -> None:
-    first = await client.patch(
+    first = await authed_client.patch(
         "/api/v1/watchlist/items/AAPL/allocation",
         json={"target_percent": 50},
     )
@@ -60,7 +60,7 @@ async def test_update_allocation_persists_target_and_balanced_summary(
         "status": "under_allocated",
     }
 
-    second = await client.patch(
+    second = await authed_client.patch(
         "/api/v1/watchlist/items/btc/allocation",
         json={"target_percent": 50},
     )
@@ -75,7 +75,7 @@ async def test_update_allocation_persists_target_and_balanced_summary(
         "status": "balanced",
     }
 
-    listing = await client.get("/api/v1/watchlist")
+    listing = await authed_client.get("/api/v1/watchlist")
     assert listing.status_code == 200
     items_by_symbol = {item["symbol"]: item for item in listing.json()["items"]}
     assert items_by_symbol["AAPL"]["target_percent"] == 50.0
@@ -83,9 +83,9 @@ async def test_update_allocation_persists_target_and_balanced_summary(
     assert listing.json()["allocation_summary"]["status"] == "balanced"
 
 
-async def test_allocation_summary_allows_over_allocation(client: AsyncClient) -> None:
-    await client.patch("/api/v1/watchlist/items/AAPL/allocation", json={"target_percent": 75})
-    response = await client.patch(
+async def test_allocation_summary_allows_over_allocation(authed_client: AsyncClient) -> None:
+    await authed_client.patch("/api/v1/watchlist/items/AAPL/allocation", json={"target_percent": 75})
+    response = await authed_client.patch(
         "/api/v1/watchlist/items/MSFT/allocation",
         json={"target_percent": 25.01},
     )
@@ -97,10 +97,10 @@ async def test_allocation_summary_allows_over_allocation(client: AsyncClient) ->
     }
 
 
-async def test_null_target_percent_clears_target(client: AsyncClient) -> None:
-    await client.patch("/api/v1/watchlist/items/AAPL/allocation", json={"target_percent": 25})
+async def test_null_target_percent_clears_target(authed_client: AsyncClient) -> None:
+    await authed_client.patch("/api/v1/watchlist/items/AAPL/allocation", json={"target_percent": 25})
 
-    response = await client.patch(
+    response = await authed_client.patch(
         "/api/v1/watchlist/items/AAPL/allocation",
         json={"target_percent": None},
     )
@@ -115,8 +115,8 @@ async def test_null_target_percent_clears_target(client: AsyncClient) -> None:
     }
 
 
-async def test_update_allocation_rejects_unknown_symbol(client: AsyncClient) -> None:
-    response = await client.patch(
+async def test_update_allocation_rejects_unknown_symbol(authed_client: AsyncClient) -> None:
+    response = await authed_client.patch(
         "/api/v1/watchlist/items/UNKNOWN/allocation",
         json={"target_percent": 10},
     )
@@ -125,9 +125,9 @@ async def test_update_allocation_rejects_unknown_symbol(client: AsyncClient) -> 
     assert response.json()["error"]["code"] == "VALIDATION_ERROR"
 
 
-async def test_update_allocation_rejects_invalid_target_percent(client: AsyncClient) -> None:
+async def test_update_allocation_rejects_invalid_target_percent(authed_client: AsyncClient) -> None:
     for target_percent in (0, 100.01, 10.123):
-        response = await client.patch(
+        response = await authed_client.patch(
             "/api/v1/watchlist/items/AAPL/allocation",
             json={"target_percent": target_percent},
         )
@@ -135,9 +135,9 @@ async def test_update_allocation_rejects_invalid_target_percent(client: AsyncCli
 
 
 async def test_update_allocation_rejects_numeric_string_target_percent(
-    client: AsyncClient,
+    authed_client: AsyncClient,
 ) -> None:
-    response = await client.patch(
+    response = await authed_client.patch(
         "/api/v1/watchlist/items/AAPL/allocation",
         json={"target_percent": "10"},
     )
@@ -146,9 +146,9 @@ async def test_update_allocation_rejects_numeric_string_target_percent(
 
 
 async def test_update_allocation_rejects_extra_body_properties(
-    client: AsyncClient,
+    authed_client: AsyncClient,
 ) -> None:
-    response = await client.patch(
+    response = await authed_client.patch(
         "/api/v1/watchlist/items/AAPL/allocation",
         json={"target_percent": 10, "unexpected": "value"},
     )
@@ -156,8 +156,8 @@ async def test_update_allocation_rejects_extra_body_properties(
     assert response.status_code == 422
 
 
-async def test_update_allocation_accepts_encoded_symbol(client: AsyncClient) -> None:
-    response = await client.patch(
+async def test_update_allocation_accepts_encoded_symbol(authed_client: AsyncClient) -> None:
+    response = await authed_client.patch(
         "/api/v1/watchlist/items/EUR%2FUSD/allocation",
         json={"target_percent": 1.25},
     )
@@ -168,15 +168,15 @@ async def test_update_allocation_accepts_encoded_symbol(client: AsyncClient) -> 
     assert payload["item"]["target_percent"] == 1.25
 
 
-async def _set_balanced_targets(client: AsyncClient) -> None:
-    await client.patch("/api/v1/watchlist/items/AAPL/allocation", json={"target_percent": 50})
-    await client.patch("/api/v1/watchlist/items/BTC/allocation", json={"target_percent": 50})
+async def _set_balanced_targets(authed_client: AsyncClient) -> None:
+    await authed_client.patch("/api/v1/watchlist/items/AAPL/allocation", json={"target_percent": 50})
+    await authed_client.patch("/api/v1/watchlist/items/BTC/allocation", json={"target_percent": 50})
 
 
-async def test_rebalance_zero_total_invested_has_null_weights(client: AsyncClient) -> None:
-    await _set_balanced_targets(client)
+async def test_rebalance_zero_total_invested_has_null_weights(authed_client: AsyncClient) -> None:
+    await _set_balanced_targets(authed_client)
 
-    response = await client.get("/api/v1/watchlist")
+    response = await authed_client.get("/api/v1/watchlist")
 
     assert response.status_code == 200
     payload = response.json()
@@ -193,8 +193,8 @@ async def test_rebalance_zero_total_invested_has_null_weights(client: AsyncClien
     assert aapl["drift_band"] is None
 
 
-async def test_update_invested_persists_and_enriches_response(client: AsyncClient) -> None:
-    response = await client.patch(
+async def test_update_invested_persists_and_enriches_response(authed_client: AsyncClient) -> None:
+    response = await authed_client.patch(
         "/api/v1/watchlist/items/AAPL/invested",
         json={"invested_amount": 1234.56},
     )
@@ -207,25 +207,25 @@ async def test_update_invested_persists_and_enriches_response(client: AsyncClien
     assert payload["rebalance_summary"]["total_invested"] == 1234.56
     assert payload["rebalance_summary"]["suggestions_ready"] is False
 
-    listing = await client.get("/api/v1/watchlist")
+    listing = await authed_client.get("/api/v1/watchlist")
     aapl = next(item for item in listing.json()["items"] if item["symbol"] == "AAPL")
     assert aapl["invested_amount"] == 1234.56
 
 
-async def test_invested_survives_target_clear(client: AsyncClient) -> None:
-    await client.patch("/api/v1/watchlist/items/AAPL/invested", json={"invested_amount": 500})
-    await client.patch("/api/v1/watchlist/items/AAPL/allocation", json={"target_percent": 25})
-    await client.patch("/api/v1/watchlist/items/AAPL/allocation", json={"target_percent": None})
+async def test_invested_survives_target_clear(authed_client: AsyncClient) -> None:
+    await authed_client.patch("/api/v1/watchlist/items/AAPL/invested", json={"invested_amount": 500})
+    await authed_client.patch("/api/v1/watchlist/items/AAPL/allocation", json={"target_percent": 25})
+    await authed_client.patch("/api/v1/watchlist/items/AAPL/allocation", json={"target_percent": None})
 
-    listing = await client.get("/api/v1/watchlist")
+    listing = await authed_client.get("/api/v1/watchlist")
     aapl = next(item for item in listing.json()["items"] if item["symbol"] == "AAPL")
     assert aapl["target_percent"] is None
     assert aapl["invested_amount"] == 500.0
 
 
-async def test_null_invested_amount_clears_value(client: AsyncClient) -> None:
-    await client.patch("/api/v1/watchlist/items/AAPL/invested", json={"invested_amount": 100})
-    response = await client.patch(
+async def test_null_invested_amount_clears_value(authed_client: AsyncClient) -> None:
+    await authed_client.patch("/api/v1/watchlist/items/AAPL/invested", json={"invested_amount": 100})
+    response = await authed_client.patch(
         "/api/v1/watchlist/items/AAPL/invested",
         json={"invested_amount": None},
     )
@@ -235,21 +235,21 @@ async def test_null_invested_amount_clears_value(client: AsyncClient) -> None:
     assert response.json()["rebalance_summary"]["total_invested"] == 0.0
 
 
-async def test_update_invested_rejects_invalid_amount(client: AsyncClient) -> None:
+async def test_update_invested_rejects_invalid_amount(authed_client: AsyncClient) -> None:
     for invested_amount in (-1, 10.123):
-        response = await client.patch(
+        response = await authed_client.patch(
             "/api/v1/watchlist/items/AAPL/invested",
             json={"invested_amount": invested_amount},
         )
         assert response.status_code == 422
 
 
-async def test_balanced_suggestions_when_targets_and_invested_set(client: AsyncClient) -> None:
-    await _set_balanced_targets(client)
-    await client.patch("/api/v1/watchlist/items/AAPL/invested", json={"invested_amount": 600})
-    await client.patch("/api/v1/watchlist/items/BTC/invested", json={"invested_amount": 400})
+async def test_balanced_suggestions_when_targets_and_invested_set(authed_client: AsyncClient) -> None:
+    await _set_balanced_targets(authed_client)
+    await authed_client.patch("/api/v1/watchlist/items/AAPL/invested", json={"invested_amount": 600})
+    await authed_client.patch("/api/v1/watchlist/items/BTC/invested", json={"invested_amount": 400})
 
-    response = await client.get("/api/v1/watchlist")
+    response = await authed_client.get("/api/v1/watchlist")
     payload = response.json()
     jsonschema.validate(instance=payload, schema=_def_schema("WatchlistResponse"))
     assert payload["rebalance_summary"] == {
@@ -274,12 +274,12 @@ async def test_balanced_suggestions_when_targets_and_invested_set(client: AsyncC
     assert abs(suggestion_sum) <= 0.01 * item_count
 
 
-async def test_rebalance_rounding_half_up(client: AsyncClient) -> None:
-    await _set_balanced_targets(client)
-    await client.patch("/api/v1/watchlist/items/AAPL/invested", json={"invested_amount": 333.33})
-    await client.patch("/api/v1/watchlist/items/BTC/invested", json={"invested_amount": 666.67})
+async def test_rebalance_rounding_half_up(authed_client: AsyncClient) -> None:
+    await _set_balanced_targets(authed_client)
+    await authed_client.patch("/api/v1/watchlist/items/AAPL/invested", json={"invested_amount": 333.33})
+    await authed_client.patch("/api/v1/watchlist/items/BTC/invested", json={"invested_amount": 666.67})
 
-    response = await client.get("/api/v1/watchlist")
+    response = await authed_client.get("/api/v1/watchlist")
     payload = response.json()
     assert payload["rebalance_summary"]["total_invested"] == 1000.0
     by_symbol = {item["symbol"]: item for item in payload["items"]}
@@ -289,16 +289,16 @@ async def test_rebalance_rounding_half_up(client: AsyncClient) -> None:
     assert by_symbol["BTC"]["suggestion_amount"] == -166.67
 
 
-async def test_drift_bands_on_target_warning_off_target(client: AsyncClient) -> None:
-    await client.patch("/api/v1/watchlist/items/AAPL/allocation", json={"target_percent": 50})
-    await client.patch("/api/v1/watchlist/items/MSFT/allocation", json={"target_percent": 25})
-    await client.patch("/api/v1/watchlist/items/BTC/allocation", json={"target_percent": 25})
+async def test_drift_bands_on_target_warning_off_target(authed_client: AsyncClient) -> None:
+    await authed_client.patch("/api/v1/watchlist/items/AAPL/allocation", json={"target_percent": 50})
+    await authed_client.patch("/api/v1/watchlist/items/MSFT/allocation", json={"target_percent": 25})
+    await authed_client.patch("/api/v1/watchlist/items/BTC/allocation", json={"target_percent": 25})
 
-    await client.patch("/api/v1/watchlist/items/AAPL/invested", json={"invested_amount": 4980})
-    await client.patch("/api/v1/watchlist/items/MSFT/invested", json={"invested_amount": 2300})
-    await client.patch("/api/v1/watchlist/items/BTC/invested", json={"invested_amount": 2720})
+    await authed_client.patch("/api/v1/watchlist/items/AAPL/invested", json={"invested_amount": 4980})
+    await authed_client.patch("/api/v1/watchlist/items/MSFT/invested", json={"invested_amount": 2300})
+    await authed_client.patch("/api/v1/watchlist/items/BTC/invested", json={"invested_amount": 2720})
 
-    response = await client.get("/api/v1/watchlist")
+    response = await authed_client.get("/api/v1/watchlist")
     by_symbol = {item["symbol"]: item for item in response.json()["items"]}
 
     assert by_symbol["AAPL"]["drift_band"] == "on_target"
@@ -306,11 +306,11 @@ async def test_drift_bands_on_target_warning_off_target(client: AsyncClient) -> 
     assert by_symbol["BTC"]["drift_band"] == "off_target"
 
 
-async def test_suggestions_null_when_allocation_not_balanced(client: AsyncClient) -> None:
-    await client.patch("/api/v1/watchlist/items/AAPL/allocation", json={"target_percent": 50})
-    await client.patch("/api/v1/watchlist/items/AAPL/invested", json={"invested_amount": 1000})
+async def test_suggestions_null_when_allocation_not_balanced(authed_client: AsyncClient) -> None:
+    await authed_client.patch("/api/v1/watchlist/items/AAPL/allocation", json={"target_percent": 50})
+    await authed_client.patch("/api/v1/watchlist/items/AAPL/invested", json={"invested_amount": 1000})
 
-    response = await client.get("/api/v1/watchlist")
+    response = await authed_client.get("/api/v1/watchlist")
     aapl = next(item for item in response.json()["items"] if item["symbol"] == "AAPL")
     assert response.json()["rebalance_summary"]["suggestions_ready"] is False
     assert aapl["suggestion_amount"] is None

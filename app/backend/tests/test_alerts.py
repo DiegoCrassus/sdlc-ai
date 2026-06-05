@@ -9,6 +9,7 @@ from typing import Any
 
 import jsonschema
 import pytest
+from auth_helpers import identify_as
 from httpx import AsyncClient
 from marketpulse.deps import get_market_provider_dep
 from marketpulse.domain.enums import AlertDirection, AssetClass, DataSource
@@ -83,14 +84,15 @@ def fixed_provider() -> FixedQuoteProvider:
 
 
 @pytest.fixture
-def client_with_fixed_provider(fixed_provider: FixedQuoteProvider, client: AsyncClient):
+async def client_with_fixed_provider(fixed_provider: FixedQuoteProvider, client: AsyncClient):
+    await identify_as(client)
     app.dependency_overrides[get_market_provider_dep] = lambda: fixed_provider
     yield client
     app.dependency_overrides.clear()
 
 
-async def test_create_alert_returns_201(client: AsyncClient) -> None:
-    response = await client.post(
+async def test_create_alert_returns_201(authed_client: AsyncClient) -> None:
+    response = await authed_client.post(
         "/api/v1/alerts",
         json={"symbol": "BTC", "direction": "above", "target_price": 60_000},
     )
@@ -105,8 +107,8 @@ async def test_create_alert_returns_201(client: AsyncClient) -> None:
     jsonschema.validate(instance=payload, schema=_def_schema("PriceAlert"))
 
 
-async def test_create_alert_rejects_non_watchlist_symbol(client: AsyncClient) -> None:
-    response = await client.post(
+async def test_create_alert_rejects_non_watchlist_symbol(authed_client: AsyncClient) -> None:
+    response = await authed_client.post(
         "/api/v1/alerts",
         json={"symbol": "UNKNOWN", "direction": "above", "target_price": 100},
     )
@@ -116,16 +118,16 @@ async def test_create_alert_rejects_non_watchlist_symbol(client: AsyncClient) ->
     assert payload["error"]["code"] == "VALIDATION_ERROR"
 
 
-async def test_create_alert_rejects_invalid_target_price(client: AsyncClient) -> None:
-    response = await client.post(
+async def test_create_alert_rejects_invalid_target_price(authed_client: AsyncClient) -> None:
+    response = await authed_client.post(
         "/api/v1/alerts",
         json={"symbol": "BTC", "direction": "above", "target_price": 0},
     )
     assert response.status_code == 422
 
 
-async def test_list_alerts_empty(client: AsyncClient) -> None:
-    response = await client.get("/api/v1/alerts")
+async def test_list_alerts_empty(authed_client: AsyncClient) -> None:
+    response = await authed_client.get("/api/v1/alerts")
     assert response.status_code == 200
     payload = response.json()
     assert payload == {"items": []}
@@ -181,40 +183,40 @@ async def test_triggered_alert_is_not_re_evaluated(
     assert second.json()["items"][0]["triggered_at"] == triggered_at
 
 
-async def test_list_alerts_filters_by_symbol(client: AsyncClient) -> None:
-    await client.post(
+async def test_list_alerts_filters_by_symbol(authed_client: AsyncClient) -> None:
+    await authed_client.post(
         "/api/v1/alerts",
         json={"symbol": "BTC", "direction": "above", "target_price": 70_000},
     )
-    await client.post(
+    await authed_client.post(
         "/api/v1/alerts",
         json={"symbol": "AAPL", "direction": "below", "target_price": 150},
     )
 
-    response = await client.get("/api/v1/alerts", params={"symbol": "BTC"})
+    response = await authed_client.get("/api/v1/alerts", params={"symbol": "BTC"})
     assert response.status_code == 200
     items = response.json()["items"]
     assert len(items) == 1
     assert items[0]["symbol"] == "BTC"
 
 
-async def test_delete_alert_returns_204(client: AsyncClient) -> None:
-    create = await client.post(
+async def test_delete_alert_returns_204(authed_client: AsyncClient) -> None:
+    create = await authed_client.post(
         "/api/v1/alerts",
         json={"symbol": "ETH", "direction": "above", "target_price": 5_000},
     )
     alert_id = create.json()["id"]
 
-    delete = await client.delete(f"/api/v1/alerts/{alert_id}")
+    delete = await authed_client.delete(f"/api/v1/alerts/{alert_id}")
     assert delete.status_code == 204
     assert delete.content == b""
 
-    listing = await client.get("/api/v1/alerts")
+    listing = await authed_client.get("/api/v1/alerts")
     assert listing.json()["items"] == []
 
 
-async def test_delete_alert_not_found(client: AsyncClient) -> None:
-    response = await client.delete("/api/v1/alerts/00000000-0000-4000-8000-000000000000")
+async def test_delete_alert_not_found(authed_client: AsyncClient) -> None:
+    response = await authed_client.delete("/api/v1/alerts/00000000-0000-4000-8000-000000000000")
     assert response.status_code == 404
     payload = response.json()
     jsonschema.validate(instance=payload, schema=_def_schema("AlertError"))

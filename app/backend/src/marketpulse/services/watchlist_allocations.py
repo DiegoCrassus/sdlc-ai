@@ -38,27 +38,32 @@ def build_allocation_summary(targets_by_symbol: dict[str, int]) -> WatchlistAllo
     )
 
 
-async def list_targets(session: AsyncSession) -> dict[str, int]:
-    """Return saved allocation targets keyed by normalized symbol."""
-    result = await session.execute(select(WatchlistAllocationTargetRow))
+async def list_targets(session: AsyncSession, user_id: str) -> dict[str, int]:
+    """Return saved allocation targets for the user keyed by normalized symbol."""
+    stmt = select(WatchlistAllocationTargetRow).where(
+        WatchlistAllocationTargetRow.user_id == user_id
+    )
+    result = await session.execute(stmt)
     return {row.symbol: row.target_bps for row in result.scalars().all()}
 
 
 async def set_target(
     session: AsyncSession,
     *,
+    user_id: str,
     symbol: str,
     target_bps: int | None,
 ) -> dict[str, int]:
-    """Set or clear a target, returning the current target map."""
+    """Set or clear a target for the user, returning the current target map."""
     normalized = symbol.upper()
-    row = await session.get(WatchlistAllocationTargetRow, normalized)
+    row = await session.get(WatchlistAllocationTargetRow, (user_id, normalized))
     if target_bps is None:
         if row is not None:
             await session.delete(row)
     elif row is None:
         session.add(
             WatchlistAllocationTargetRow(
+                user_id=user_id,
                 symbol=normalized,
                 target_bps=target_bps,
                 updated_at=datetime.now(tz=UTC),
@@ -68,30 +73,35 @@ async def set_target(
         row.target_bps = target_bps
         row.updated_at = datetime.now(tz=UTC)
     await session.flush()
-    return await list_targets(session)
+    return await list_targets(session, user_id)
 
 
-async def list_invested(session: AsyncSession) -> dict[str, int]:
-    """Return saved invested amounts keyed by normalized symbol (amount in cents)."""
-    result = await session.execute(select(WatchlistInvestedAmountRow))
+async def list_invested(session: AsyncSession, user_id: str) -> dict[str, int]:
+    """Return saved invested amounts for the user keyed by symbol (cents)."""
+    stmt = select(WatchlistInvestedAmountRow).where(
+        WatchlistInvestedAmountRow.user_id == user_id
+    )
+    result = await session.execute(stmt)
     return {row.symbol: row.amount_cents for row in result.scalars().all()}
 
 
 async def set_invested(
     session: AsyncSession,
     *,
+    user_id: str,
     symbol: str,
     amount_cents: int | None,
 ) -> dict[str, int]:
-    """Set or clear an invested amount, returning the current invested map."""
+    """Set or clear an invested amount for the user, returning the current map."""
     normalized = symbol.upper()
-    row = await session.get(WatchlistInvestedAmountRow, normalized)
+    row = await session.get(WatchlistInvestedAmountRow, (user_id, normalized))
     if amount_cents is None:
         if row is not None:
             await session.delete(row)
     elif row is None:
         session.add(
             WatchlistInvestedAmountRow(
+                user_id=user_id,
                 symbol=normalized,
                 amount_cents=amount_cents,
                 updated_at=datetime.now(tz=UTC),
@@ -101,7 +111,7 @@ async def set_invested(
         row.amount_cents = amount_cents
         row.updated_at = datetime.now(tz=UTC)
     await session.flush()
-    return await list_invested(session)
+    return await list_invested(session, user_id)
 
 
 def invested_amount_to_cents(invested_amount: Decimal) -> int:
