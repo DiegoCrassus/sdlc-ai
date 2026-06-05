@@ -1,4 +1,5 @@
 import type { AssetClass as SharedAssetClass } from "@shared/types/allocation";
+import type { SourceMeta } from "@shared/types/forecast";
 
 export type AssetClass = SharedAssetClass;
 
@@ -78,4 +79,46 @@ export interface SearchHit {
   symbol: string;
   name: string;
   asset_class: AssetClass;
+}
+
+export interface ComparePoint {
+  date: string;
+  normalized_close: number;
+  open: number;
+  high: number;
+  low: number;
+  volume: number;
+}
+
+export interface CompareSeries {
+  symbol: string;
+  asset_id: string;
+  points: ComparePoint[];
+}
+
+export interface CompareCorrelation {
+  symbols: string[];
+  values: number[][];
+}
+
+export interface CompareMetric {
+  symbol: string;
+  volatility: number;
+  max_drawdown: number;
+}
+
+export interface CompareDateRange {
+  start: string;
+  end: string;
+  aligned_points: number;
+}
+
+export interface CompareResponse {
+  symbols: string[];
+  days: number;
+  series: CompareSeries[];
+  correlation: CompareCorrelation;
+  metrics: CompareMetric[];
+  date_range: CompareDateRange;
+  meta: SourceMeta;
 }

@@ -88,3 +88,15 @@ export function useAssetSearch(query: string) {
     enabled: query.trim().length >= 2,
   });
 }
+
+export function useCompare(symbols: string[], days = 90) {
+  const normalized = symbols.map((symbol) => symbol.trim().toUpperCase()).filter(Boolean);
+  const unique = [...new Set(normalized)];
+
+  return useQuery({
+    queryKey: ["compare", unique.join(","), days],
+    queryFn: () => api.compare(unique, days),
+    enabled: unique.length >= 2 && unique.length <= 4,
+    refetchInterval: REFETCH_MS,
+  });
+}

@@ -61,6 +61,9 @@ export function AppLayout() {
               <NavLink to="/forecast" className={navLinkClass}>
                 Forecast
               </NavLink>
+              <NavLink to="/compare" className={navLinkClass}>
+                Compare
+              </NavLink>
               <NavLink to="/portfolio" className={navLinkClass}>
                 Portfólio
               </NavLink>

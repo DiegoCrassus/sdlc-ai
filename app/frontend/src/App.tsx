@@ -1,6 +1,7 @@
 import { Route, Routes } from "react-router-dom";
 
 import { AppLayout } from "./components/layout/AppLayout";
+import { ComparePage } from "./pages/ComparePage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { ForecastPage } from "./pages/ForecastPage";
 import { PortfolioPage } from "./pages/PortfolioPage";
@@ -11,6 +12,7 @@ export default function App() {
       <Route element={<AppLayout />}>
         <Route path="/" element={<DashboardPage />} />
         <Route path="/forecast" element={<ForecastPage />} />
+        <Route path="/compare" element={<ComparePage />} />
         <Route path="/portfolio" element={<PortfolioPage />} />
       </Route>
     </Routes>
