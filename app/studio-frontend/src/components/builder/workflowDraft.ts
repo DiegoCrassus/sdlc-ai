@@ -168,6 +168,8 @@ export function draftsToCanvasEdges(drafts: WorkflowTransitionDraft[]): CanvasEd
     validation_overlays: [],
     label: draft.name,
     summary: draft.description,
+    agent: draft.agent,
+    skill: draft.skill,
   }));
 }
 

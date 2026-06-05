@@ -1,6 +1,6 @@
 import { useMemo, useState, type ReactNode } from "react";
 
-import type { PipelineAgentMeta, PipelineStageMeta } from "../../types/pipeline";
+import type { PipelineAgentMeta, PipelineGateMeta, PipelineStageMeta } from "../../types/pipeline";
 
 import { stageDisplayId } from "./builderDnD";
 import { DraggableAssetChip } from "./DraggableAssetChip";
@@ -8,6 +8,7 @@ import { DraggableAssetChip } from "./DraggableAssetChip";
 type AssetPaletteProps = {
   stages: PipelineStageMeta[];
   agents: PipelineAgentMeta[];
+  gates: PipelineGateMeta[];
   onFocusStage: (displayNodeId: string) => void;
 };
 
@@ -42,7 +43,7 @@ function CollapsibleSection({
   );
 }
 
-export function AssetPalette({ stages, agents, onFocusStage }: AssetPaletteProps) {
+export function AssetPalette({ stages, agents, gates, onFocusStage }: AssetPaletteProps) {
   const [search, setSearch] = useState("");
 
   const query = search.trim().toLowerCase();
@@ -68,6 +69,18 @@ export function AssetPalette({ stages, agents, onFocusStage }: AssetPaletteProps
         agent.skill.name.toLowerCase().includes(query),
     );
   }, [agents, query]);
+
+  const filteredGates = useMemo(() => {
+    if (!query) {
+      return gates;
+    }
+    return gates.filter(
+      (gate) =>
+        gate.name.toLowerCase().includes(query) ||
+        gate.stage.toLowerCase().includes(query) ||
+        gate.id.toLowerCase().includes(query),
+    );
+  }, [gates, query]);
 
   return (
     <div className="flex h-full min-h-0 flex-col rounded-xl border border-slate-800 bg-surface-card text-sm">
@@ -127,9 +140,31 @@ export function AssetPalette({ stages, agents, onFocusStage }: AssetPaletteProps
           </ul>
         </CollapsibleSection>
 
+        <CollapsibleSection title="Gate paths" count={filteredGates.length} defaultOpen={false}>
+          <ul className="space-y-1 text-xs text-slate-400" data-testid="builder-toolbox-gates">
+            {filteredGates.map((gate) => (
+              <li
+                key={gate.id}
+                className="rounded px-2 py-1 hover:bg-slate-800/60"
+                data-testid={`builder-toolbox-gate-${gate.id}`}
+              >
+                <span className="text-slate-200">{gate.name}</span>
+                <span className="text-slate-500">
+                  {" "}
+                  · {gate.allowed_prefixes.length} prefix
+                  {gate.allowed_prefixes.length === 1 ? "" : "es"}
+                </span>
+              </li>
+            ))}
+            {filteredGates.length === 0 ? (
+              <li className="px-2 text-slate-500">No gates match search.</li>
+            ) : null}
+          </ul>
+        </CollapsibleSection>
+
         <p className="mt-3 text-[10px] text-slate-500">
-          Gates, skills, and rules: use Rules & Skills and Registry screens. Cursor runs agents via{" "}
-          <code className="text-slate-400">.cursor/agents/</code>.
+          Agents and gates appear as read-only canvas annotations when enabled. Assign subagents on
+          transition edges in the inspector.
         </p>
       </div>
     </div>

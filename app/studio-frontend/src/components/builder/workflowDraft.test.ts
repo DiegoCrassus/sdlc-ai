@@ -5,6 +5,7 @@ import {
   buildWorkflowProposalRequest,
   createTransitionDraft,
   draftsFromCanvas,
+  draftsToCanvasEdges,
   serializeTransitionsYaml,
   stageSlugFromGraphNodeId,
   transitionIdFromGraphEdgeId,
@@ -158,6 +159,32 @@ describe("buildWorkflowProposalRequest", () => {
     expect(request.target_paths).toEqual([WORKFLOW_TARGET_PATH]);
     expect(request.ops[0].op).toBe("replace_block");
     expect(request.simulated_gate).toEqual({ stage: "architecture", card: "INVES-85" });
+  });
+});
+
+describe("draftsToCanvasEdges", () => {
+  it("includes agent and skill on transition edges", () => {
+    const edges = draftsToCanvasEdges([
+      {
+        id: "a_to_b",
+        name: "A → B",
+        from_stage: "a",
+        to_stage: "b",
+        description: "",
+        agent: "architect",
+        skill: "architecture-analysis",
+        preconditions: [],
+        outputs: [],
+        edgeDisplayId: "e1",
+        sourceDisplayId: "n1",
+        targetDisplayId: "n2",
+      },
+    ]);
+
+    expect(edges[0]).toMatchObject({
+      agent: "architect",
+      skill: "architecture-analysis",
+    });
   });
 });
 
