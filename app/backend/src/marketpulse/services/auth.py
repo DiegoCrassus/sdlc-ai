@@ -14,6 +14,7 @@ from marketpulse.config import Settings, get_settings
 from marketpulse.db.models import SessionRow, UserRow
 from marketpulse.domain.auth import CurrentUser, User
 
+
 def normalize_email(email: str) -> str:
     return email.strip().lower()
 

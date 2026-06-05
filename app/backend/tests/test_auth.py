@@ -7,9 +7,8 @@ from pathlib import Path
 from typing import Any
 
 import jsonschema
-from httpx import AsyncClient
-
 from auth_helpers import identify_as
+from httpx import AsyncClient
 
 AUTH_SCHEMA_PATH = (
     Path(__file__).resolve().parents[2] / "shared" / "contracts" / "auth.schema.json"

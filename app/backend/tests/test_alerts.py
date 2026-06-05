@@ -9,14 +9,13 @@ from typing import Any
 
 import jsonschema
 import pytest
+from auth_helpers import identify_as
 from httpx import AsyncClient
 from marketpulse.deps import get_market_provider_dep
 from marketpulse.domain.enums import AlertDirection, AssetClass, DataSource
 from marketpulse.domain.models import Quote, SourceMeta
 from marketpulse.main import app
 from marketpulse.providers.base import MarketDataProvider
-
-from auth_helpers import identify_as
 
 ALERTS_SCHEMA_PATH = (
     Path(__file__).resolve().parents[2] / "shared" / "contracts" / "alerts.schema.json"
