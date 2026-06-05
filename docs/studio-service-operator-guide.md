@@ -52,7 +52,7 @@ CORS preflight (`OPTIONS`) is not challenged by auth middleware.
 | `make studio-dev` | API :8100 + UI dev server :5174 |
 | `make studio-api` | API only (background-friendly) |
 | `make studio-smoke` | HTTP smoke against running API |
-| `make studio-e2e` | Build UI + Playwright smoke (3 routes) |
+| `make studio-e2e` | Build UI + Playwright (9 tests: smoke + builder) |
 
 ## Smoke and E2E
 
@@ -60,11 +60,22 @@ CORS preflight (`OPTIONS`) is not challenged by auth middleware.
 # API smoke (API must be running)
 make studio-smoke
 
-# Playwright: dashboard, workflows, observability
+# Playwright: 3 smoke routes + 6 builder tests (9 total)
 make studio-e2e
 ```
 
-E2E uses `tests/e2e/studio/smoke.spec.ts` and expects preview on :5174 with API on :8100.
+E2E harness (`tests/e2e/run-studio-e2e.sh`) builds the UI, starts API + preview, then runs Playwright.
+
+| Spec | Tests | Routes / scope |
+|------|-------|----------------|
+| `tests/e2e/studio/smoke.spec.ts` | 3 | `/`, `/workflows`, `/observability` |
+| `tests/e2e/studio/builder.spec.ts` | 6 | `/builder` — E2E-B1…B6 |
+
+**E2E-B1…B6 (builder):** heading visible; ≥10 stages; drag connection; inspector agent select; proposal disabled/enabled; unified diff non-empty.
+
+CI check name: **Studio E2E (smoke + builder)**.
+
+**Manual builder QA:** [`docs/operations/studio-workflow-builder-manual-test.md`](operations/studio-workflow-builder-manual-test.md) (required for WB card PASS — not replaced by Playwright alone).
 
 ## Enforcement visibility
 
@@ -86,3 +97,5 @@ pytest studio/ -q
 
 - [studio-service-platform.md](architecture/studio-service-platform.md)
 - [sdlc-studio-service-roadmap.md](roadmap/sdlc-studio-service-roadmap.md)
+- [studio-workflow-builder-manual-test.md](operations/studio-workflow-builder-manual-test.md)
+- [sdlc-studio-workflow-builder-ux-plan.md](roadmap/sdlc-studio-workflow-builder-ux-plan.md)
