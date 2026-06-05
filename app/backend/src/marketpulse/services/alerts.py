@@ -31,12 +31,17 @@ def _is_triggered(price: float, direction: AlertDirection, target_price: float) 
     return price <= target_price
 
 
-async def create_alert(session: AsyncSession, payload: CreateAlertRequest) -> PriceAlert:
-    """Persist a new price alert."""
+async def create_alert(
+    session: AsyncSession,
+    user_id: str,
+    payload: CreateAlertRequest,
+) -> PriceAlert:
+    """Persist a new price alert for the authenticated user."""
     symbol = payload.symbol.upper()
     now = datetime.now(tz=UTC)
     row = PriceAlertRow(
         id=str(uuid.uuid4()),
+        user_id=user_id,
         symbol=symbol,
         direction=payload.direction.value,
         target_price=payload.target_price,
@@ -50,21 +55,26 @@ async def create_alert(session: AsyncSession, payload: CreateAlertRequest) -> Pr
 
 async def list_alerts(
     session: AsyncSession,
+    user_id: str,
     *,
     symbol: str | None = None,
 ) -> list[PriceAlert]:
-    """Return alerts ordered by created_at descending."""
-    stmt = select(PriceAlertRow).order_by(PriceAlertRow.created_at.desc())
+    """Return alerts for the user ordered by created_at descending."""
+    stmt = (
+        select(PriceAlertRow)
+        .where(PriceAlertRow.user_id == user_id)
+        .order_by(PriceAlertRow.created_at.desc())
+    )
     if symbol is not None:
         stmt = stmt.where(PriceAlertRow.symbol == symbol.upper())
     result = await session.execute(stmt)
     return [_row_to_model(row) for row in result.scalars().all()]
 
 
-async def delete_alert(session: AsyncSession, alert_id: str) -> bool:
-    """Delete alert by id; return False when missing."""
+async def delete_alert(session: AsyncSession, user_id: str, alert_id: str) -> bool:
+    """Delete alert by id for the user; return False when missing."""
     row = await session.get(PriceAlertRow, alert_id)
-    if row is None:
+    if row is None or row.user_id != user_id:
         return False
     await session.delete(row)
     await session.flush()
@@ -73,12 +83,16 @@ async def delete_alert(session: AsyncSession, alert_id: str) -> bool:
 
 async def evaluate_pending_alerts(
     session: AsyncSession,
+    user_id: str,
     provider: MarketDataProvider,
     *,
     symbol: str | None = None,
 ) -> None:
-    """Evaluate pending alerts using live quotes; latch triggered_at on first match."""
-    stmt = select(PriceAlertRow).where(PriceAlertRow.triggered_at.is_(None))
+    """Evaluate pending alerts for the user using live quotes."""
+    stmt = select(PriceAlertRow).where(
+        PriceAlertRow.user_id == user_id,
+        PriceAlertRow.triggered_at.is_(None),
+    )
     if symbol is not None:
         stmt = stmt.where(PriceAlertRow.symbol == symbol.upper())
     result = await session.execute(stmt)

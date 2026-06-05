@@ -6,6 +6,9 @@ from functools import lru_cache
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+SESSION_COOKIE_NAME = "mp_session"
+SESSION_TTL_SECONDS = 604800
+
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
@@ -23,9 +26,16 @@ class Settings(BaseSettings):
 
     database_url: str = "sqlite+aiosqlite:///./data/marketpulse.db"
 
+    session_cookie_name: str = SESSION_COOKIE_NAME
+    session_ttl_seconds: int = SESSION_TTL_SECONDS
+
     @property
     def cors_origin_list(self) -> list[str]:
         return [origin.strip() for origin in self.cors_origins.split(",") if origin.strip()]
+
+    @property
+    def session_cookie_secure(self) -> bool:
+        return not self.debug
 
 
 @lru_cache

@@ -9,7 +9,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from marketpulse.api.errors import AlertApiError
 from marketpulse.db.session import get_db_session
-from marketpulse.deps import get_market_provider_dep
+from marketpulse.deps import get_current_user, get_market_provider_dep
+from marketpulse.domain.auth import CurrentUser
 from marketpulse.domain.models import (
     RebalanceSummary,
     UpdateWatchlistAllocationRequest,
@@ -81,14 +82,15 @@ async def _build_watchlist_item(
 
 async def _load_rebalance_context(
     session: AsyncSession,
+    user_id: str,
 ) -> tuple[
     dict[str, int],
     dict[str, int],
     dict[str, rebalance_service.ItemRebalanceFields],
     RebalanceSummary,
 ]:
-    targets_by_symbol = await allocation_service.list_targets(session)
-    invested_cents_by_symbol = await allocation_service.list_invested(session)
+    targets_by_symbol = await allocation_service.list_targets(session, user_id)
+    invested_cents_by_symbol = await allocation_service.list_invested(session, user_id)
     allocation_summary = allocation_service.build_allocation_summary(targets_by_symbol)
     item_rebalances, rebalance_summary = rebalance_service.compute_all_item_rebalances(
         symbols=list(DEFAULT_WATCHLIST),
@@ -101,11 +103,12 @@ async def _load_rebalance_context(
 
 @router.get("", response_model=Watchlist)
 async def get_watchlist(
+    current_user: Annotated[CurrentUser, Depends(get_current_user)],
     provider: Annotated[MarketDataProvider, Depends(get_market_provider_dep)],
     session: Annotated[AsyncSession, Depends(get_db_session)],
 ) -> Watchlist:
     targets_by_symbol, invested_cents_by_symbol, item_rebalances, rebalance_summary = (
-        await _load_rebalance_context(session)
+        await _load_rebalance_context(session, current_user.id)
     )
     allocation_summary = allocation_service.build_allocation_summary(targets_by_symbol)
     items = [
@@ -132,6 +135,7 @@ async def get_watchlist(
 async def update_watchlist_allocation(
     symbol: str,
     payload: UpdateWatchlistAllocationRequest,
+    current_user: Annotated[CurrentUser, Depends(get_current_user)],
     provider: Annotated[MarketDataProvider, Depends(get_market_provider_dep)],
     session: Annotated[AsyncSession, Depends(get_db_session)],
 ) -> UpdateWatchlistAllocationResponse:
@@ -149,10 +153,11 @@ async def update_watchlist_allocation(
     )
     targets_by_symbol = await allocation_service.set_target(
         session,
+        user_id=current_user.id,
         symbol=normalized,
         target_bps=target_bps,
     )
-    invested_cents_by_symbol = await allocation_service.list_invested(session)
+    invested_cents_by_symbol = await allocation_service.list_invested(session, current_user.id)
     allocation_summary = allocation_service.build_allocation_summary(targets_by_symbol)
     item_rebalances, rebalance_summary = rebalance_service.compute_all_item_rebalances(
         symbols=list(DEFAULT_WATCHLIST),
@@ -180,6 +185,7 @@ async def update_watchlist_allocation(
 async def update_watchlist_invested(
     symbol: str,
     payload: UpdateWatchlistInvestedRequest,
+    current_user: Annotated[CurrentUser, Depends(get_current_user)],
     provider: Annotated[MarketDataProvider, Depends(get_market_provider_dep)],
     session: Annotated[AsyncSession, Depends(get_db_session)],
 ) -> UpdateWatchlistInvestedResponse:
@@ -197,10 +203,11 @@ async def update_watchlist_invested(
     )
     invested_cents_by_symbol = await allocation_service.set_invested(
         session,
+        user_id=current_user.id,
         symbol=normalized,
         amount_cents=amount_cents,
     )
-    targets_by_symbol = await allocation_service.list_targets(session)
+    targets_by_symbol = await allocation_service.list_targets(session, current_user.id)
     allocation_summary = allocation_service.build_allocation_summary(targets_by_symbol)
     item_rebalances, rebalance_summary = rebalance_service.compute_all_item_rebalances(
         symbols=list(DEFAULT_WATCHLIST),
