@@ -20,6 +20,7 @@ jobs:
         with:
           python-version: ${{ env.PYTHON_VERSION }}
       - run: pip install pyyaml
+      - run: pip install -e ".[dev]"
       - name: Run SDLC Doctor
         run: python3 .sdlc/dsl/cli.py doctor
       - name: Run SDLC Audit
